@@ -1,0 +1,41 @@
+# Web Framework
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+
+# Database
+sqlalchemy==2.0.*
+psycopg2-binary==2.9.*
+alembic==1.14.*
+
+# Crawling
+selenium==4.27.*
+beautifulsoup4==4.12.*
+requests==2.32.*
+
+# NLP Preprocessing
+konlpy==0.6.*
+
+# Sentiment Analysis
+transformers==4.47.*
+torch==2.5.*
+
+# Topic Modeling & Keywords
+bertopic==0.16.*
+keybert==0.8.*
+sentence-transformers==3.3.*
+
+# Summarization (Ollama client)
+ollama==0.4.*
+
+# Scheduling
+apscheduler==3.10.*
+
+# Utilities
+python-dotenv==1.0.*
+pydantic==2.10.*
+pydantic-settings==2.7.*
+
+# Testing
+pytest==8.3.*
+pytest-asyncio==0.24.*
+httpx==0.28.*

@@ -1,0 +1,533 @@
+openapi: 3.0.3
+info:
+  title: Cheonan Community Sentiment Analysis API
+  version: 1.0.0
+  description: API for Cheonan regional opinion analysis and restaurant/cafe recommendations
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.example.com
+    description: Cloudflare Tunnel (production)
+
+paths:
+  # ===== Opinion Analysis =====
+  /api/posts:
+    get:
+      summary: Get post list
+      tags: [Opinion]
+      parameters:
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [naver_blog, dcinside, cheonan_city]
+        - name: sentiment
+          in: query
+          schema:
+            type: string
+            enum: [positive, negative, neutral]
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostWithAnalysis"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+
+  /api/stats/sentiment:
+    get:
+      summary: Get sentiment distribution
+      tags: [Opinion]
+      parameters:
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SentimentStats"
+
+  /api/stats/trend:
+    get:
+      summary: Get sentiment trend over time
+      tags: [Opinion]
+      parameters:
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly]
+            default: daily
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrendPoint"
+
+  /api/stats/sources:
+    get:
+      summary: Get sentiment comparison by source
+      tags: [Opinion]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SourceStats"
+
+  /api/topics:
+    get:
+      summary: Get topic list
+      tags: [Opinion]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Topic"
+
+  /api/topics/{topic_id}/posts:
+    get:
+      summary: Get posts by topic
+      tags: [Opinion]
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostWithAnalysis"
+
+  /api/keywords:
+    get:
+      summary: Get keyword frequencies
+      tags: [Opinion]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KeywordFrequency"
+
+  /api/summaries:
+    get:
+      summary: Get weekly summaries
+      tags: [Opinion]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WeeklySummary"
+
+  # ===== Places (Restaurant/Cafe) =====
+  /api/places:
+    get:
+      summary: Get place list
+      tags: [Places]
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [sentiment_score, rating_naver, rating_kakao, review_count]
+            default: sentiment_score
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PlaceWithStats"
+                  total:
+                    type: integer
+
+  /api/places/{place_id}:
+    get:
+      summary: Get place detail with reviews
+      tags: [Places]
+      parameters:
+        - name: place_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaceDetail"
+
+  /api/places/ranking:
+    get:
+      summary: Get top places by sentiment score
+      tags: [Places]
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlaceWithStats"
+
+  /api/places/keywords:
+    get:
+      summary: Get place review keywords
+      tags: [Places]
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: "Filter by keyword (e.g. quiet, spacious, wifi)"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlaceKeyword"
+
+  # ===== Pipeline Management =====
+  /api/pipeline/run:
+    post:
+      summary: Trigger crawling + analysis pipeline
+      tags: [Pipeline]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Pipeline started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        "401":
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    PostWithAnalysis:
+      type: object
+      properties:
+        id:
+          type: integer
+        source:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        sentiment:
+          type: string
+        sentiment_score:
+          type: number
+        topic:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+
+    SentimentStats:
+      type: object
+      properties:
+        positive:
+          type: integer
+        negative:
+          type: integer
+        neutral:
+          type: integer
+        total:
+          type: integer
+
+    TrendPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        positive:
+          type: integer
+        negative:
+          type: integer
+        neutral:
+          type: integer
+
+    SourceStats:
+      type: object
+      properties:
+        source:
+          type: string
+        positive:
+          type: integer
+        negative:
+          type: integer
+        neutral:
+          type: integer
+
+    Topic:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        post_count:
+          type: integer
+        ratio:
+          type: number
+
+    KeywordFrequency:
+      type: object
+      properties:
+        keyword:
+          type: string
+        count:
+          type: integer
+
+    WeeklySummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        week_start:
+          type: string
+          format: date
+        week_end:
+          type: string
+          format: date
+        summary:
+          type: string
+        top_topics:
+          type: array
+          items:
+            type: string
+        total_posts:
+          type: integer
+        sentiment_ratio:
+          type: object
+
+    PlaceWithStats:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        address:
+          type: string
+        rating_naver:
+          type: number
+        rating_kakao:
+          type: number
+        latitude:
+          type: number
+        longitude:
+          type: number
+        avg_sentiment_score:
+          type: number
+        review_count:
+          type: integer
+
+    PlaceDetail:
+      type: object
+      properties:
+        place:
+          $ref: "#/components/schemas/PlaceWithStats"
+        reviews:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              source:
+                type: string
+              review_text:
+                type: string
+              sentiment:
+                type: string
+              sentiment_score:
+                type: number
+              keywords:
+                type: array
+                items:
+                  type: string
+              published_at:
+                type: string
+                format: date-time
+        sentiment_by_source:
+          type: object
+          properties:
+            naver_place:
+              $ref: "#/components/schemas/SentimentStats"
+            kakao_map:
+              $ref: "#/components/schemas/SentimentStats"
+
+    PlaceKeyword:
+      type: object
+      properties:
+        place_id:
+          type: integer
+        place_name:
+          type: string
+        category:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        avg_sentiment_score:
+          type: number
