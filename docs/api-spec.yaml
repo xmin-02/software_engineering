@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Cheonan Community Sentiment Analysis API
-  version: 1.0.0
-  description: API for Cheonan regional opinion analysis and restaurant/cafe recommendations
+  title: Cheonan Community Sentiment & Life Info API
+  version: 2.0.0
+  description: API for Cheonan regional opinion analysis and age-based life information
 
 servers:
   - url: http://localhost:8000
@@ -11,11 +11,11 @@ servers:
     description: Cloudflare Tunnel (production)
 
 paths:
-  # ===== Opinion Analysis =====
+  # ===== Main Dashboard =====
   /api/posts:
     get:
-      summary: Get post list
-      tags: [Opinion]
+      summary: Get post list with sentiment
+      tags: [Dashboard]
       parameters:
         - name: source
           in: query
@@ -29,65 +29,40 @@ paths:
             enum: [positive, negative, neutral]
         - name: date_from
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
         - name: date_to
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
         - name: page
           in: query
-          schema:
-            type: integer
-            default: 1
+          schema: { type: integer, default: 1 }
         - name: size
           in: query
-          schema:
-            type: integer
-            default: 20
+          schema: { type: integer, default: 20 }
       responses:
         "200":
-          description: OK
+          description: Paginated posts with analysis
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/PostWithAnalysis"
-                  total:
-                    type: integer
-                  page:
-                    type: integer
-                  size:
-                    type: integer
+                $ref: "#/components/schemas/PaginatedPosts"
 
   /api/stats/sentiment:
     get:
-      summary: Get sentiment distribution
-      tags: [Opinion]
+      summary: Sentiment distribution
+      tags: [Dashboard]
       parameters:
         - name: source
           in: query
-          schema:
-            type: string
+          schema: { type: string }
         - name: date_from
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
         - name: date_to
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -95,32 +70,26 @@ paths:
 
   /api/stats/trend:
     get:
-      summary: Get sentiment trend over time
-      tags: [Opinion]
+      summary: Sentiment trend over time
+      tags: [Dashboard]
       parameters:
-        - name: source
-          in: query
-          schema:
-            type: string
         - name: interval
           in: query
           schema:
             type: string
             enum: [daily, weekly]
             default: daily
+        - name: source
+          in: query
+          schema: { type: string }
         - name: date_from
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
         - name: date_to
           in: query
-          schema:
-            type: string
-            format: date
+          schema: { type: string, format: date }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -130,11 +99,10 @@ paths:
 
   /api/stats/sources:
     get:
-      summary: Get sentiment comparison by source
-      tags: [Opinion]
+      summary: Sentiment comparison by source
+      tags: [Dashboard]
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -144,11 +112,17 @@ paths:
 
   /api/topics:
     get:
-      summary: Get topic list
-      tags: [Opinion]
+      summary: Topic list (today / weekly)
+      tags: [Dashboard]
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, weekly]
+            default: today
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -158,17 +132,15 @@ paths:
 
   /api/topics/{topic_id}/posts:
     get:
-      summary: Get posts by topic
-      tags: [Opinion]
+      summary: Posts by topic
+      tags: [Dashboard]
       parameters:
         - name: topic_id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -178,17 +150,14 @@ paths:
 
   /api/keywords:
     get:
-      summary: Get keyword frequencies
-      tags: [Opinion]
+      summary: Keyword frequencies for word cloud
+      tags: [Dashboard]
       parameters:
         - name: limit
           in: query
-          schema:
-            type: integer
-            default: 50
+          schema: { type: integer, default: 50 }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -198,11 +167,10 @@ paths:
 
   /api/summaries:
     get:
-      summary: Get weekly summaries
-      tags: [Opinion]
+      summary: Weekly AI summaries
+      tags: [Dashboard]
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -210,60 +178,61 @@ paths:
                 items:
                   $ref: "#/components/schemas/WeeklySummary"
 
-  # ===== Places (Restaurant/Cafe) =====
+  # ===== Places (All Ages) =====
   /api/places:
     get:
-      summary: Get place list
+      summary: Place list with filters
       tags: [Places]
       parameters:
         - name: category
           in: query
+          schema: { type: string }
+        - name: tags
+          in: query
+          description: "Comma-separated tags (e.g. quiet,parking,wifi)"
+          schema: { type: string }
+        - name: open_now
+          in: query
+          schema: { type: boolean, default: false }
+        - name: age_group
+          in: query
+          description: "Filter by age group presets"
           schema:
             type: string
+            enum: [youth, college, early_career, worker, family]
         - name: sort_by
           in: query
           schema:
             type: string
-            enum: [sentiment_score, rating_naver, rating_kakao, review_count]
+            enum: [sentiment_score, rating, review_count]
             default: sentiment_score
+        - name: price_range
+          in: query
+          schema: { type: string }
         - name: page
           in: query
-          schema:
-            type: integer
-            default: 1
+          schema: { type: integer, default: 1 }
         - name: size
           in: query
-          schema:
-            type: integer
-            default: 20
+          schema: { type: integer, default: 20 }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/PlaceWithStats"
-                  total:
-                    type: integer
+                $ref: "#/components/schemas/PaginatedPlaces"
 
   /api/places/{place_id}:
     get:
-      summary: Get place detail with reviews
+      summary: Place detail with reviews
       tags: [Places]
       parameters:
         - name: place_id
           in: path
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -271,21 +240,22 @@ paths:
 
   /api/places/ranking:
     get:
-      summary: Get top places by sentiment score
+      summary: Top places by sentiment
       tags: [Places]
       parameters:
         - name: category
           in: query
-          schema:
-            type: string
-        - name: limit
+          schema: { type: string }
+        - name: age_group
           in: query
           schema:
-            type: integer
-            default: 10
+            type: string
+            enum: [youth, college, early_career, worker, family]
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
@@ -293,31 +263,170 @@ paths:
                 items:
                   $ref: "#/components/schemas/PlaceWithStats"
 
-  /api/places/keywords:
+  # ===== Events (All Ages) =====
+  /api/events:
     get:
-      summary: Get place review keywords
-      tags: [Places]
+      summary: Cheonan events and festivals
+      tags: [Events]
       parameters:
         - name: category
           in: query
-          schema:
-            type: string
-        - name: keyword
+          schema: { type: string }
+        - name: upcoming
           in: query
-          schema:
-            type: string
-            description: "Filter by keyword (e.g. quiet, spacious, wifi)"
+          description: "Show only upcoming events"
+          schema: { type: boolean, default: true }
       responses:
         "200":
-          description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PlaceKeyword"
+                  $ref: "#/components/schemas/Event"
 
-  # ===== Pipeline Management =====
+  # ===== Youth =====
+  /api/youth/university-notices:
+    get:
+      summary: University admission and notices
+      tags: [Youth]
+      parameters:
+        - name: university
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UniversityNotice"
+
+  # ===== College =====
+  /api/college/contests:
+    get:
+      summary: Contest and competition info
+      tags: [College]
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contest"
+
+  /api/college/scholarships:
+    get:
+      summary: Scholarship info
+      tags: [College]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Scholarship"
+
+  /api/college/housing:
+    get:
+      summary: Housing info for students
+      tags: [College]
+      parameters:
+        - name: price_max
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RealEstate"
+
+  # ===== Jobs (College / Early Career / Worker) =====
+  /api/jobs:
+    get:
+      summary: Job listings for Cheonan area
+      tags: [Jobs]
+      parameters:
+        - name: experience_level
+          in: query
+          schema:
+            type: string
+            enum: [entry, junior, mid, senior]
+        - name: job_type
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedJobs"
+
+  # ===== Certifications (College / Early Career) =====
+  /api/certifications:
+    get:
+      summary: Certification exam schedule
+      tags: [Certifications]
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: upcoming
+          in: query
+          schema: { type: boolean, default: true }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certification"
+
+  # ===== Family =====
+  /api/family/real-estate:
+    get:
+      summary: Real estate listings for Cheonan
+      tags: [Family]
+      parameters:
+        - name: property_type
+          in: query
+          schema: { type: string }
+        - name: deal_type
+          in: query
+          schema: { type: string }
+        - name: price_max
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RealEstate"
+
+  # ===== Pipeline =====
   /api/pipeline/run:
     post:
       summary: Trigger crawling + analysis pipeline
@@ -332,10 +441,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  status:
-                    type: string
-                  message:
-                    type: string
+                  status: { type: string }
+                  message: { type: string }
         "401":
           description: Unauthorized
 
@@ -350,136 +457,106 @@ components:
     PostWithAnalysis:
       type: object
       properties:
-        id:
-          type: integer
-        source:
-          type: string
-        title:
-          type: string
-        content:
-          type: string
-        author:
-          type: string
-        published_at:
-          type: string
-          format: date-time
-        sentiment:
-          type: string
-        sentiment_score:
-          type: number
-        topic:
-          type: string
+        id: { type: integer }
+        source: { type: string }
+        title: { type: string }
+        content: { type: string }
+        author: { type: string }
+        url: { type: string }
+        published_at: { type: string, format: date-time }
+        sentiment: { type: string }
+        sentiment_score: { type: number }
+        topic: { type: string }
         keywords:
           type: array
+          items: { type: string }
+
+    PaginatedPosts:
+      type: object
+      properties:
+        items:
+          type: array
           items:
-            type: string
+            $ref: "#/components/schemas/PostWithAnalysis"
+        total: { type: integer }
+        page: { type: integer }
+        size: { type: integer }
 
     SentimentStats:
       type: object
       properties:
-        positive:
-          type: integer
-        negative:
-          type: integer
-        neutral:
-          type: integer
-        total:
-          type: integer
+        positive: { type: integer }
+        negative: { type: integer }
+        neutral: { type: integer }
+        total: { type: integer }
 
     TrendPoint:
       type: object
       properties:
-        date:
-          type: string
-          format: date
-        positive:
-          type: integer
-        negative:
-          type: integer
-        neutral:
-          type: integer
+        date: { type: string, format: date }
+        positive: { type: integer }
+        negative: { type: integer }
+        neutral: { type: integer }
 
     SourceStats:
       type: object
       properties:
-        source:
-          type: string
-        positive:
-          type: integer
-        negative:
-          type: integer
-        neutral:
-          type: integer
+        source: { type: string }
+        positive: { type: integer }
+        negative: { type: integer }
+        neutral: { type: integer }
 
     Topic:
       type: object
       properties:
-        id:
-          type: integer
-        name:
-          type: string
+        id: { type: integer }
+        name: { type: string }
         keywords:
           type: array
-          items:
-            type: string
-        post_count:
-          type: integer
-        ratio:
-          type: number
+          items: { type: string }
+        post_count: { type: integer }
+        sentiment: { type: string }
+        score: { type: number }
 
     KeywordFrequency:
       type: object
       properties:
-        keyword:
-          type: string
-        count:
-          type: integer
+        keyword: { type: string }
+        count: { type: integer }
 
     WeeklySummary:
       type: object
       properties:
-        id:
-          type: integer
-        week_start:
-          type: string
-          format: date
-        week_end:
-          type: string
-          format: date
-        summary:
-          type: string
+        id: { type: integer }
+        week_start: { type: string, format: date }
+        week_end: { type: string, format: date }
+        summary: { type: string }
         top_topics:
           type: array
-          items:
-            type: string
-        total_posts:
-          type: integer
-        sentiment_ratio:
-          type: object
+          items: { type: string }
+        total_posts: { type: integer }
+        sentiment_ratio: { type: object }
 
     PlaceWithStats:
       type: object
       properties:
-        id:
-          type: integer
-        name:
-          type: string
-        category:
-          type: string
-        address:
-          type: string
-        rating_naver:
-          type: number
-        rating_kakao:
-          type: number
-        latitude:
-          type: number
-        longitude:
-          type: number
-        avg_sentiment_score:
-          type: number
-        review_count:
-          type: integer
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        address: { type: string }
+        rating_naver: { type: number }
+        rating_kakao: { type: number }
+        latitude: { type: number }
+        longitude: { type: number }
+        business_hours: { type: object }
+        has_parking: { type: boolean }
+        price_range: { type: string }
+        is_open_now: { type: boolean }
+        tags:
+          type: array
+          items: { type: string }
+        avg_sentiment_score: { type: number }
+        review_count: { type: integer }
 
     PlaceDetail:
       type: object
@@ -491,43 +568,119 @@ components:
           items:
             type: object
             properties:
-              id:
-                type: integer
-              source:
-                type: string
-              review_text:
-                type: string
-              sentiment:
-                type: string
-              sentiment_score:
-                type: number
+              id: { type: integer }
+              source: { type: string }
+              review_text: { type: string }
+              review_url: { type: string }
+              sentiment: { type: string }
+              sentiment_score: { type: number }
               keywords:
                 type: array
-                items:
-                  type: string
-              published_at:
-                type: string
-                format: date-time
-        sentiment_by_source:
-          type: object
-          properties:
-            naver_place:
-              $ref: "#/components/schemas/SentimentStats"
-            kakao_map:
-              $ref: "#/components/schemas/SentimentStats"
+                items: { type: string }
+              published_at: { type: string, format: date-time }
 
-    PlaceKeyword:
+    PaginatedPlaces:
       type: object
       properties:
-        place_id:
-          type: integer
-        place_name:
-          type: string
-        category:
-          type: string
-        keywords:
+        items:
           type: array
           items:
-            type: string
-        avg_sentiment_score:
-          type: number
+            $ref: "#/components/schemas/PlaceWithStats"
+        total: { type: integer }
+        page: { type: integer }
+        size: { type: integer }
+
+    Event:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        location: { type: string }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        url: { type: string }
+        category: { type: string }
+
+    UniversityNotice:
+      type: object
+      properties:
+        id: { type: integer }
+        university: { type: string }
+        title: { type: string }
+        category: { type: string }
+        url: { type: string }
+        published_at: { type: string, format: date-time }
+
+    Contest:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        organizer: { type: string }
+        deadline: { type: string, format: date }
+        url: { type: string }
+        category: { type: string }
+
+    Scholarship:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        organization: { type: string }
+        amount: { type: string }
+        deadline: { type: string, format: date }
+        eligibility: { type: string }
+        url: { type: string }
+
+    PaginatedJobs:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+        total: { type: integer }
+        page: { type: integer }
+        size: { type: integer }
+
+    Job:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        company: { type: string }
+        location: { type: string }
+        salary: { type: string }
+        job_type: { type: string }
+        experience_level: { type: string }
+        deadline: { type: string, format: date }
+        url: { type: string }
+        source: { type: string }
+
+    Certification:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        exam_date: { type: string, format: date }
+        registration_start: { type: string, format: date }
+        registration_end: { type: string, format: date }
+        fee: { type: string }
+        url: { type: string }
+
+    RealEstate:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        address: { type: string }
+        property_type: { type: string }
+        deal_type: { type: string }
+        price: { type: string }
+        area_sqm: { type: number }
+        floor: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        url: { type: string }

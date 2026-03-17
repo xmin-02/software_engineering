@@ -15,16 +15,31 @@ These rules MUST be preserved across context compression. Never discard or summa
   - Separate domain, application, infrastructure, and presentation layers.
   - Define clear bounded contexts for each module (crawler, analyzer, backend, frontend).
   - Use domain entities and value objects where appropriate.
-- All features MUST be modularized for maintainability.
-  - Each crawler is an independent module.
+- All features MUST be modularized for maintainability and easy add/remove.
+  - Crawlers: organized by age group (youth, college, early_career, worker, family) + common (opinion, places, events).
+  - Each crawler is an independent module within its age group folder.
   - Each AI analysis step (sentiment, topic, keyword, summary) is an independent module.
   - Shared logic goes in a common/utils module, not duplicated.
 
 ## Data Sources
 
-- Regional opinion: Naver Blog, DCInside Cheonan Gallery, Cheonan City Hall (Civil Communication).
-- Restaurant/cafe reviews: Naver Place, KakaoMap.
-- Total 5 sources. Do NOT add X(Twitter), Instagram, or Everytime.
+### Opinion (Main Dashboard)
+- Naver Blog (Search API), DCInside Cheonan Gallery (BeautifulSoup), Cheonan City Hall (BeautifulSoup)
+
+### Places (Restaurant/Cafe - All Ages)
+- Naver Place Search API (metadata only), Kakao Place Search API (metadata only), Naver Blog reviews (Search API)
+- Do NOT crawl Naver Place reviews or KakaoMap reviews directly (ToS violation).
+
+### Age-Based Content
+- University websites (BeautifulSoup): admissions, contests, notices
+- KOSAF / data.go.kr: scholarships
+- Saramin API: jobs (Cheonan area)
+- JobKorea API: jobs (Cheonan area)
+- data.go.kr: real estate data, cultural events
+- Do NOT crawl Zigbang or Dabang (legal precedent for damages).
+
+### Prohibited Sources
+- X (Twitter), Instagram, Everytime, Naver Place reviews (direct), KakaoMap reviews (direct), Zigbang, Dabang.
 
 ## Development Process
 
@@ -37,8 +52,8 @@ These rules MUST be preserved across context compression. Never discard or summa
 - Backend: FastAPI (Python)
 - Frontend: React + Recharts
 - Database: PostgreSQL
-- Crawling: Selenium, BeautifulSoup, Naver Search API
-- NLP Preprocessing: konlpy (Mecab)
+- Crawling: BeautifulSoup, Naver Search API, Kakao Place Search API, Saramin API, data.go.kr API
+- NLP Preprocessing: konlpy (Mecab-ko)
 - Sentiment Analysis: KcELECTRA-base (local)
 - Topic Modeling: BERTopic + jhgan/ko-sbert-nli
 - Keyword Extraction: KeyBERT + ko-sbert
