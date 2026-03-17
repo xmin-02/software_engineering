@@ -22,10 +22,11 @@ env/
 *~
 .DS_Store
 
-# Environment Variables
+# Environment Variables & API Keys
 .env
 .env.local
 .env.*.local
+config/
 
 # Database
 *.db
