@@ -63,7 +63,7 @@ export default function DashboardPage() {
         api.get('/api/stats/sources'),
         api.get('/api/keywords', { params: { limit: 30 } }),
         api.get('/api/summaries'),
-        api.get('/api/posts', { params: { page: 1, size: 10 } }),
+        api.get('/api/posts', { params: { page: 1, size: 50 } }),
         api.get('/api/topics', { params: { period: 'weekly' } }),
         api.get('/api/events'),
       ]);
@@ -118,7 +118,9 @@ export default function DashboardPage() {
     const matchSentiment = filterSentiment
       ? post.sentiment?.toLowerCase() === filterSentiment
       : true;
-    return matchSource && matchSentiment;
+    // 천안 관련 게시글 우선 (제목에 "천안" 포함)
+    const isCheonan = post.title?.includes('천안') || post.source === 'dcinside' || post.source === 'cheonan_city';
+    return matchSource && matchSentiment && isCheonan;
   }) ?? [];
 
   // 소스 목록 (필터용)
@@ -340,20 +342,35 @@ export default function DashboardPage() {
       <div className="grid-2">
         {/* 주간 AI 요약 */}
         <div className="card">
-          <h2>주간 AI 요약</h2>
-          {errors.summaries ? (
+          <h2>주간 요약</h2>
+          {errors.summaries && errors.sentiment ? (
             <p className="error-text">데이터를 불러올 수 없습니다</p>
-          ) : !summaries?.length ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
-          ) : (
+          ) : summaries?.length ? (
             <div className="summary-list">
               {summaries.slice(0, 2).map((s, idx) => (
                 <div key={idx} className="summary-item">
                   <p>{s.content}</p>
-                  <span className="summary-date">{formatDate(s.created_at)}</span>
+                  <span className="summary-date">{s.created_at?.slice(0, 10)}</span>
                 </div>
               ))}
             </div>
+          ) : sentiment ? (
+            <div className="summary-fallback">
+              <p className="summary-text">
+                현재까지 총 <strong>{sentiment.total?.toLocaleString()}건</strong>의 게시글이 분석되었습니다.
+                긍정 <strong>{sentiment.positive?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.positive / sentiment.total * 100) : 0}%),
+                부정 <strong>{sentiment.negative?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.negative / sentiment.total * 100) : 0}%),
+                중립 <strong>{sentiment.neutral?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.neutral / sentiment.total * 100) : 0}%)입니다.
+              </p>
+              {sources?.length > 0 && (
+                <p className="summary-text">
+                  가장 활발한 소스는 <strong>{sources.reduce((a, b) => (a.positive + a.negative + a.neutral) > (b.positive + b.negative + b.neutral) ? a : b).source}</strong>이며,
+                  부정 비율이 가장 높은 소스는 <strong>{sources.reduce((a, b) => (a.negative / Math.max(a.positive + a.negative + a.neutral, 1)) > (b.negative / Math.max(b.positive + b.negative + b.neutral, 1)) ? a : b).source}</strong>입니다.
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="empty-text">아직 데이터가 없습니다</p>
           )}
         </div>
 
@@ -397,7 +414,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredPosts.map((post, idx) => (
+                {filteredPosts.slice(0, 10).map((post, idx) => (
                   <tr key={post.id ?? idx}>
                     <td>{post.source}</td>
                     <td className="post-title" title={post.title}>

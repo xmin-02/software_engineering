@@ -279,6 +279,22 @@
   margin-top: 2px;
 }
 
+.summary-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #444;
+}
+
+.summary-text strong {
+  color: #1a1a2e;
+}
+
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;

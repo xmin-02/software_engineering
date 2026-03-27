@@ -96,6 +96,10 @@ def get_trend(
     date_to: date | None = None,
 ) -> list[dict]:
     """감성 트렌드 (일별/주별)"""
+    # date_from이 없으면 최근 30일만
+    if not date_from:
+        date_from = date.today() - timedelta(days=30)
+
     if interval == "weekly":
         date_col = func.date_trunc("week", Post.published_at).label("period")
     else:
@@ -162,6 +166,7 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
         Analysis.topic,
         func.count(Analysis.id).label("post_count"),
     ).filter(Analysis.topic.isnot(None))
+    query = query.filter(Analysis.topic != "기타")
 
     query = query.join(Post, Analysis.post_id == Post.id)
 
@@ -227,6 +232,17 @@ def get_posts_by_topic(db: Session, topic_name: str) -> list[dict]:
     ]
 
 
+SPAM_PATTERNS = [
+    "견적", "000원", "전화상담", "무료견적", "신속처리", "안전운송",
+    "친절서비스", "꽃집", "화환", "근조", "장례", "이사",
+    "납품", "대여", "교체", "수리", "시공",
+]
+
+
+def _is_spam_keyword(keyword: str) -> bool:
+    return any(p in keyword for p in SPAM_PATTERNS)
+
+
 def get_keyword_frequencies(db: Session, limit: int = 50) -> list[dict]:
     """키워드 빈도 집계 (ARRAY unnest)"""
     rows = (
@@ -237,11 +253,12 @@ def get_keyword_frequencies(db: Session, limit: int = 50) -> list[dict]:
         .filter(Analysis.keywords.isnot(None))
         .group_by("keyword")
         .order_by(func.count().desc())
-        .limit(limit)
+        .limit(limit * 2)
         .all()
     )
 
-    return [{"keyword": row.keyword, "count": row.cnt} for row in rows]
+    filtered = [{"keyword": row.keyword, "count": row.cnt} for row in rows if not _is_spam_keyword(row.keyword)]
+    return filtered[:limit]
 
 
 def get_summaries(db: Session) -> list:
