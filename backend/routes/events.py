@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from backend.deps import get_db
@@ -20,5 +21,8 @@ def list_events(
     if category:
         query = query.filter(Event.category == category)
     if upcoming:
-        query = query.filter(Event.end_date >= date.today())
-    return query.order_by(Event.start_date.asc()).all()
+        # end_date가 null이면 상시 운영으로 간주
+        query = query.filter(
+            or_(Event.end_date >= date.today(), Event.end_date.is_(None))
+        )
+    return query.order_by(Event.start_date.asc().nulls_last()).limit(50).all()
