@@ -21,6 +21,7 @@ class Settings:
         self._naver = _load_config("naver_api.json")
         self._kakao = _load_config("kakao_api.json")
         self._saramin = _load_config("saramin_api.json")
+        self._work24 = _load_config("work24_api.json")
         self._data_go_kr = _load_config("data_go_kr_api.json")
         self._pipeline = _load_config("pipeline.json")
         self._ollama = _load_config("ollama.json")
@@ -52,6 +53,11 @@ class Settings:
     @property
     def saramin_api_key(self) -> str:
         return self._saramin.get("api_key", "")
+
+    # 워크넷(Work24) API
+    @property
+    def work24_auth_key(self) -> str:
+        return self._work24.get("auth_key", "")
 
     # data.go.kr API
     @property
