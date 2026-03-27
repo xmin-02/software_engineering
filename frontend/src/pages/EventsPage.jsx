@@ -75,7 +75,9 @@ export default function EventsPage() {
                 <h3 className="event-title">{ev.title}</h3>
                 <div className="event-meta">
                   <span className="meta-item">
-                    📅 {formatDate(ev.start_date)}{ev.end_date ? ` ~ ${formatDate(ev.end_date)}` : ''}
+                    📅 {ev.start_date || ev.end_date
+                      ? `${formatDate(ev.start_date)}${ev.end_date ? ` ~ ${formatDate(ev.end_date)}` : ''}`
+                      : '상시 운영'}
                   </span>
                   {ev.location && (
                     <span className="meta-item">📍 {ev.location}</span>

@@ -192,7 +192,9 @@ export default function DashboardPage() {
                     ) : evt.title}
                   </div>
                   <div className="event-date">
-                    {formatDate(evt.start_date)} ~ {formatDate(evt.end_date)}
+                    {evt.start_date || evt.end_date
+                      ? `${formatDate(evt.start_date)} ~ ${formatDate(evt.end_date)}`
+                      : '상시 운영'}
                   </div>
                   {evt.location && <div className="event-location">{evt.location}</div>}
                 </div>
