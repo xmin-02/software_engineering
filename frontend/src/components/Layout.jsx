@@ -34,9 +34,18 @@ export default function Layout() {
           ))}
         </nav>
       </aside>
-      <main className="main-content">
-        <Outlet />
-      </main>
+      <div className="content-area">
+        <header className="top-bar">
+          <div className="top-bar-title">천안 지역 여론 분석 & 생활 정보</div>
+          <div className="top-bar-info">
+            <span className="status-dot" />
+            <span>실시간 운영 중</span>
+          </div>
+        </header>
+        <main className="main-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
