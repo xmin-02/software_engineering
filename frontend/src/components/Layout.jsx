@@ -5,7 +5,7 @@ import './Layout.css';
 const navItems = [
   { to: '/', label: '대시보드', end: true },
   { to: '/places', label: '맛집/카페' },
-  { to: '/events', label: '행사/축제' },
+  { to: '/events', label: '관광/명소' },
   { to: '/youth', label: '청년' },
   { to: '/college', label: '대학생' },
   { to: '/jobs', label: '채용' },
