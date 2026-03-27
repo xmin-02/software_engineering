@@ -178,9 +178,12 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
 
     rows = query.group_by(Analysis.topic).order_by(func.count(Analysis.id).desc()).all()
 
-    # 토픽별 키워드를 별도 쿼리로 수집
+    # 스팸 토픽 + 키워드 필터링
     result = []
-    for idx, row in enumerate(rows):
+    seq = 0
+    for row in rows:
+        if _is_spam_keyword(row.topic):
+            continue
         kw_rows = (
             db.query(func.unnest(Analysis.keywords).label("kw"))
             .filter(Analysis.topic == row.topic, Analysis.keywords.isnot(None))
@@ -193,10 +196,11 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
             .limit(5)
             .all()
         )
+        seq += 1
         result.append({
-            "id": idx + 1,
+            "id": seq,
             "name": row.topic,
-            "keywords": [k.kw for k in top_kws],
+            "keywords": [k.kw for k in top_kws if not _is_spam_keyword(k.kw)],
             "post_count": row.post_count,
         })
 
@@ -235,7 +239,10 @@ def get_posts_by_topic(db: Session, topic_name: str) -> list[dict]:
 SPAM_PATTERNS = [
     "견적", "000원", "전화상담", "무료견적", "신속처리", "안전운송",
     "친절서비스", "꽃집", "화환", "근조", "장례", "이사",
-    "납품", "대여", "교체", "수리", "시공",
+    "납품", "대여", "교체", "수리", "시공", "예식장", "결혼축하",
+    "사다리차", "비상주사무실", "싱크대", "페인트", "미용실",
+    "피부관리", "휴대폰성지", "인테리어", "에어컨", "보일러",
+    "정책자금", "대출", "보험", "영업시간",
 ]
 
 

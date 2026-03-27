@@ -112,15 +112,22 @@ export default function DashboardPage() {
     return min + ((count / keywordMax) * (max - min));
   };
 
+  // 광고성 키워드 패턴
+  const AD_PATTERNS = [
+    '견적', '시공', '사다리차', '비상주사무실', '싱크대', '페인트',
+    '피부관리', '휴대폰성지', '에어컨', '보일러', '정책자금', '대출',
+    '화환', '근조', '장례', '이사짐', '인테리어', '미용실',
+  ];
+  const isAd = (title) => AD_PATTERNS.some((p) => title?.includes(p));
+
   // 게시글 필터 적용
   const filteredPosts = posts?.items?.filter((post) => {
     const matchSource = filterSource ? post.source === filterSource : true;
     const matchSentiment = filterSentiment
       ? post.sentiment?.toLowerCase() === filterSentiment
       : true;
-    // 천안 관련 게시글 우선 (제목에 "천안" 포함)
     const isCheonan = post.title?.includes('천안') || post.source === 'dcinside' || post.source === 'cheonan_city';
-    return matchSource && matchSentiment && isCheonan;
+    return matchSource && matchSentiment && isCheonan && !isAd(post.title);
   }) ?? [];
 
   // 소스 목록 (필터용)
