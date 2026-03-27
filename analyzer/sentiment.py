@@ -12,7 +12,7 @@ LABEL_MAP = {
     3: "positive",   # 사랑하는
     4: "positive",   # 즐거운(신나는)
     5: "neutral",    # 일상적인
-    6: "neutral",    # 생각이 많은
+    6: "negative",   # 생각이 많은
     7: "negative",   # 슬픔(우울한)
     8: "negative",   # 힘듦(지침)
     9: "negative",   # 짜증남
@@ -64,7 +64,7 @@ class SentimentAnalyzer:
         emotion = ID2LABEL[pred_idx]
 
         # 신뢰도 낮으면 중립 처리
-        if score < 0.6:
+        if score < 0.4:
             sentiment = "neutral"
 
         return {

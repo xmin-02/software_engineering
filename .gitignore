@@ -58,5 +58,8 @@ ollama_data/
 *.log
 logs/
 
+# OMC state
+.omc/
+
 # OS
 Thumbs.db

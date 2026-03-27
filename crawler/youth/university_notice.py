@@ -225,13 +225,16 @@ class UniversityNoticeCrawler(BaseCrawler):
 
     def save(self, data: list[dict[str, Any]], db: Session) -> int:
         """DB 저장 (source_id 기반 중복 체크)"""
+        existing = {r[0] for r in db.query(UniversityNotice.source_id).filter(
+            UniversityNotice.source_id.isnot(None)
+        ).all()}
+        seen = set()
         saved = 0
         for item in data:
-            if not item.get("source_id"):
+            sid = item.get("source_id")
+            if not sid or sid in existing or sid in seen:
                 continue
-            exists = db.query(UniversityNotice.id).filter_by(source_id=item["source_id"]).first()
-            if exists:
-                continue
+            seen.add(sid)
             notice = UniversityNotice(**item)
             db.add(notice)
             saved += 1

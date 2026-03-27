@@ -11,7 +11,7 @@ class Place(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    category: Mapped[str | None] = mapped_column(String(50))
+    category: Mapped[str | None] = mapped_column(String(50), index=True)
     sub_category: Mapped[str | None] = mapped_column(String(50))
     address: Mapped[str | None] = mapped_column(Text)
     phone: Mapped[str | None] = mapped_column(String(20))

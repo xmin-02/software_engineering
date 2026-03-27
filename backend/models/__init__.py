@@ -11,6 +11,7 @@ from backend.models.content import (
     Certification,
     UniversityNotice,
 )
+from backend.models.topic import Topic
 
 __all__ = [
     "Post",
@@ -26,4 +27,5 @@ __all__ = [
     "RealEstate",
     "Certification",
     "UniversityNotice",
+    "Topic",
 ]
