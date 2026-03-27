@@ -177,24 +177,25 @@ export default function DashboardPage() {
         </div>
 
         <div className="card">
-          <h2>천안 행사</h2>
+          <h2>천안 명소 & 행사</h2>
           {errors.events ? (
             <p className="error-text">데이터를 불러올 수 없습니다</p>
           ) : !events?.length ? (
-            <p className="empty-text">예정된 행사가 없습니다</p>
+            <p className="empty-text">등록된 명소가 없습니다</p>
           ) : (
             <div className="event-list">
-              {events.slice(0, 5).map((evt) => (
+              {events.slice(0, 6).map((evt) => (
                 <div key={evt.id} className="event-item">
                   <div className="event-title">
                     {evt.url ? (
                       <a href={evt.url} target="_blank" rel="noreferrer">{evt.title}</a>
                     ) : evt.title}
                   </div>
-                  <div className="event-date">
-                    {evt.start_date || evt.end_date
-                      ? `${formatDate(evt.start_date)} ~ ${formatDate(evt.end_date)}`
-                      : '상시 운영'}
+                  <div className="event-meta-row">
+                    {evt.category && <span className="event-category">{evt.category}</span>}
+                    {evt.start_date || evt.end_date ? (
+                      <span className="event-date">{formatDate(evt.start_date)} ~ {formatDate(evt.end_date)}</span>
+                    ) : null}
                   </div>
                   {evt.location && <div className="event-location">{evt.location}</div>}
                 </div>
