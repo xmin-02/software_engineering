@@ -159,3 +159,20 @@
   font-size: 14px;
   color: #555;
 }
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+  color: #2e7d32;
+}

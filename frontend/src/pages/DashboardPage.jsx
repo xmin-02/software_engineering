@@ -44,6 +44,8 @@ export default function DashboardPage() {
   const [keywords, setKeywords] = useState(null);
   const [summaries, setSummaries] = useState(null);
   const [posts, setPosts] = useState(null);
+  const [topics, setTopics] = useState(null);
+  const [events, setEvents] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -62,10 +64,12 @@ export default function DashboardPage() {
         api.get('/api/keywords', { params: { limit: 30 } }),
         api.get('/api/summaries'),
         api.get('/api/posts', { params: { page: 1, size: 10 } }),
+        api.get('/api/topics', { params: { period: 'weekly' } }),
+        api.get('/api/events'),
       ]);
 
-      const keys = ['sentiment', 'trend', 'sources', 'keywords', 'summaries', 'posts'];
-      const setters = [setSentiment, setTrend, setSources, setKeywords, setSummaries, setPosts];
+      const keys = ['sentiment', 'trend', 'sources', 'keywords', 'summaries', 'posts', 'topics', 'events'];
+      const setters = [setSentiment, setTrend, setSources, setKeywords, setSummaries, setPosts, setTopics, setEvents];
       const newErrors = {};
 
       results.forEach((result, i) => {
@@ -94,13 +98,8 @@ export default function DashboardPage() {
         }))
     : [];
 
-  // 소스별 비교 데이터 - 소스명 기준으로 스택바
-  const sourceData = sources
-    ? Object.entries(sources).map(([source, counts]) => ({
-        source,
-        ...counts,
-      }))
-    : [];
+  // 소스별 비교 데이터
+  const sourceData = Array.isArray(sources) ? sources : [];
 
   // 키워드 폰트 크기 계산 (12~26px)
   const keywordMax = keywords?.length
@@ -138,6 +137,59 @@ export default function DashboardPage() {
   return (
     <div className="dashboard">
       <h1 className="dashboard-title">천안 여론 대시보드</h1>
+
+      {/* Trending Topics + 행사 정보 */}
+      <div className="grid-2">
+        <div className="card">
+          <h2>주간 토픽</h2>
+          {errors.topics ? (
+            <p className="error-text">데이터를 불러올 수 없습니다</p>
+          ) : !topics?.length ? (
+            <p className="empty-text">아직 데이터가 없습니다</p>
+          ) : (
+            <div className="topic-list">
+              {topics.slice(0, 8).map((t) => (
+                <div key={t.id} className="topic-card">
+                  <div className="topic-name">{t.name}</div>
+                  <div className="topic-meta">
+                    <span className="topic-count">{t.post_count}건</span>
+                    <div className="topic-keywords">
+                      {t.keywords?.slice(0, 3).map((kw, i) => (
+                        <span key={i} className="topic-kw">{kw}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <h2>천안 행사</h2>
+          {errors.events ? (
+            <p className="error-text">데이터를 불러올 수 없습니다</p>
+          ) : !events?.length ? (
+            <p className="empty-text">예정된 행사가 없습니다</p>
+          ) : (
+            <div className="event-list">
+              {events.slice(0, 5).map((evt) => (
+                <div key={evt.id} className="event-item">
+                  <div className="event-title">
+                    {evt.url ? (
+                      <a href={evt.url} target="_blank" rel="noreferrer">{evt.title}</a>
+                    ) : evt.title}
+                  </div>
+                  <div className="event-date">
+                    {formatDate(evt.start_date)} ~ {formatDate(evt.end_date)}
+                  </div>
+                  {evt.location && <div className="event-location">{evt.location}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* 상단: 감성 파이차트 + 트렌드 라인차트 */}
       <div className="grid-2">
@@ -360,7 +412,7 @@ export default function DashboardPage() {
                     <td>
                       <SentimentBadge value={post.sentiment} />
                     </td>
-                    <td>{formatDate(post.created_at)}</td>
+                    <td>{formatDate(post.published_at)}</td>
                   </tr>
                 ))}
               </tbody>

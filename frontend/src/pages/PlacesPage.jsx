@@ -9,6 +9,7 @@ export default function PlacesPage() {
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
+  const [openNow, setOpenNow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,6 +19,7 @@ export default function PlacesPage() {
     try {
       const params = { page, size: 20 };
       if (category) params.category = category;
+      if (openNow) params.open_now = true;
       const res = await api.get('/api/places', { params });
       const data = res.data;
       setPlaces(Array.isArray(data) ? data : data.items ?? []);
@@ -27,7 +29,7 @@ export default function PlacesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, category]);
+  }, [page, category, openNow]);
 
   const fetchRanking = useCallback(async () => {
     setLoading(true);
@@ -97,11 +99,19 @@ export default function PlacesPage() {
         <div className="filter-bar">
           <select value={category} onChange={handleCategoryChange} className="filter-select">
             <option value="">전체 카테고리</option>
-            <option value="restaurant">음식점</option>
-            <option value="cafe">카페</option>
-            <option value="bar">주점</option>
-            <option value="bakery">베이커리</option>
+            <option value="한식">한식</option>
+            <option value="중식">중식</option>
+            <option value="일식">일식</option>
+            <option value="양식">양식</option>
+            <option value="카페">카페</option>
+            <option value="술집">술집</option>
           </select>
+          <button
+            className={`toggle-btn${openNow ? ' active' : ''}`}
+            onClick={() => { setOpenNow(!openNow); setPage(1); }}
+          >
+            {openNow ? '🟢 영업 중만' : '전체 보기'}
+          </button>
         </div>
       )}
 
