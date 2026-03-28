@@ -361,7 +361,7 @@ export default function DashboardPage() {
             <div className="summary-list">
               {summaries.slice(0, 2).map((s, idx) => (
                 <div key={idx} className="summary-item">
-                  <p>{s.content}</p>
+                  <p>{s.summary}</p>
                   <span className="summary-date">{s.created_at?.slice(0, 10)}</span>
                 </div>
               ))}
