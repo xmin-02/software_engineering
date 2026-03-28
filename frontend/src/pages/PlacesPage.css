@@ -176,3 +176,14 @@
   background: #e8f5e9;
   color: #2e7d32;
 }
+
+.map-container {
+  margin-top: 16px;
+}
+
+.map-info {
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
