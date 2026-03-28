@@ -159,45 +159,50 @@ function KakaoMap({ places }) {
   const mapInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || !window.kakao?.maps) return;
+    if (!mapRef.current || !window.kakao) return;
 
-    const kakao = window.kakao;
-    const center = new kakao.maps.LatLng(36.8151, 127.1139); // 천안 중심
-    const map = new kakao.maps.Map(mapRef.current, {
-      center,
-      level: 7,
-    });
-    mapInstanceRef.current = map;
-
-    // 마커 추가
-    const bounds = new kakao.maps.LatLngBounds();
-    let hasMarker = false;
-
-    places.forEach((place) => {
-      if (!place.latitude || !place.longitude) return;
-      const pos = new kakao.maps.LatLng(place.latitude, place.longitude);
-      bounds.extend(pos);
-      hasMarker = true;
-
-      const marker = new kakao.maps.Marker({ map, position: pos });
-
-      const content = `
-        <div style="padding:8px 12px;font-size:13px;max-width:200px;line-height:1.4">
-          <strong>${place.name}</strong><br/>
-          <span style="color:#888">${place.category ?? ''}</span><br/>
-          <span style="color:#666">${place.address ?? ''}</span>
-          ${place.review_count ? `<br/><span style="color:#1565c0">리뷰 ${place.review_count}건</span>` : ''}
-        </div>
-      `;
-      const infowindow = new kakao.maps.InfoWindow({ content });
-
-      kakao.maps.event.addListener(marker, 'click', () => {
-        infowindow.open(map, marker);
+    const initMap = () => {
+      const kakao = window.kakao;
+      const center = new kakao.maps.LatLng(36.8151, 127.1139);
+      const map = new kakao.maps.Map(mapRef.current, {
+        center,
+        level: 7,
       });
-    });
+      mapInstanceRef.current = map;
 
-    if (hasMarker) {
-      map.setBounds(bounds);
+      const bounds = new kakao.maps.LatLngBounds();
+      let hasMarker = false;
+
+      places.forEach((place) => {
+        if (!place.latitude || !place.longitude) return;
+        const pos = new kakao.maps.LatLng(place.latitude, place.longitude);
+        bounds.extend(pos);
+        hasMarker = true;
+
+        const marker = new kakao.maps.Marker({ map, position: pos });
+
+        const content = `
+          <div style="padding:8px 12px;font-size:13px;max-width:200px;line-height:1.4">
+            <strong>${place.name}</strong><br/>
+            <span style="color:#888">${place.category ?? ''}</span><br/>
+            <span style="color:#666">${place.address ?? ''}</span>
+            ${place.review_count ? `<br/><span style="color:#1565c0">리뷰 ${place.review_count}건</span>` : ''}
+          </div>
+        `;
+        const infowindow = new kakao.maps.InfoWindow({ content });
+
+        kakao.maps.event.addListener(marker, 'click', () => {
+          infowindow.open(map, marker);
+        });
+      });
+
+      if (hasMarker) {
+        map.setBounds(bounds);
+      }
+    };
+
+    if (window.kakao.maps) {
+      kakao.maps.load(initMap);
     }
   }, [places]);
 
