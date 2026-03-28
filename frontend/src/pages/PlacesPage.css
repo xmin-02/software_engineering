@@ -448,3 +448,352 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
 }
+
+/* ===== 모달 오버레이 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: overlay-in 0.2s ease;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===== 모달 패널 ===== */
+.modal-panel {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  animation: panel-in 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ===== 닫기 버튼 ===== */
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modal-close-btn:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ===== 모달 상태 메시지 ===== */
+.modal-status {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 60px 0;
+}
+
+.modal-status.error {
+  color: var(--color-negative);
+}
+
+/* ===== 모달 본문 (좌우 분할) ===== */
+.modal-body {
+  display: flex;
+  height: 90vh;
+  max-height: 90vh;
+}
+
+/* ===== 왼쪽 패널 (60%) ===== */
+.modal-left {
+  flex: 0 0 60%;
+  padding: 28px 28px 28px 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 커스텀 스크롤바 */
+.modal-left::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-left::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-left::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+/* 장소명 헤더 */
+.modal-place-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-right: 40px;
+}
+
+.modal-place-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+/* 주소 */
+.modal-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 부가 정보 칩 */
+.modal-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-badge);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* ===== 감성 점수 섹션 ===== */
+.modal-sentiment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-sentiment-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.modal-sentiment-score {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.modal-sentiment-score.positive { color: var(--color-positive); }
+.modal-sentiment-score.negative { color: var(--color-negative); }
+.modal-sentiment-score.neutral  { color: var(--color-neutral); }
+
+.modal-sentiment-track {
+  height: 10px;
+  background: var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.modal-sentiment-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.modal-sentiment-fill.positive { background: var(--color-positive); }
+.modal-sentiment-fill.negative { background: var(--color-negative); }
+.modal-sentiment-fill.neutral  { background: var(--color-neutral); }
+
+.modal-review-total {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* ===== 리뷰 목록 ===== */
+.modal-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-reviews-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-reviews-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* 리뷰 아이템 */
+.modal-review-item {
+  padding: 14px;
+  background: var(--color-bg);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-review-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modal-review-source {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.modal-review-date {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+/* 감성 뱃지 */
+.sentiment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-badge);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-positive { background: var(--color-positive-bg); color: var(--color-positive); }
+.badge-negative { background: var(--color-negative-bg); color: var(--color-negative); }
+.badge-neutral  { background: var(--color-neutral-bg);  color: var(--color-neutral); }
+
+/* 리뷰 텍스트 (기본 3줄 제한) */
+.modal-review-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.modal-review-text.expanded {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.modal-review-more {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--color-indigo);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.modal-review-more:hover {
+  color: var(--color-indigo-hover);
+}
+
+/* ===== 오른쪽 패널 (40%) — 미니맵 ===== */
+.modal-right {
+  flex: 0 0 40%;
+  border-left: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.modal-map-container {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+.modal-map-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* ===== 모달 반응형 ===== */
+@media (max-width: 700px) {
+  .modal-body {
+    flex-direction: column;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-left {
+    flex: none;
+    padding: 20px 20px 16px;
+    overflow-y: visible;
+  }
+
+  .modal-right {
+    flex: none;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    height: 240px;
+  }
+
+  .modal-map-container {
+    height: 240px;
+  }
+}
