@@ -1,0 +1,172 @@
+.college-page {
+  padding: 24px;
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 8px 20px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: #fff;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+  font-weight: 600;
+}
+
+.status-msg {
+  font-size: 14px;
+  color: #888;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.status-msg.error {
+  color: #e53935;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.college-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.college-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  align-self: flex-start;
+}
+
+.card-badge.contest {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.card-badge.scholarship {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+
+.card-meta {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.card-meta.deadline {
+  color: #e53935;
+  font-weight: 500;
+}
+
+.card-link {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.card-link:hover {
+  text-decoration: underline;
+}
+
+/* 주거 테이블 */
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead tr {
+  background: #f8f9fc;
+  border-bottom: 2px solid #e8eaf0;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.data-table tbody tr:hover {
+  background: #f0f4ff;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  color: #4b5563;
+}
+
+.trade-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trade-badge.매매 { background: #fee2e2; color: #b91c1c; }
+.trade-badge.전세 { background: #dbeafe; color: #1e40af; }
+.trade-badge.월세 { background: #d1fae5; color: #065f46; }

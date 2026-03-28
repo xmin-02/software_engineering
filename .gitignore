@@ -22,10 +22,11 @@ env/
 *~
 .DS_Store
 
-# Environment Variables
+# Environment Variables & API Keys
 .env
 .env.local
 .env.*.local
+config/
 
 # Database
 *.db
@@ -56,6 +57,9 @@ ollama_data/
 # Logs
 *.log
 logs/
+
+# OMC state
+.omc/
 
 # OS
 Thumbs.db

@@ -1,0 +1,129 @@
+.family-page {
+  padding: 24px;
+  background-color: #f5f6fa;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  color: #444;
+  cursor: pointer;
+}
+
+.status-msg {
+  font-size: 14px;
+  color: #888;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.status-msg.error {
+  color: #e53935;
+}
+
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.estate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.estate-table thead tr {
+  background: #f8f9fc;
+  border-bottom: 2px solid #e8eaf0;
+}
+
+.estate-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.estate-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+
+.estate-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.estate-table tbody tr:hover {
+  background: #f0f4ff;
+}
+
+.estate-table td {
+  padding: 12px 16px;
+  color: #4b5563;
+  vertical-align: middle;
+}
+
+.address-cell {
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #e0e7ff;
+  color: #3730a3;
+  white-space: nowrap;
+}
+
+.trade-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.trade-badge.매매 { background: #fee2e2; color: #b91c1c; }
+.trade-badge.전세 { background: #dbeafe; color: #1e40af; }
+.trade-badge.월세 { background: #d1fae5; color: #065f46; }
+
+.price-cell {
+  font-weight: 600;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+
+.date-cell {
+  white-space: nowrap;
+  color: #9ca3af;
+  font-size: 13px;
+}
