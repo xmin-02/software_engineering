@@ -14,13 +14,15 @@ def list_places(
     category: str | None = None,
     tags: str | None = None,
     open_now: bool = False,
+    age_group: str | None = None,
     sort_by: str = Query("sentiment_score", enum=["sentiment_score", "rating", "review_count"]),
     pagination: PaginationParams = Depends(),
     db: Session = Depends(get_db),
 ):
     items, total = place_service.get_places(
         db, category=category, tags=tags, open_now=open_now,
-        sort_by=sort_by, offset=pagination.offset, limit=pagination.size,
+        age_group=age_group, sort_by=sort_by,
+        offset=pagination.offset, limit=pagination.size,
     )
     return {"items": items, "total": total, "page": pagination.page, "size": pagination.size}
 

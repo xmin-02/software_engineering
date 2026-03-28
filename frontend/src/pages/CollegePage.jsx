@@ -14,6 +14,11 @@ export default function CollegePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // 맛집 추천 상태
+  const [places, setPlaces] = useState([]);
+  const [placesLoading, setPlacesLoading] = useState(false);
+  const [placesError, setPlacesError] = useState(null);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -28,6 +33,23 @@ export default function CollegePage() {
   }, [activeTab]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // 대학생 추천 맛집 로드
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      setPlacesLoading(true);
+      setPlacesError(null);
+      try {
+        const res = await api.get('/api/places', { params: { age_group: 'college', size: 6 } });
+        setPlaces(Array.isArray(res.data) ? res.data : res.data.items ?? []);
+      } catch {
+        setPlacesError('맛집 데이터를 불러올 수 없습니다');
+      } finally {
+        setPlacesLoading(false);
+      }
+    };
+    fetchPlaces();
+  }, []);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
@@ -123,6 +145,37 @@ export default function CollegePage() {
           </table>
         </div>
       )}
+
+      {/* 대학생 추천 맛집 섹션 */}
+      <div className="places-section">
+        <h2 className="places-title">대학생 추천 맛집</h2>
+        <p className="places-desc">카공, 가성비, 데이트 — 대학생 취향 맞춤 천안 맛집</p>
+        {placesLoading && <p className="status-msg">맛집 정보를 불러오는 중...</p>}
+        {placesError && <p className="status-msg error">{placesError}</p>}
+        {!placesLoading && !placesError && places.length === 0 && (
+          <p className="status-msg">등록된 맛집이 없습니다</p>
+        )}
+        {!placesLoading && !placesError && places.length > 0 && (
+          <div className="places-grid">
+            {places.map((place, i) => (
+              <div key={place.id ?? i} className="place-card">
+                <h3 className="place-name">{place.name}</h3>
+                <div className="place-tags">
+                  <span className="place-tag">카공</span>
+                  <span className="place-tag">가성비</span>
+                  <span className="place-tag">데이트</span>
+                </div>
+                {place.category && (
+                  <span className="place-category">{place.category}</span>
+                )}
+                {place.address && (
+                  <p className="place-address">{place.address}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

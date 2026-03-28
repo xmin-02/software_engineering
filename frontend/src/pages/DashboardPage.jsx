@@ -101,16 +101,26 @@ export default function DashboardPage() {
   // 소스별 비교 데이터
   const sourceData = Array.isArray(sources) ? sources : [];
 
-  // 키워드 폰트 크기 계산 (12~26px)
+  // 키워드 폰트 크기 계산 (12~36px)
   const keywordMax = keywords?.length
     ? Math.max(...keywords.map((k) => k.count))
     : 1;
 
   const getKeywordSize = (count) => {
     const min = 12;
-    const max = 26;
+    const max = 36;
     return min + ((count / keywordMax) * (max - min));
   };
+
+  // 워드클라우드 색상 팔레트 (인디고, 네이비, 보라, 하늘 계열)
+  const KEYWORD_COLORS = [
+    '#3730a3', '#1e40af', '#5b21b6', '#0369a1',
+    '#4338ca', '#1d4ed8', '#6d28d9', '#0284c7',
+    '#312e81', '#1e3a5f', '#4c1d95', '#075985',
+    '#3b5bdb', '#364fc7', '#7048e8', '#1971c2',
+  ];
+
+  const getKeywordColor = (index) => KEYWORD_COLORS[index % KEYWORD_COLORS.length];
 
   // 광고성 키워드 패턴
   const AD_PATTERNS = [
@@ -335,12 +345,15 @@ export default function DashboardPage() {
             <p className="empty-text">아직 데이터가 없습니다</p>
           ) : (
             <div className="keyword-list">
-              {keywords.map((kw) => (
+              {keywords.map((kw, idx) => (
                 <span
                   key={kw.keyword}
                   className="keyword-tag"
-                  style={{ fontSize: `${getKeywordSize(kw.count)}px` }}
-                  title={`${kw.count}건`}
+                  style={{
+                    fontSize: `${getKeywordSize(kw.count)}px`,
+                    color: getKeywordColor(idx),
+                  }}
+                  title={`${kw.keyword}: ${kw.count}건`}
                 >
                   {kw.keyword}
                 </span>

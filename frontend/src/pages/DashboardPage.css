@@ -68,21 +68,27 @@
   padding: 20px 0;
 }
 
-/* 키워드 태그 */
+/* 키워드 워드클라우드 */
 .keyword-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 4px;
+  gap: 10px 14px;
+  padding: 8px 4px;
+  align-items: center;
+  line-height: 1.8;
 }
 
 .keyword-tag {
-  background: #e8f0fe;
-  color: #1a73e8;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: default;
+  transition: opacity 0.15s, transform 0.15s;
+  letter-spacing: -0.01em;
+}
+
+.keyword-tag:hover {
+  opacity: 0.75;
+  transform: scale(1.08);
 }
 
 /* 주간 요약 카드 */
