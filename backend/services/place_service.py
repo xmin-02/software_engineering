@@ -53,11 +53,21 @@ def _build_place_response(place: Place, stats: dict | None = None) -> dict:
     }
 
 
+AGE_GROUP_FILTERS = {
+    "youth": {"exclude_categories": ["술집", "주점"], "prefer_tags": ["가성비"]},
+    "college": {"prefer_tags": ["가성비", "카공", "데이트", "단체석"]},
+    "early_career": {"prefer_tags": ["가성비"]},
+    "worker": {},
+    "family": {"exclude_tags": ["노키즈존"], "prefer_tags": ["가족", "키즈시설"]},
+}
+
+
 def get_places(
     db: Session,
     category: str | None = None,
     tags: str | None = None,
     open_now: bool = False,
+    age_group: str | None = None,
     sort_by: str = "sentiment_score",
     offset: int = 0,
     limit: int = 20,
@@ -70,6 +80,26 @@ def get_places(
     if tags:
         tag_list = [t.strip() for t in tags.split(",")]
         query = query.join(PlaceTag).filter(PlaceTag.tag.in_(tag_list))
+
+    # 연령별 필터
+    if age_group and age_group in AGE_GROUP_FILTERS:
+        ag = AGE_GROUP_FILTERS[age_group]
+        if "exclude_categories" in ag:
+            query = query.filter(~Place.category.in_(ag["exclude_categories"]))
+        if "exclude_tags" in ag:
+            exclude_ids = (
+                db.query(PlaceTag.place_id)
+                .filter(PlaceTag.tag.in_(ag["exclude_tags"]))
+                .subquery()
+            )
+            query = query.filter(~Place.id.in_(exclude_ids))
+        if "prefer_tags" in ag and not tags:
+            prefer_ids = (
+                db.query(PlaceTag.place_id)
+                .filter(PlaceTag.tag.in_(ag["prefer_tags"]))
+                .subquery()
+            )
+            query = query.filter(Place.id.in_(prefer_ids))
 
     total = query.count()
     places = query.offset(offset).limit(limit).all()
