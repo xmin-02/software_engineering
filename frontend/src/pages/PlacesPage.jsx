@@ -22,23 +22,33 @@ function ReviewItem({ review }) {
     ? new Date(review.published_at).toLocaleDateString('ko-KR')
     : null;
 
+  // 감성에 따라 왼쪽 보더 클래스 결정
+  const borderClass = {
+    positive: 'review-border-positive',
+    negative: 'review-border-negative',
+    neutral:  'review-border-neutral',
+  }[review.sentiment] ?? 'review-border-neutral';
+
   return (
-    <div className="modal-review-item">
+    <div className={`modal-review-item ${borderClass}`}>
+      {/* 헤더: 감성뱃지 좌측 / 출처+날짜 우측 */}
       <div className="modal-review-header">
         <SentimentBadge sentiment={review.sentiment} />
-        <span className="modal-review-source">{source}</span>
-        {date && <span className="modal-review-date">{date}</span>}
+        <div className="modal-review-meta">
+          <span className="modal-review-source">{source}</span>
+          {date && <span className="modal-review-date">{date}</span>}
+        </div>
       </div>
       <p className={`modal-review-text${expanded ? ' expanded' : ''}`}>
         {review.review_text}
       </p>
-      {/* 텍스트가 길면 더보기 버튼 표시 */}
+      {/* 텍스트가 길면 더보기 링크 표시 */}
       {review.review_text?.length > 100 && (
         <button
           className="modal-review-more"
           onClick={() => setExpanded((v) => !v)}
         >
-          {expanded ? '접기' : '더보기'}
+          {expanded ? '접기 ↑' : '더보기 ↓'}
         </button>
       )}
     </div>
@@ -136,20 +146,30 @@ function PlaceDetailModal({ placeId, onClose }) {
           <div className="modal-body">
             {/* 왼쪽 패널 */}
             <div className="modal-left">
-              {/* 장소명 + 카테고리 */}
+              {/* 장소명 + 카테고리 헤더 블록 */}
               <div className="modal-place-header">
-                <h2 className="modal-place-name">{place.name}</h2>
-                {place.category && (
-                  <span className={`category-badge ${CATEGORY_CLASS[place.category] ?? 'cat-default'}`}>
-                    {place.category}
-                  </span>
+                <div className="modal-place-title-row">
+                  <h2 className="modal-place-name">{place.name}</h2>
+                  {place.category && (
+                    <span className={`category-badge modal-category-badge ${CATEGORY_CLASS[place.category] ?? 'cat-default'}`}>
+                      {place.category}
+                    </span>
+                  )}
+                </div>
+                {/* 태그 뱃지 (있는 경우만) */}
+                {place.tags?.length > 0 && (
+                  <div className="modal-tags-row">
+                    {place.tags.map((tag) => (
+                      <span key={tag} className="modal-tag-badge">{tag}</span>
+                    ))}
+                  </div>
                 )}
               </div>
 
               {/* 주소 */}
               <p className="modal-address">
-                <span>📍</span>
-                {place.address ?? '주소 정보 없음'}
+                <span className="modal-address-icon">📍</span>
+                <span>{place.address ?? '주소 정보 없음'}</span>
               </p>
 
               {/* 부가 정보 (있는 경우만) */}
@@ -169,9 +189,11 @@ function PlaceDetailModal({ placeId, onClose }) {
 
               {/* 감성 점수 양방향 바 */}
               <div className="modal-sentiment-section">
-                <span className="modal-sentiment-title">감성 점수</span>
+                <div className="modal-sentiment-header">
+                  <span className="modal-sentiment-title">감성 점수</span>
+                  <span className="modal-review-total">리뷰 {place.review_count ?? 0}건 기준</span>
+                </div>
                 <SentimentDualBar score={place.avg_sentiment_score} />
-                <span className="modal-review-total">리뷰 {place.review_count ?? 0}건 기준</span>
               </div>
 
               {/* 리뷰 목록 */}
@@ -187,9 +209,11 @@ function PlaceDetailModal({ placeId, onClose }) {
               </div>
             </div>
 
-            {/* 오른쪽 패널 */}
+            {/* 오른쪽 패널 — sticky 지도 */}
             <div className="modal-right">
-              <ModalMiniMap place={place} />
+              <div className="modal-right-sticky">
+                <ModalMiniMap place={place} />
+              </div>
             </div>
           </div>
         )}
