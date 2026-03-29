@@ -1,0 +1,21 @@
+{
+	"name": "cheonan-api",
+	"main": "src/index.js",
+	"compatibility_date": "2026-03-28",
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "cheonan-db",
+			"database_id": "13a1ff36-1a91-4255-b627-bb40b6426be8"
+		}
+	],
+	"routes": [
+		{
+			"pattern": "cheonan-api.xmincloud.com/*",
+			"zone_name": "xmincloud.com"
+		}
+	]
+}
