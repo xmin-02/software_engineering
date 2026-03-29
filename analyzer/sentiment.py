@@ -11,7 +11,7 @@ LABEL_MAP = {
     2: "positive",   # 설레는(기대하는)
     3: "positive",   # 사랑하는
     4: "positive",   # 즐거운(신나는)
-    5: "neutral",    # 일상적인
+    5: "positive",   # 일상적인
     6: "negative",   # 생각이 많은
     7: "negative",   # 슬픔(우울한)
     8: "negative",   # 힘듦(지침)
