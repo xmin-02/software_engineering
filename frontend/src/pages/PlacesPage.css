@@ -335,39 +335,37 @@
   font-weight: 500;
 }
 
-/* ===== 감성 점수 바 ===== */
-.sentiment-wrap {
-  flex: 1;
-  min-width: 80px;
+/* ===== 양방향 감성 바 ===== */
+.sentiment-dual-bar {
+  margin-top: 8px;
 }
 
-.sentiment-label {
+.sentiment-labels {
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: var(--color-text-muted);
+  font-weight: 600;
   margin-bottom: 4px;
 }
 
-.sentiment-bar-track {
-  height: 5px;
-  background: var(--color-border);
-  border-radius: 10px;
+.pos-label { color: #16a34a; }
+.neg-label { color: #dc2626; }
+
+.dual-bar-track {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.sentiment-bar-fill {
-  height: 100%;
-  border-radius: 10px;
+.dual-bar-pos {
+  background: #4ade80;
   transition: width 0.4s ease;
 }
 
-.sentiment-bar-fill.positive { background: var(--color-positive); }
-.sentiment-bar-fill.negative { background: var(--color-negative); }
-.sentiment-bar-fill.neutral  { background: var(--color-neutral); }
-
-.sentiment-emoji {
-  font-size: 14px;
+.dual-bar-neg {
+  background: #f87171;
+  transition: width 0.4s ease;
 }
 
 /* 감성 점수 없는 경우 */
@@ -600,47 +598,23 @@
   color: var(--color-text-secondary);
 }
 
-/* ===== 감성 점수 섹션 ===== */
+/* ===== 모달 감성 섹션 ===== */
 .modal-sentiment-section {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.modal-sentiment-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.modal-sentiment-title {
   font-size: 13px;
-  color: var(--color-text-secondary);
   font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
-.modal-sentiment-score {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.modal-sentiment-score.positive { color: var(--color-positive); }
-.modal-sentiment-score.negative { color: var(--color-negative); }
-.modal-sentiment-score.neutral  { color: var(--color-neutral); }
-
-.modal-sentiment-track {
+/* 모달에서는 dual-bar 높이를 10px로 키움 */
+.modal-sentiment-section .dual-bar-track {
   height: 10px;
-  background: var(--color-border);
-  border-radius: 10px;
-  overflow: hidden;
 }
-
-.modal-sentiment-fill {
-  height: 100%;
-  border-radius: 10px;
-  transition: width 0.5s ease;
-}
-
-.modal-sentiment-fill.positive { background: var(--color-positive); }
-.modal-sentiment-fill.negative { background: var(--color-negative); }
-.modal-sentiment-fill.neutral  { background: var(--color-neutral); }
 
 .modal-review-total {
   font-size: 11px;

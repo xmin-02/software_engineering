@@ -115,10 +115,6 @@ function PlaceDetailModal({ placeId, onClose }) {
 
   const place = data?.place;
   const reviews = data?.reviews ?? [];
-  const sentimentPct = place?.avg_sentiment_score != null
-    ? Math.round(place.avg_sentiment_score * 100)
-    : null;
-  const sentimentClass = getSentimentClass(place?.avg_sentiment_score);
 
   // 배경 클릭 시 닫기
   const handleOverlayClick = (e) => {
@@ -171,28 +167,12 @@ function PlaceDetailModal({ placeId, onClose }) {
                 )}
               </div>
 
-              {/* 감성 점수 큰 바 */}
-              {sentimentPct != null ? (
-                <div className="modal-sentiment-section">
-                  <div className="modal-sentiment-label">
-                    <span>감성 점수</span>
-                    <span className={`modal-sentiment-score ${sentimentClass}`}>
-                      {getSentimentEmoji(place.avg_sentiment_score)} {sentimentPct}%
-                    </span>
-                  </div>
-                  <div className="modal-sentiment-track">
-                    <div
-                      className={`modal-sentiment-fill ${sentimentClass}`}
-                      style={{ width: `${sentimentPct}%` }}
-                    />
-                  </div>
-                  <span className="modal-review-total">리뷰 {place.review_count ?? 0}건 기준</span>
-                </div>
-              ) : (
-                <div className="modal-sentiment-section">
-                  <span className="no-sentiment">감성 데이터 없음</span>
-                </div>
-              )}
+              {/* 감성 점수 양방향 바 */}
+              <div className="modal-sentiment-section">
+                <span className="modal-sentiment-title">감성 점수</span>
+                <SentimentDualBar score={place.avg_sentiment_score} />
+                <span className="modal-review-total">리뷰 {place.review_count ?? 0}건 기준</span>
+              </div>
 
               {/* 리뷰 목록 */}
               <div className="modal-reviews">
@@ -231,28 +211,33 @@ const CATEGORY_CLASS = {
 // 1~3위 메달
 const MEDALS = ['🥇', '🥈', '🥉'];
 
-// 감성 점수(0~1) → 등급/이모지
-function getSentimentClass(score) {
-  if (score == null) return 'neutral';
-  if (score >= 0.6) return 'positive';
-  if (score <= 0.4) return 'negative';
-  return 'neutral';
+// 감성 점수(0~1) → 긍정 퍼센트 정수 (null 가능)
+function toSentimentPct(score) {
+  return score != null ? Math.round(score * 100) : null;
 }
 
-function getSentimentEmoji(score) {
-  if (score == null) return '—';
-  if (score >= 0.6) return '😊';
-  if (score <= 0.4) return '😞';
-  return '😐';
+// 양방향 감성 바 공통 컴포넌트
+function SentimentDualBar({ score }) {
+  const pct = toSentimentPct(score);
+  if (pct == null) return <span className="no-sentiment">감성 데이터 없음</span>;
+
+  return (
+    <div className="sentiment-dual-bar">
+      <div className="sentiment-labels">
+        <span className="pos-label">긍정 {pct}%</span>
+        <span className="neg-label">부정 {100 - pct}%</span>
+      </div>
+      <div className="dual-bar-track">
+        <div className="dual-bar-pos" style={{ width: `${pct}%` }} />
+        <div className="dual-bar-neg" style={{ width: `${100 - pct}%` }} />
+      </div>
+    </div>
+  );
 }
 
 // 장소 카드 컴포넌트
 function PlaceCard({ place, rank, onClick }) {
   const catClass = CATEGORY_CLASS[place.category] ?? 'cat-default';
-  const sentimentClass = getSentimentClass(place.avg_sentiment_score);
-  const sentimentPct = place.avg_sentiment_score != null
-    ? Math.round(place.avg_sentiment_score * 100)
-    : null;
 
   const rankClass = rank != null
     ? `place-card ranked rank-${rank}`
@@ -285,29 +270,13 @@ function PlaceCard({ place, rank, onClick }) {
         {place.address ?? '주소 정보 없음'}
       </p>
 
-      {/* 리뷰 수 + 감성 점수 바 */}
-      <div className="place-meta">
-        <span className="review-count">
-          💬 {place.review_count ?? 0}건
-        </span>
+      {/* 리뷰 수 */}
+      <span className="review-count">
+        💬 {place.review_count ?? 0}건
+      </span>
 
-        {sentimentPct != null ? (
-          <div className="sentiment-wrap">
-            <div className="sentiment-label">
-              <span>감성</span>
-              <span>{getSentimentEmoji(place.avg_sentiment_score)} {sentimentPct}%</span>
-            </div>
-            <div className="sentiment-bar-track">
-              <div
-                className={`sentiment-bar-fill ${sentimentClass}`}
-                style={{ width: `${sentimentPct}%` }}
-              />
-            </div>
-          </div>
-        ) : (
-          <span className="no-sentiment">감성 데이터 없음</span>
-        )}
-      </div>
+      {/* 양방향 감성 바 */}
+      <SentimentDualBar score={place.avg_sentiment_score} />
     </div>
   );
 }

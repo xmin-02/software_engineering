@@ -106,7 +106,7 @@ app.get('/api/places', async (c) => {
   const wc = where.length ? 'WHERE ' + where.join(' AND ') : '';
   const fullWhere = wc + (tagFilter ? (wc ? ' ' + tagFilter : 'WHERE ' + tagFilter.slice(4)) : '');
   const total = await c.env.DB.prepare(`SELECT COUNT(*) as cnt FROM places p ${fullWhere}`).bind(...params).first('cnt');
-  const rows = await c.env.DB.prepare(`SELECT p.*, (SELECT AVG(sentiment_score) FROM place_reviews WHERE place_id=p.id AND sentiment_score IS NOT NULL) as avg_sentiment_score, (SELECT COUNT(*) FROM place_reviews WHERE place_id=p.id) as review_count FROM places p ${fullWhere} LIMIT ? OFFSET ?`).bind(...params, limit, offset).all();
+  const rows = await c.env.DB.prepare(`SELECT p.*, (SELECT CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) FROM place_reviews WHERE place_id=p.id) as avg_sentiment_score, (SELECT COUNT(*) FROM place_reviews WHERE place_id=p.id) as review_count FROM places p ${fullWhere} LIMIT ? OFFSET ?`).bind(...params, limit, offset).all();
   const items = [];
   for (const row of rows.results) {
     const tags = await c.env.DB.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(row.id).all();
@@ -119,7 +119,7 @@ app.get('/api/places/ranking', async (c) => {
   const { category, limit = '10' } = c.req.query();
   let where = '', params = [parseInt(limit)];
   if (category) { where = 'WHERE p.category = ?'; params = [category, parseInt(limit)]; }
-  const rows = await c.env.DB.prepare(`SELECT p.id,p.name,p.category,p.address,p.rating_naver,p.rating_kakao, AVG(r.sentiment_score) as avg_sentiment_score, COUNT(r.id) as review_count FROM places p JOIN place_reviews r ON p.id=r.place_id ${where} GROUP BY p.id HAVING COUNT(r.id)>=2 ORDER BY AVG(r.sentiment_score) DESC LIMIT ?`).bind(...params).all();
+  const rows = await c.env.DB.prepare(`SELECT p.id,p.name,p.category,p.address,p.rating_naver,p.rating_kakao, CAST(SUM(CASE WHEN r.sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/COUNT(r.id) as avg_sentiment_score, COUNT(r.id) as review_count FROM places p JOIN place_reviews r ON p.id=r.place_id ${where} GROUP BY p.id HAVING COUNT(r.id)>=2 ORDER BY avg_sentiment_score DESC LIMIT ?`).bind(...params).all();
   return c.json(rows.results);
 });
 
@@ -129,7 +129,7 @@ app.get('/api/places/:id', async (c) => {
   if (!place) return c.json({ error: 'Not found' }, 404);
   const reviews = await c.env.DB.prepare('SELECT * FROM place_reviews WHERE place_id=? ORDER BY published_at DESC').bind(id).all();
   const tags = await c.env.DB.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(id).all();
-  const stats = await c.env.DB.prepare('SELECT AVG(sentiment_score) as avg_score, COUNT(*) as cnt FROM place_reviews WHERE place_id=?').bind(id).first();
+  const stats = await c.env.DB.prepare("SELECT CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) as avg_score, COUNT(*) as cnt FROM place_reviews WHERE place_id=?").bind(id).first();
   return c.json({
     place: { ...place, is_open_now: false, tags: tags.results.map(t => t.tag), avg_sentiment_score: stats?.avg_score, review_count: stats?.cnt || 0, business_hours: place.business_hours ? JSON.parse(place.business_hours) : null },
     reviews: reviews.results.map(r => ({ ...r, keywords: r.keywords ? JSON.parse(r.keywords) : null })),
