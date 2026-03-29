@@ -197,7 +197,52 @@
     grid-template-columns: 1fr;
   }
   .places-page {
-    padding: 20px 16px;
+    padding: 16px;
+  }
+
+  /* 페이지 제목 */
+  .page-title {
+    font-size: 18px;
+  }
+
+  /* 탭 바: 전체 너비로 늘려 각 탭이 균등 분할 */
+  .tab-bar {
+    width: 100%;
+    display: flex;
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  /* 필터 바: 세로 방향, 전체 너비 */
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  /* 카드 내부 */
+  .place-card {
+    padding: 14px;
+  }
+
+  .place-name {
+    font-size: 14px;
+  }
+
+  .place-address {
+    font-size: 11px;
+  }
+
+  .category-badge {
+    font-size: 10px;
   }
 }
 
