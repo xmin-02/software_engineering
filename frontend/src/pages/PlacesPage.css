@@ -531,11 +531,11 @@
 /* ===== 왼쪽 패널 (60%) ===== */
 .modal-left {
   flex: 0 0 60%;
-  padding: 28px 28px 28px 32px;
+  padding: 28px 28px 32px 32px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* 커스텀 스크롤바 */
@@ -550,25 +550,56 @@
   border-radius: 4px;
 }
 
-/* 장소명 헤더 */
+/* ===== 장소 헤더 블록 ===== */
 .modal-place-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 40px;
+}
+
+/* 장소명 + 카테고리 한 줄 */
+.modal-place-title-row {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding-right: 40px;
 }
 
 .modal-place-name {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.6px;
   line-height: 1.2;
 }
 
-/* 주소 */
+/* 모달 내 카테고리 뱃지 — 카드보다 살짝 크게 */
+.modal-category-badge {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+/* 태그 뱃지 행 */
+.modal-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modal-tag-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-badge);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--color-indigo-light);
+  color: var(--color-indigo-hover);
+  border: 1px solid #c7d2fe;
+}
+
+/* ===== 주소 ===== */
 .modal-address {
   display: flex;
   align-items: flex-start;
@@ -576,10 +607,15 @@
   font-size: 13px;
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* 부가 정보 칩 */
+.modal-address-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ===== 부가 정보 칩 ===== */
 .modal-info-row {
   display: flex;
   flex-wrap: wrap;
@@ -598,22 +634,34 @@
   color: var(--color-text-secondary);
 }
 
-/* ===== 모달 감성 섹션 ===== */
+/* ===== 감성 섹션 ===== */
 .modal-sentiment-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  padding: 16px;
+  background: var(--color-bg);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+/* 제목 + 리뷰 수 한 줄 */
+.modal-sentiment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .modal-sentiment-title {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
-/* 모달에서는 dual-bar 높이를 10px로 키움 */
+/* 모달에서는 dual-bar 높이를 12px로 키움 */
 .modal-sentiment-section .dual-bar-track {
-  height: 10px;
+  height: 12px;
+  border-radius: 6px;
 }
 
 .modal-review-total {
@@ -625,14 +673,14 @@
 .modal-reviews {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .modal-reviews-title {
   font-size: 14px;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0;
+  margin: 0 0 4px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -642,55 +690,102 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--color-text-muted);
+  background: var(--color-bg);
+  padding: 1px 8px;
+  border-radius: var(--radius-badge);
+  border: 1px solid var(--color-border);
 }
 
-/* 리뷰 아이템 */
+/* ===== 리뷰 아이템 ===== */
 .modal-review-item {
-  padding: 14px;
-  background: var(--color-bg);
+  padding: 14px 16px;
+  background: var(--color-surface);
   border-radius: 10px;
+  /* 기본 보더 + 왼쪽 색상 보더 */
   border: 1px solid var(--color-border);
+  border-left-width: 3px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  transition: box-shadow 0.15s;
 }
 
+.modal-review-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+/* 감성별 왼쪽 보더 색상 */
+.review-border-positive { border-left-color: var(--color-positive); }
+.review-border-negative { border-left-color: var(--color-negative); }
+.review-border-neutral  { border-left-color: #d1d5db; }
+
+/* 리뷰 헤더: 뱃지 좌측, 출처+날짜 우측 */
 .modal-review-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  flex-wrap: wrap;
+}
+
+/* 출처 + 날짜 묶음 (우측 정렬) */
+.modal-review-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
 }
 
 .modal-review-source {
   font-size: 11px;
   color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* 출처와 날짜 사이 구분점 */
+.modal-review-meta .modal-review-source::after {
+  content: '·';
+  margin-left: 6px;
+  color: var(--color-border);
 }
 
 .modal-review-date {
   font-size: 11px;
   color: var(--color-text-muted);
-  margin-left: auto;
 }
 
-/* 감성 뱃지 */
+/* ===== 감성 뱃지 (pill 스타일, 더 눈에 띄게) ===== */
 .sentiment-badge {
-  display: inline-block;
-  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
   border-radius: var(--radius-badge);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
 }
 
-.badge-positive { background: var(--color-positive-bg); color: var(--color-positive); }
-.badge-negative { background: var(--color-negative-bg); color: var(--color-negative); }
-.badge-neutral  { background: var(--color-neutral-bg);  color: var(--color-neutral); }
+.badge-positive {
+  background: var(--color-positive-bg);
+  color: var(--color-positive);
+  box-shadow: inset 0 0 0 1px rgba(22,163,74,0.2);
+}
+.badge-negative {
+  background: var(--color-negative-bg);
+  color: var(--color-negative);
+  box-shadow: inset 0 0 0 1px rgba(220,38,38,0.2);
+}
+.badge-neutral {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral);
+  box-shadow: inset 0 0 0 1px rgba(107,114,128,0.2);
+}
 
-/* 리뷰 텍스트 (기본 3줄 제한) */
+/* ===== 리뷰 텍스트 (기본 3줄 제한) ===== */
 .modal-review-text {
   font-size: 13px;
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.7;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -704,6 +799,7 @@
   -webkit-line-clamp: unset;
 }
 
+/* 더보기: 텍스트 링크 스타일 (밑줄, 인디고 색) */
 .modal-review-more {
   align-self: flex-start;
   border: none;
@@ -713,6 +809,8 @@
   font-weight: 600;
   cursor: pointer;
   padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   transition: color 0.15s;
 }
 
@@ -720,11 +818,21 @@
   color: var(--color-indigo-hover);
 }
 
-/* ===== 오른쪽 패널 (40%) — 미니맵 ===== */
+/* ===== 오른쪽 패널 (40%) — sticky 지도 ===== */
 .modal-right {
   flex: 0 0 40%;
   border-left: 1px solid var(--color-border);
   overflow: hidden;
+  /* sticky를 위한 컨텍스트 */
+  position: relative;
+}
+
+/* sticky 래퍼: 스크롤 시 지도 고정 */
+.modal-right-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 90vh;
 }
 
 .modal-map-container {
@@ -745,7 +853,7 @@
   font-size: 13px;
 }
 
-/* ===== 모달 반응형 ===== */
+/* ===== 모달 반응형 (700px 이하 → 상하 분할) ===== */
 @media (max-width: 700px) {
   .modal-body {
     flex-direction: column;
@@ -767,7 +875,16 @@
     height: 240px;
   }
 
+  .modal-right-sticky {
+    position: static;
+    height: 240px;
+  }
+
   .modal-map-container {
     height: 240px;
+  }
+
+  .modal-place-name {
+    font-size: 20px;
   }
 }
