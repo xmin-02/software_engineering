@@ -112,7 +112,7 @@ app.get('/api/places', async (c) => {
     const tags = await c.env.DB.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(row.id).all();
     items.push({ ...row, is_open_now: false, tags: tags.results.map(t => t.tag), business_hours: row.business_hours ? JSON.parse(row.business_hours) : null });
   }
-  return c.json({ items, total: total || 0, page: parseInt(page), size: limit });
+  return c.json({ items, total: total || 0, page: parseInt(page), size: limit, has_next: offset + limit < (total || 0) });
 });
 
 app.get('/api/places/ranking', async (c) => {
@@ -140,9 +140,9 @@ app.get('/api/places/:id', async (c) => {
 
 app.get('/api/events', async (c) => {
   const { category } = c.req.query();
-  let where = ["(end_date >= date('now') OR end_date IS NULL)"];
-  if (category) where.push(`category='${category}'`);
-  const rows = await c.env.DB.prepare(`SELECT * FROM events WHERE ${where.join(' AND ')} ORDER BY CASE WHEN start_date IS NULL THEN 1 ELSE 0 END, start_date ASC LIMIT 50`).all();
+  let where = ["(end_date >= date('now') OR end_date IS NULL)"], params = [];
+  if (category) { where.push('category = ?'); params.push(category); }
+  const rows = await c.env.DB.prepare(`SELECT * FROM events WHERE ${where.join(' AND ')} ORDER BY CASE WHEN start_date IS NULL THEN 1 ELSE 0 END, start_date ASC LIMIT 50`).bind(...params).all();
   return c.json(rows.results);
 });
 
@@ -181,15 +181,15 @@ app.get('/api/jobs', async (c) => {
   const wc = where.length ? 'WHERE ' + where.join(' AND ') : '';
   const total = await c.env.DB.prepare(`SELECT COUNT(*) as cnt FROM jobs ${wc}`).bind(...params).first('cnt');
   const rows = await c.env.DB.prepare(`SELECT * FROM jobs ${wc} ORDER BY deadline ASC LIMIT ? OFFSET ?`).bind(...params, limit, offset).all();
-  return c.json({ items: rows.results, total: total || 0, page: parseInt(page), size: limit });
+  return c.json({ items: rows.results, total: total || 0, page: parseInt(page), size: limit, has_next: offset + limit < (total || 0) });
 });
 
 app.get('/api/certifications', async (c) => {
   const { category } = c.req.query();
-  let where = [];
-  if (category) where.push(`category='${category}'`);
+  let where = [], params = [];
+  if (category) { where.push('category = ?'); params.push(category); }
   const wc = where.length ? 'WHERE ' + where.join(' AND ') : '';
-  const rows = await c.env.DB.prepare(`SELECT * FROM certifications ${wc} ORDER BY exam_date ASC`).all();
+  const rows = await c.env.DB.prepare(`SELECT * FROM certifications ${wc} ORDER BY exam_date ASC`).bind(...params).all();
   return c.json(rows.results);
 });
 

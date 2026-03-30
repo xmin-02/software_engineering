@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,6 +10,10 @@ from analyzer.preprocessor import TextPreprocessor
 from analyzer.sentiment import SentimentAnalyzer
 from analyzer.keyword import KeywordExtractor
 from analyzer.topic import TopicModeler
+from analyzer.summarizer import TextSummarizer
+from analyzer.tagger import PlaceTagger
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisPipeline:
@@ -18,6 +24,8 @@ class AnalysisPipeline:
         self.sentiment = SentimentAnalyzer()
         self.keyword = KeywordExtractor()
         self.topic = TopicModeler()
+        self.summarizer = TextSummarizer()
+        self.tagger = PlaceTagger()
 
     def _get_unanalyzed_posts(self, db: Session) -> list[Post]:
         """미분석 게시글 조회"""
@@ -127,13 +135,133 @@ class AnalysisPipeline:
         finally:
             db.close()
 
+    def run_summaries(self) -> int:
+        """4단계: 주간 요약 생성"""
+        from datetime import date, timedelta
+        from sqlalchemy import func
+        from backend.models.content import WeeklySummary
+
+        db = SessionLocal()
+        try:
+            week_end = date.today()
+            week_start = week_end - timedelta(days=7)
+
+            exists = db.query(WeeklySummary).filter_by(week_start=week_start).first()
+            if exists:
+                return 0
+
+            posts = (
+                db.query(Post)
+                .filter(Post.published_at >= week_start, Post.published_at <= week_end)
+                .order_by(Post.published_at.desc())
+                .limit(50)
+                .all()
+            )
+            if not posts:
+                return 0
+
+            stats = (
+                db.query(Analysis.sentiment, func.count())
+                .join(Post)
+                .filter(Post.published_at >= week_start, Post.published_at <= week_end)
+                .group_by(Analysis.sentiment)
+                .all()
+            )
+            stats_dict = {s: c for s, c in stats}
+            total = sum(stats_dict.values())
+
+            top_topics = (
+                db.query(Analysis.topic, func.count().label("cnt"))
+                .join(Post)
+                .filter(
+                    Post.published_at >= week_start,
+                    Post.published_at <= week_end,
+                    Analysis.topic.isnot(None),
+                    Analysis.topic != "기타",
+                )
+                .group_by(Analysis.topic)
+                .order_by(func.count().desc())
+                .limit(5)
+                .all()
+            )
+
+            context = f"기간: {week_start} ~ {week_end}, 총 {total}건"
+            texts = [f"[{p.source}] {p.title or ''}: {p.content[:200]}" for p in posts]
+            summary_text = self.summarizer.summarize(texts, context)
+
+            weekly = WeeklySummary(
+                week_start=week_start,
+                week_end=week_end,
+                summary=summary_text,
+                top_topics=[t.topic for t in top_topics],
+                total_posts=total,
+                sentiment_ratio=stats_dict,
+            )
+            db.add(weekly)
+            db.commit()
+            return 1
+        except Exception:
+            db.rollback()
+            logger.error("주간 요약 생성 실패", exc_info=True)
+            return 0
+        finally:
+            db.close()
+
+    def run_tagging(self) -> int:
+        """5단계: 장소 리뷰 태깅"""
+        from backend.models.place import Place, PlaceReview, PlaceTag
+
+        db = SessionLocal()
+        try:
+            places = db.query(Place).all()
+            tagged = 0
+            for place in places:
+                reviews = (
+                    db.query(PlaceReview)
+                    .filter(PlaceReview.place_id == place.id)
+                    .all()
+                )
+                if not reviews:
+                    continue
+                texts = [r.review_text for r in reviews]
+                tags = self.tagger.tag_reviews(texts)
+                for tag, confidence in tags.items():
+                    existing = (
+                        db.query(PlaceTag)
+                        .filter_by(place_id=place.id, tag=tag)
+                        .first()
+                    )
+                    if existing:
+                        existing.confidence = confidence
+                        existing.source_count = len(reviews)
+                    else:
+                        db.add(PlaceTag(
+                            place_id=place.id,
+                            tag=tag,
+                            confidence=confidence,
+                            source_count=len(reviews),
+                        ))
+                tagged += 1
+            db.commit()
+            return tagged
+        except Exception:
+            db.rollback()
+            logger.error("태깅 실패", exc_info=True)
+            return 0
+        finally:
+            db.close()
+
     def run(self) -> dict:
         """전체 파이프라인 실행"""
         sentiment_count = self.run_sentiment()
         keyword_count = self.run_keywords(batch_size=500)
         topic_count = self.run_topics()
+        summary_count = self.run_summaries()
+        tagging_count = self.run_tagging()
         return {
             "sentiment": sentiment_count,
             "keywords": keyword_count,
             "topics": topic_count,
+            "summaries": summary_count,
+            "tagging": tagging_count,
         }

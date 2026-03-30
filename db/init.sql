@@ -15,13 +15,24 @@ CREATE TABLE IF NOT EXISTS posts (
     collected_at TIMESTAMP DEFAULT NOW()
 );
 
+-- 토픽
+CREATE TABLE IF NOT EXISTS topics (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    keywords TEXT[],
+    post_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 감성 분석 결과
 CREATE TABLE IF NOT EXISTS analysis (
     id SERIAL PRIMARY KEY,
     post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
     sentiment VARCHAR(10) NOT NULL,
+    emotion VARCHAR(30),
     sentiment_score FLOAT NOT NULL,
     topic VARCHAR(100),
+    topic_id INTEGER REFERENCES topics(id),
     keywords TEXT[],
     analyzed_at TIMESTAMP DEFAULT NOW()
 );
@@ -159,15 +170,22 @@ CREATE TABLE IF NOT EXISTS real_estate (
     id SERIAL PRIMARY KEY,
     title VARCHAR(300),
     address TEXT,
+    district VARCHAR(50),
+    dong VARCHAR(50),
     property_type VARCHAR(50),
     deal_type VARCHAR(50),
     price VARCHAR(100),
+    deposit VARCHAR(100),
+    monthly_rent VARCHAR(100),
     area_sqm FLOAT,
     floor VARCHAR(20),
+    build_year VARCHAR(10),
+    deal_date DATE,
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
     url TEXT,
     source VARCHAR(50),
+    source_id VARCHAR(255) UNIQUE,
     collected_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -205,6 +223,8 @@ CREATE INDEX IF NOT EXISTS idx_posts_source ON posts(source);
 CREATE INDEX IF NOT EXISTS idx_posts_published_at ON posts(published_at);
 CREATE INDEX IF NOT EXISTS idx_analysis_post_id ON analysis(post_id);
 CREATE INDEX IF NOT EXISTS idx_analysis_sentiment ON analysis(sentiment);
+CREATE INDEX IF NOT EXISTS idx_analysis_topic_id ON analysis(topic_id);
+CREATE INDEX IF NOT EXISTS idx_real_estate_deal_type ON real_estate(deal_type);
 CREATE INDEX IF NOT EXISTS idx_places_category ON places(category);
 CREATE INDEX IF NOT EXISTS idx_places_has_parking ON places(has_parking);
 CREATE INDEX IF NOT EXISTS idx_places_is_alcohol_only ON places(is_alcohol_only);

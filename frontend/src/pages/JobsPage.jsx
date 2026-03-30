@@ -24,7 +24,7 @@ export default function JobsPage() {
     setError(null);
     try {
       const params = { page, size: 20 };
-      if (experience) params.experience = experience;
+      if (experience) params.experience_level = experience;
       if (jobType) params.job_type = jobType;
       const res = await api.get('/api/jobs', { params });
       const data = res.data;

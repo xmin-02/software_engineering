@@ -23,7 +23,7 @@ export default function FamilyPage() {
     try {
       const params = {};
       if (propertyType) params.property_type = propertyType;
-      if (tradeType) params.trade_type = tradeType;
+      if (tradeType) params.deal_type = tradeType;
       const res = await api.get('/api/family/real-estate', { params });
       setEstates(Array.isArray(res.data) ? res.data : res.data.items ?? []);
     } catch {
@@ -121,7 +121,7 @@ export default function FamilyPage() {
                     <tr key={item.id ?? i}>
                       <td className="address-cell">{item.address ?? '-'}</td>
                       <td><span className="type-badge">{item.property_type ?? '-'}</span></td>
-                      <td><span className={`trade-badge ${item.trade_type}`}>{item.trade_type ?? '-'}</span></td>
+                      <td><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
                       <td className="price-cell">{formatPrice(item.price)}</td>
                       <td>{item.area ?? '-'}</td>
                       <td>{item.floor != null ? `${item.floor}층` : '-'}</td>

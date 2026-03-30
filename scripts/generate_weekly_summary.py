@@ -74,7 +74,7 @@ def main():
 
     texts = [f"[{p.source}] {p.title or ''}: {p.content[:200]}" for p in posts]
 
-    print("요약 생성 중... (Qwen2.5:32b)")
+    print("요약 생성 중... (Qwen2.5:14b-instruct-q4_K_M)")
     summary_text = summarizer.summarize(texts, context)
     print(f"요약 결과:\n{summary_text}\n")
 
