@@ -161,9 +161,9 @@ export default function CollegePage() {
               <div key={place.id ?? i} className="place-card">
                 <h3 className="place-name">{place.name}</h3>
                 {place.tags && place.tags.length > 0 && (
-                  <div className="place-tags">
+                  <div className="college-place-tags">
                     {place.tags.map((tag, ti) => (
-                      <span key={ti} className="place-tag">{tag}</span>
+                      <span key={ti} className="college-place-tag">{tag}</span>
                     ))}
                   </div>
                 )}
