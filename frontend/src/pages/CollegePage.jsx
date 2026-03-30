@@ -136,9 +136,9 @@ export default function CollegePage() {
               {data.map((item, i) => (
                 <tr key={item.id ?? i}>
                   <td>{item.address ?? '-'}</td>
-                  <td><span className={`trade-badge ${item.trade_type}`}>{item.trade_type ?? '-'}</span></td>
+                  <td><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
                   <td>{formatPrice(item.price)}</td>
-                  <td>{item.area ?? '-'}</td>
+                  <td>{item.area_sqm ?? '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -160,11 +160,13 @@ export default function CollegePage() {
             {places.map((place, i) => (
               <div key={place.id ?? i} className="place-card">
                 <h3 className="place-name">{place.name}</h3>
-                <div className="place-tags">
-                  <span className="place-tag">카공</span>
-                  <span className="place-tag">가성비</span>
-                  <span className="place-tag">데이트</span>
-                </div>
+                {place.tags && place.tags.length > 0 && (
+                  <div className="place-tags">
+                    {place.tags.map((tag, ti) => (
+                      <span key={ti} className="place-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
                 {place.category && (
                   <span className="place-category">{place.category}</span>
                 )}

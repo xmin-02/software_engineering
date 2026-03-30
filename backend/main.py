@@ -1,13 +1,31 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import settings
+from backend.scheduler import CrawlScheduler
+
+logger = logging.getLogger(__name__)
+scheduler = CrawlScheduler()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler.start()
+    logger.info("스케줄러 시작됨")
+    yield
+    scheduler.stop()
+    logger.info("스케줄러 중지됨")
+
 
 app = FastAPI(
     title="Cheonan Community Sentiment & Life Info API",
     version="2.0.0",
     description="천안 지역 여론 분석 및 연령별 생활 정보 API",
+    lifespan=lifespan,
 )
 
 # CORS

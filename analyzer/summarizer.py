@@ -2,7 +2,7 @@ import requests
 
 from backend.config import settings
 
-DEFAULT_MODEL = "qwen2.5:32b"
+DEFAULT_MODEL = "qwen2.5:14b-instruct-q4_K_M"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 SYSTEM_PROMPT = """당신은 천안시 관련 텍스트를 요약하는 전문가입니다.
