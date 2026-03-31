@@ -63,7 +63,7 @@ export default function CollegePage() {
 
   return (
     <div className="college-page">
-      <h1 className="page-title">대학생</h1>
+      <h1 className="college-page-title">대학생</h1>
 
       <div className="tab-bar">
         {TABS.map(({ key, label }) => (
