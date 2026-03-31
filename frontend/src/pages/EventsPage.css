@@ -9,7 +9,7 @@
   font-size: var(--font-size-page-title);
   font-weight: 800;
   letter-spacing: -0.5px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: var(--color-text-primary);
 }
 
@@ -58,8 +58,8 @@
 
 .event-category {
   font-size: var(--font-size-small);
-  background: #fce7f3;
-  color: #be185d;
+  background: var(--color-badge-pink-bg);
+  color: var(--color-badge-pink-text);
   border-radius: var(--radius-pill);
   padding: 2px 8px;
   font-weight: 500;

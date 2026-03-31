@@ -1,32 +1,9 @@
-/* ===== CSS 변수 ===== */
-:root {
-  --color-bg: #f4f5f9;
-  --color-surface: #ffffff;
-  --color-navy: #1a1a2e;
-  --color-indigo: #6366f1;
-  --color-indigo-light: #e0e7ff;
-  --color-indigo-hover: #4f46e5;
-  --color-positive: #16a34a;
-  --color-positive-bg: #dcfce7;
-  --color-negative: #dc2626;
-  --color-negative-bg: #fee2e2;
-  --color-neutral: #6b7280;
-  --color-neutral-bg: #f3f4f6;
-  --color-border: #e5e7eb;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(99,102,241,0.12);
-  --radius-card: 14px;
-  --radius-badge: 20px;
-}
-
 /* ===== 페이지 래퍼 ===== */
 .places-page {
   padding: 28px 32px;
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-page);
   min-height: 100%;
+  --page-accent: var(--color-places);
 }
 
 /* ===== 페이지 헤더 ===== */
@@ -37,22 +14,22 @@
   margin-bottom: 24px;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-navy);
-  letter-spacing: -0.3px;
+.places-page-title {
+  font-size: var(--font-size-page-title);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
 }
 
 .page-subtitle {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
 }
 
 /* ===== 탭 바 (pill 스타일) ===== */
 .tab-bar {
   display: inline-flex;
-  background: var(--color-surface);
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 4px;
@@ -68,21 +45,21 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast);
   white-space: nowrap;
 }
 
 .tab-btn:hover:not(.active) {
-  background: var(--color-bg);
+  background: var(--color-bg-page);
   color: var(--color-text-primary);
 }
 
 .tab-btn.active {
-  background: var(--color-navy);
+  background: var(--color-text-primary);
   color: #ffffff;
   box-shadow: 0 1px 4px rgba(26,26,46,0.2);
 }
@@ -91,46 +68,18 @@
   font-size: 14px;
 }
 
-/* ===== 필터 바 ===== */
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
+/* ===== 필터 (PlacesPage 전용) ===== */
 .filter-label {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
 .filter-icon {
   font-size: 14px;
-}
-
-.filter-select {
-  padding: 8px 32px 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 13px;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color 0.15s;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: var(--color-indigo);
 }
 
 .toggle-btn {
@@ -139,18 +88,18 @@
   gap: 6px;
   padding: 8px 16px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
+  border-radius: var(--radius-input);
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 }
 
 .toggle-btn:hover:not(.active) {
   border-color: #d1d5db;
-  background: var(--color-bg);
+  background: var(--color-bg-page);
 }
 
 .toggle-btn.active {
@@ -166,42 +115,29 @@
   background: currentColor;
 }
 
-/* ===== 상태 메시지 ===== */
-.status-msg {
-  font-size: 14px;
-  color: var(--color-text-muted);
-  text-align: center;
-  padding: 60px 0;
-}
-
-.status-msg.error {
-  color: var(--color-negative);
-}
-
 /* ===== 카드 그리드 ===== */
-.card-grid {
+.places-page .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: var(--spacing-gap-md);
   margin-bottom: 24px;
 }
 
 @media (max-width: 1100px) {
-  .card-grid {
+  .places-page .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .card-grid {
+  .places-page .card-grid {
     grid-template-columns: 1fr;
   }
   .places-page {
     padding: 16px;
   }
 
-  /* 페이지 제목 */
-  .page-title {
+  .places-page-title {
     font-size: 18px;
   }
 
@@ -218,26 +154,16 @@
     padding: 8px 10px;
   }
 
-  /* 필터 바: 세로 방향, 전체 너비 */
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-select {
-    width: 100%;
-  }
-
   /* 카드 내부 */
-  .place-card {
+  .places-page .place-card {
     padding: 14px;
   }
 
-  .place-name {
+  .places-page .place-name {
     font-size: 14px;
   }
 
-  .place-address {
+  .places-page .place-address {
     font-size: 11px;
   }
 
@@ -246,26 +172,20 @@
   }
 }
 
-/* ===== 장소 카드 ===== */
-.place-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+/* ===== 장소 카드 (shared.css 위에 추가 속성만) ===== */
+.places-page .place-card {
   padding: 20px;
   position: relative;
-  border: 1px solid var(--color-border);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
 }
 
-.place-card:hover {
+.places-page .place-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-card-hover);
 }
 
 /* 랭킹 카드 강조 */
 .place-card.ranked {
-  border-left: 3px solid var(--color-indigo);
+  border-left: 3px solid var(--color-places);
 }
 
 .place-card.rank-1 { border-left-color: #f59e0b; }
@@ -290,7 +210,7 @@
 .rank-number {
   font-size: 11px;
   font-weight: 700;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
   margin-top: 2px;
 }
 
@@ -299,8 +219,8 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: var(--color-indigo-light);
-  color: var(--color-indigo);
+  background: var(--color-places-light);
+  color: var(--color-places);
   border-radius: 50%;
   width: 30px;
   height: 30px;
@@ -321,11 +241,7 @@
   padding-right: 40px;
 }
 
-.place-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
+.places-page .place-name {
   line-height: 1.3;
 }
 
@@ -333,7 +249,7 @@
 .category-badge {
   display: inline-block;
   padding: 3px 9px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -346,16 +262,13 @@
 .cat-양식 { background: #dcfce7; color: #15803d; }
 .cat-카페 { background: #ede9fe; color: #6d28d9; }
 .cat-술집 { background: #ffedd5; color: #c2410c; }
-.cat-default { background: var(--color-neutral-bg); color: var(--color-neutral); }
+.cat-default { background: var(--color-neutral-bg); color: var(--color-text-muted); }
 
-.place-address {
-  font-size: 12px;
-  color: var(--color-text-muted);
+.places-page .place-address {
   margin: 0 0 12px;
   display: flex;
   align-items: flex-start;
   gap: 4px;
-  line-height: 1.4;
 }
 
 .addr-icon {
@@ -376,7 +289,7 @@
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
@@ -416,7 +329,7 @@
 /* 감성 점수 없는 경우 */
 .no-sentiment {
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
 }
 
 /* ===== 페이지네이션 ===== */
@@ -434,19 +347,19 @@
   gap: 4px;
   padding: 7px 16px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
+  border-radius: var(--radius-input);
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 }
 
 .pagination button:hover:not(:disabled) {
-  border-color: var(--color-indigo);
-  color: var(--color-indigo);
-  background: var(--color-indigo-light);
+  border-color: var(--color-places);
+  color: var(--color-places);
+  background: var(--color-places-light);
 }
 
 .pagination button:disabled {
@@ -456,7 +369,7 @@
 
 .pagination-page {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-weight: 500;
   min-width: 48px;
   text-align: center;
@@ -472,10 +385,10 @@
   top: 14px;
   left: 14px;
   z-index: 10;
-  background: var(--color-navy);
+  background: var(--color-text-primary);
   color: #fff;
   padding: 6px 14px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: 13px;
   font-weight: 600;
   display: flex;
@@ -514,7 +427,7 @@
 /* ===== 모달 패널 ===== */
 .modal-panel {
   position: relative;
-  background: var(--color-surface);
+  background: var(--color-bg-card);
   border-radius: 16px;
   width: 100%;
   max-width: 900px;
@@ -539,14 +452,14 @@
   height: 32px;
   border: none;
   border-radius: 50%;
-  background: var(--color-bg);
-  color: var(--color-text-secondary);
+  background: var(--color-bg-page);
+  color: var(--color-text-muted);
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .modal-close-btn:hover {
@@ -557,13 +470,13 @@
 /* ===== 모달 상태 메시지 ===== */
 .modal-status {
   font-size: 14px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
   text-align: center;
   padding: 60px 0;
 }
 
 .modal-status.error {
-  color: var(--color-negative);
+  color: var(--color-error);
 }
 
 /* ===== 모달 본문 (좌우 분할) ===== */
@@ -636,11 +549,11 @@
 .modal-tag-badge {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 500;
-  background: var(--color-indigo-light);
-  color: var(--color-indigo-hover);
+  background: var(--color-places-light);
+  color: #7c3aed;
   border: 1px solid #c7d2fe;
 }
 
@@ -650,7 +563,7 @@
   align-items: flex-start;
   gap: 6px;
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   margin: 0;
   line-height: 1.6;
 }
@@ -672,11 +585,11 @@
   align-items: center;
   gap: 4px;
   padding: 5px 12px;
-  background: var(--color-bg);
+  background: var(--color-bg-page);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 /* ===== 감성 섹션 ===== */
@@ -685,7 +598,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: var(--color-bg);
+  background: var(--color-bg-page);
   border-radius: 12px;
   border: 1px solid var(--color-border);
 }
@@ -711,7 +624,7 @@
 
 .modal-review-total {
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
 }
 
 /* ===== 리뷰 목록 ===== */
@@ -734,25 +647,24 @@
 .modal-reviews-count {
   font-size: 12px;
   font-weight: 500;
-  color: var(--color-text-muted);
-  background: var(--color-bg);
+  color: var(--color-text-faint);
+  background: var(--color-bg-page);
   padding: 1px 8px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
 }
 
 /* ===== 리뷰 아이템 ===== */
 .modal-review-item {
   padding: 14px 16px;
-  background: var(--color-surface);
+  background: var(--color-bg-card);
   border-radius: 10px;
-  /* 기본 보더 + 왼쪽 색상 보더 */
   border: 1px solid var(--color-border);
   border-left-width: 3px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: box-shadow 0.15s;
+  transition: box-shadow var(--transition-fast);
 }
 
 .modal-review-item:hover {
@@ -761,7 +673,7 @@
 
 /* 감성별 왼쪽 보더 색상 */
 .review-border-positive { border-left-color: var(--color-positive); }
-.review-border-negative { border-left-color: var(--color-negative); }
+.review-border-negative { border-left-color: var(--color-error); }
 .review-border-neutral  { border-left-color: #d1d5db; }
 
 /* 리뷰 헤더: 뱃지 좌측, 출처+날짜 우측 */
@@ -782,7 +694,7 @@
 
 .modal-review-source {
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
   font-weight: 500;
 }
 
@@ -795,15 +707,15 @@
 
 .modal-review-date {
   font-size: 11px;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
 }
 
-/* ===== 감성 뱃지 (pill 스타일, 더 눈에 띄게) ===== */
+/* ===== 감성 뱃지 (pill 스타일) ===== */
 .sentiment-badge {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -816,20 +728,20 @@
   box-shadow: inset 0 0 0 1px rgba(22,163,74,0.2);
 }
 .badge-negative {
-  background: var(--color-negative-bg);
-  color: var(--color-negative);
+  background: var(--color-badge-red-bg);
+  color: var(--color-error);
   box-shadow: inset 0 0 0 1px rgba(220,38,38,0.2);
 }
 .badge-neutral {
   background: var(--color-neutral-bg);
-  color: var(--color-neutral);
+  color: var(--color-text-muted);
   box-shadow: inset 0 0 0 1px rgba(107,114,128,0.2);
 }
 
 /* ===== 리뷰 텍스트 (기본 3줄 제한) ===== */
 .modal-review-text {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   line-height: 1.7;
   margin: 0;
   display: -webkit-box;
@@ -844,23 +756,23 @@
   -webkit-line-clamp: unset;
 }
 
-/* 더보기: 텍스트 링크 스타일 (밑줄, 인디고 색) */
+/* 더보기: 텍스트 링크 스타일 */
 .modal-review-more {
   align-self: flex-start;
   border: none;
   background: none;
-  color: var(--color-indigo);
+  color: var(--color-places);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: color 0.15s;
+  transition: color var(--transition-fast);
 }
 
 .modal-review-more:hover {
-  color: var(--color-indigo-hover);
+  color: #7c3aed;
 }
 
 /* ===== 오른쪽 패널 (40%) — sticky 지도 ===== */
@@ -868,7 +780,6 @@
   flex: 0 0 40%;
   border-left: 1px solid var(--color-border);
   overflow: hidden;
-  /* sticky를 위한 컨텍스트 */
   position: relative;
 }
 
@@ -893,8 +804,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
-  color: var(--color-text-muted);
+  background: var(--color-bg-page);
+  color: var(--color-text-faint);
   font-size: 13px;
 }
 

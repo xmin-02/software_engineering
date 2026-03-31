@@ -9,7 +9,7 @@
   font-size: var(--font-size-page-title);
   font-weight: 800;
   color: var(--color-text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   letter-spacing: -0.5px;
 }
 
@@ -57,7 +57,7 @@
 .univ-badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-small);
   font-weight: 600;
   background: var(--color-youth-light);

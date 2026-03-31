@@ -19,6 +19,9 @@
   --color-accent: #1a73e8;
   --color-accent-hover: #1558b0;
   --color-error: #e53935;
+  --color-positive: #16a34a;
+  --color-positive-bg: #dcfce7;
+  --color-neutral-bg: #f3f4f6;
 
   /* 페이지별 액센트 */
   --color-dashboard: #6366f1;
@@ -55,6 +58,8 @@
   --color-badge-red-text: #b91c1c;
   --color-badge-blue-bg: #dbeafe;
   --color-badge-blue-text: #1e40af;
+  --color-badge-pink-bg: #fce7f3;
+  --color-badge-pink-text: #be185d;
 
   /* 타이포 */
   --font-size-page-title: 28px;
