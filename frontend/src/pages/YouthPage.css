@@ -1,4 +1,5 @@
 .youth-page {
+  --page-accent: var(--color-youth);
   padding: var(--spacing-page);
   background-color: var(--color-bg-page);
   min-height: 100vh;
@@ -6,9 +7,10 @@
 
 .youth-page-title {
   font-size: var(--font-size-page-title);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text-primary);
   margin-bottom: 20px;
+  letter-spacing: -0.5px;
 }
 
 /* 공지 테이블 */
@@ -20,19 +22,22 @@
 
 .notice-table thead tr {
   background: var(--color-bg-thead);
-  border-bottom: 2px solid var(--color-border-thead);
+  border-bottom: 2px solid var(--color-youth);
 }
 
 .notice-table th {
   padding: 12px 16px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .notice-table tbody tr {
   border-bottom: 1px solid var(--color-border-light);
-  transition: background 0.15s;
+  transition: all var(--transition-fast);
 }
 
 .notice-table tbody tr:nth-child(even) {
@@ -40,7 +45,7 @@
 }
 
 .notice-table tbody tr:hover {
-  background: var(--color-bg-row-hover);
+  background: var(--color-youth-light);
 }
 
 .notice-table td {
@@ -55,12 +60,12 @@
   border-radius: var(--radius-badge);
   font-size: var(--font-size-small);
   font-weight: 600;
-  background: var(--color-badge-indigo-bg);
-  color: var(--color-badge-indigo-text);
+  background: var(--color-youth-light);
+  color: var(--color-youth);
 }
 
 .notice-link {
-  color: var(--color-accent);
+  color: var(--color-youth);
   text-decoration: none;
 }
 
@@ -72,4 +77,37 @@
   white-space: nowrap;
   color: var(--color-text-faint);
   font-size: var(--font-size-meta);
+}
+
+@media (max-width: 640px) {
+  .youth-page { padding: 16px; }
+  .youth-page-title { font-size: 22px; }
+  .notice-table thead { display: none; }
+  .notice-table, .notice-table tbody, .notice-table tr, .notice-table td { display: block; width: 100%; }
+  .notice-table tbody tr {
+    padding: 12px;
+    margin-bottom: 12px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    border-bottom: none;
+    border-left: 3px solid var(--color-youth);
+    animation: card-in 0.3s ease both;
+  }
+  /* 모바일 카드 순차 애니메이션 */
+  .notice-table tbody tr:nth-child(1) { animation-delay: 0s; }
+  .notice-table tbody tr:nth-child(2) { animation-delay: 0.05s; }
+  .notice-table tbody tr:nth-child(3) { animation-delay: 0.05s; }
+  .notice-table tbody tr:nth-child(4) { animation-delay: 0.1s; }
+  .notice-table tbody tr:nth-child(5) { animation-delay: 0.15s; }
+  .notice-table tbody tr:nth-child(6) { animation-delay: 0.2s; }
+  .notice-table td { padding: 4px 0; border: none; }
+  .notice-table td::before {
+    content: attr(data-label);
+    display: inline-block;
+    width: 80px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-meta);
+  }
 }

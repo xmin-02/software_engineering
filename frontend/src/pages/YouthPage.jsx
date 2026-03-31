@@ -61,7 +61,9 @@ export default function YouthPage() {
       <h1 className="youth-page-title">대학 공지</h1>
 
       <div className="filter-bar">
+        <label className="sr-only" htmlFor="youth-univ-filter">대학 필터</label>
         <select
+          id="youth-univ-filter"
           value={university}
           onChange={(e) => setUniversity(e.target.value)}
           className="filter-select"
@@ -72,7 +74,9 @@ export default function YouthPage() {
           ))}
         </select>
 
+        <label className="sr-only" htmlFor="youth-cat-filter">카테고리 필터</label>
         <select
+          id="youth-cat-filter"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="filter-select"
@@ -85,8 +89,8 @@ export default function YouthPage() {
         </select>
       </div>
 
-      {loading && <p className="status-msg">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error">{error}</p>}
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {!loading && !error && (
         <div className="table-wrapper">
@@ -94,6 +98,7 @@ export default function YouthPage() {
             ? <p className="status-msg">아직 데이터가 없습니다</p>
             : (
               <table className="notice-table">
+                <caption className="sr-only">대학 공지사항 목록</caption>
                 <thead>
                   <tr>
                     <th>대학</th>
@@ -105,15 +110,15 @@ export default function YouthPage() {
                 <tbody>
                   {notices.map((n, i) => (
                     <tr key={n.id ?? i}>
-                      <td><span className="univ-badge">{n.university ?? '-'}</span></td>
-                      <td>{n.category ?? '-'}</td>
-                      <td>
+                      <td data-label="대학"><span className="univ-badge">{n.university ?? '-'}</span></td>
+                      <td data-label="카테고리">{n.category ?? '-'}</td>
+                      <td data-label="제목">
                         {n.url
                           ? <a href={n.url} target="_blank" rel="noopener noreferrer" className="notice-link">{n.title}</a>
                           : n.title
                         }
                       </td>
-                      <td className="youth-date-cell">{formatDate(n.date ?? n.created_at)}</td>
+                      <td data-label="날짜" className="youth-date-cell">{formatDate(n.date ?? n.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
