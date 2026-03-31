@@ -81,6 +81,7 @@ export default function DashboardPage() {
   const [posts, setPosts] = useState(null);
   const [topics, setTopics] = useState(null);
   const [events, setEvents] = useState(null);
+  const [places, setPlaces] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -108,10 +109,11 @@ export default function DashboardPage() {
         api.get('/api/posts', { params: { page: 1, size: 50 } }),
         api.get('/api/topics', { params: { period: 'weekly' } }),
         api.get('/api/events'),
+        api.get('/api/places', { params: { page: 1, size: 1 } }),
       ]);
 
-      const keys = ['sentiment', 'trend', 'sources', 'keywords', 'summaries', 'posts', 'topics', 'events'];
-      const setters = [setSentiment, setTrend, setSources, setKeywords, setSummaries, setPosts, setTopics, setEvents];
+      const keys = ['sentiment', 'trend', 'sources', 'keywords', 'summaries', 'posts', 'topics', 'events', 'places'];
+      const setters = [setSentiment, setTrend, setSources, setKeywords, setSummaries, setPosts, setTopics, setEvents, setPlaces];
       const newErrors = {};
 
       results.forEach((result, i) => {
@@ -187,7 +189,7 @@ export default function DashboardPage() {
   const positiveRate = sentiment?.total
     ? Math.round((sentiment.positive / sentiment.total) * 100)
     : 0;
-  const placeCount = events?.filter((e) => e.category === '맛집').length ?? 0;
+  const placeCount = places?.total ?? (Array.isArray(places) ? places.length : (places?.items?.length ?? 0));
   const eventCount = events?.length ?? 0;
 
   if (loading) {
