@@ -1,101 +1,66 @@
 .youth-page {
-  padding: 24px;
-  background-color: #f5f6fa;
+  padding: var(--spacing-page);
+  background-color: var(--color-bg-page);
   min-height: 100vh;
 }
 
-.page-title {
-  font-size: 28px;
+.youth-page-title {
+  font-size: var(--font-size-page-title);
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
 }
 
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.filter-select {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  background: #fff;
-  color: #444;
-  cursor: pointer;
-}
-
-.status-msg {
-  font-size: 14px;
-  color: #888;
-  text-align: center;
-  padding: 40px 0;
-}
-
-.status-msg.error {
-  color: #e53935;
-}
-
-.table-wrapper {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow-x: auto;
-}
-
+/* 공지 테이블 */
 .notice-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .notice-table thead tr {
-  background: #f8f9fc;
-  border-bottom: 2px solid #e8eaf0;
+  background: var(--color-bg-thead);
+  border-bottom: 2px solid var(--color-border-thead);
 }
 
 .notice-table th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .notice-table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-light);
   transition: background 0.15s;
 }
 
 .notice-table tbody tr:nth-child(even) {
-  background: #fafafa;
+  background: var(--color-bg-row-even);
 }
 
 .notice-table tbody tr:hover {
-  background: #f0f4ff;
+  background: var(--color-bg-row-hover);
 }
 
 .notice-table td {
   padding: 12px 16px;
-  color: #4b5563;
+  color: var(--color-text-body);
   vertical-align: middle;
 }
 
 .univ-badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 10px;
-  font-size: 12px;
+  border-radius: var(--radius-badge);
+  font-size: var(--font-size-small);
   font-weight: 600;
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--color-badge-indigo-bg);
+  color: var(--color-badge-indigo-text);
 }
 
 .notice-link {
-  color: #1a73e8;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -103,74 +68,8 @@
   text-decoration: underline;
 }
 
-.date-cell {
+.youth-date-cell {
   white-space: nowrap;
-  color: #9ca3af;
-  font-size: 13px;
-}
-
-/* 맛집 추천 섹션 */
-.places-section {
-  margin-top: 32px;
-}
-
-.places-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 4px;
-}
-
-.places-desc {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 16px;
-}
-
-.places-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.place-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.place-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.place-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.place-category {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: #e0e7ff;
-  color: #3730a3;
-  align-self: flex-start;
-}
-
-.place-address {
-  font-size: 12px;
-  color: #9ca3af;
-  margin: 0;
-  line-height: 1.4;
+  color: var(--color-text-faint);
+  font-size: var(--font-size-meta);
 }

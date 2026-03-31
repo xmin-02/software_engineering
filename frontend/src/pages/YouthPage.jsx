@@ -58,7 +58,7 @@ export default function YouthPage() {
 
   return (
     <div className="youth-page">
-      <h1 className="page-title">대학 공지</h1>
+      <h1 className="youth-page-title">대학 공지</h1>
 
       <div className="filter-bar">
         <select
@@ -113,7 +113,7 @@ export default function YouthPage() {
                           : n.title
                         }
                       </td>
-                      <td className="date-cell">{formatDate(n.date ?? n.created_at)}</td>
+                      <td className="youth-date-cell">{formatDate(n.date ?? n.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>

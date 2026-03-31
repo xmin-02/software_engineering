@@ -1,78 +1,70 @@
 .college-page {
-  padding: 24px;
-  background-color: #f5f6fa;
+  padding: var(--spacing-page);
+  background-color: var(--color-bg-page);
   min-height: 100vh;
 }
 
-.page-title {
-  font-size: 28px;
+.college-page-title {
+  font-size: var(--font-size-page-title);
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
 }
 
+/* 탭 바 */
 .tab-bar {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-gap-xs);
   margin-bottom: 20px;
 }
 
 .tab-btn {
   padding: 8px 20px;
-  border: 1px solid #ddd;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
   border-radius: 20px;
-  background: #fff;
+  background: var(--color-bg-card);
   color: #555;
-  font-size: 14px;
+  font-size: var(--font-size-body);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tab-btn.active {
-  background: #1a73e8;
+  background: var(--color-accent);
   color: #fff;
-  border-color: #1a73e8;
+  border-color: var(--color-accent);
   font-weight: 600;
 }
 
-.status-msg {
-  font-size: 14px;
-  color: #888;
-  text-align: center;
-  padding: 40px 0;
-}
-
-.status-msg.error {
-  color: #e53935;
-}
-
+/* 카드 그리드 */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: var(--spacing-gap-md);
 }
 
 .college-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 16px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-gap-md);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-gap-xs);
   transition: box-shadow 0.2s;
 }
 
 .college-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .card-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: var(--font-size-badge);
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-badge);
   align-self: flex-start;
 }
 
@@ -82,31 +74,31 @@
 }
 
 .card-badge.scholarship {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-badge-green-bg);
+  color: var(--color-badge-green-text);
 }
 
 .card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
 .card-meta {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: var(--font-size-meta);
+  color: var(--color-text-muted);
 }
 
 .card-meta.deadline {
-  color: #e53935;
+  color: var(--color-error);
   font-weight: 500;
 }
 
 .card-link {
   margin-top: 4px;
-  font-size: 13px;
-  color: #1a73e8;
+  font-size: var(--font-size-meta);
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 500;
 }
@@ -116,107 +108,40 @@
 }
 
 /* 주거 테이블 */
-.table-wrapper {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow-x: auto;
-}
-
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .data-table thead tr {
-  background: #f8f9fc;
-  border-bottom: 2px solid #e8eaf0;
+  background: var(--color-bg-thead);
+  border-bottom: 2px solid var(--color-border-thead);
 }
 
 .data-table th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .data-table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-light);
   transition: background 0.15s;
 }
 
 .data-table tbody tr:nth-child(even) {
-  background: #fafafa;
+  background: var(--color-bg-row-even);
 }
 
 .data-table tbody tr:hover {
-  background: #f0f4ff;
+  background: var(--color-bg-row-hover);
 }
 
 .data-table td {
   padding: 12px 16px;
-  color: #4b5563;
-}
-
-.trade-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.trade-badge.매매 { background: #fee2e2; color: #b91c1c; }
-.trade-badge.전세 { background: #dbeafe; color: #1e40af; }
-.trade-badge.월세 { background: #d1fae5; color: #065f46; }
-
-/* 맛집 추천 섹션 */
-.places-section {
-  margin-top: 32px;
-}
-
-.places-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: 4px;
-}
-
-.places-desc {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 16px;
-}
-
-.places-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.place-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.place-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.place-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0;
-  line-height: 1.4;
+  color: var(--color-text-body);
 }
 
 /* 대학생 태그 뱃지 */
@@ -228,28 +153,10 @@
 }
 
 .college-place-tag {
-  font-size: 11px;
+  font-size: var(--font-size-badge);
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-badge);
   background: #fce7f3;
   color: #be185d;
-}
-
-.place-category {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: #e0e7ff;
-  color: #3730a3;
-  align-self: flex-start;
-}
-
-.place-address {
-  font-size: 12px;
-  color: #9ca3af;
-  margin: 0;
-  line-height: 1.4;
 }
