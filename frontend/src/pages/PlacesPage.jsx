@@ -362,7 +362,7 @@ export default function PlacesPage() {
     <div className="places-page">
       {/* 헤더 */}
       <div className="page-header">
-        <h1 className="page-title">맛집 · 카페</h1>
+        <h1 className="places-page-title">맛집 · 카페</h1>
         <span className="page-subtitle">천안시 음식점 감성 분석</span>
       </div>
 

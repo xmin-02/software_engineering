@@ -10,7 +10,7 @@
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--color-text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .job-list {
@@ -75,7 +75,7 @@
   font-weight: 500;
 }
 
-.tag.location { background: #f3f4f6; color: var(--color-text-secondary); }
+.tag.location { background: var(--color-neutral-bg); color: var(--color-text-secondary); }
 .tag.salary { background: var(--color-jobs-light); color: var(--color-jobs); }
 .tag.experience { background: var(--color-badge-blue-bg); color: var(--color-badge-blue-text); }
 
@@ -90,7 +90,7 @@
 .job-source {
   font-size: var(--font-size-badge);
   color: var(--color-text-faint);
-  background: #f3f4f6;
+  background: var(--color-neutral-bg);
   padding: 2px 8px;
   border-radius: 4px;
 }

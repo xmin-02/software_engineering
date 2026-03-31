@@ -9,7 +9,7 @@
   font-size: var(--font-size-page-title);
   font-weight: 800;
   color: var(--color-text-primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   letter-spacing: -0.5px;
 }
 
@@ -26,7 +26,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-bg-card);
-  color: #555;
+  color: var(--color-text-muted);
   font-size: var(--font-size-body);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -79,13 +79,13 @@
   font-size: var(--font-size-badge);
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   align-self: flex-start;
 }
 
 .card-badge.contest {
-  background: #fce7f3;
-  color: #be185d;
+  background: var(--color-badge-pink-bg);
+  color: var(--color-badge-pink-text);
 }
 
 .card-badge.scholarship {
@@ -138,8 +138,10 @@
 .data-table th {
   padding: 12px 16px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .data-table tbody tr {
@@ -173,8 +175,8 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: var(--radius-pill);
-  background: #fce7f3;
-  color: #be185d;
+  background: var(--color-badge-pink-bg);
+  color: var(--color-badge-pink-text);
 }
 
 @media (max-width: 640px) {
