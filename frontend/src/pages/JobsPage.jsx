@@ -46,10 +46,12 @@ export default function JobsPage() {
 
   return (
     <div className="jobs-page">
-      <h1 className="page-title">채용</h1>
+      <h1 className="jobs-page-title">채용</h1>
 
       <div className="filter-bar">
+        <label className="sr-only" htmlFor="jobs-experience">경력 필터</label>
         <select
+          id="jobs-experience"
           value={experience}
           onChange={(e) => { setExperience(e.target.value); setPage(1); }}
           className="filter-select"
@@ -59,7 +61,9 @@ export default function JobsPage() {
           ))}
         </select>
 
+        <label className="sr-only" htmlFor="jobs-type">직종 필터</label>
         <select
+          id="jobs-type"
           value={jobType}
           onChange={(e) => { setJobType(e.target.value); setPage(1); }}
           className="filter-select"
@@ -74,8 +78,8 @@ export default function JobsPage() {
         </select>
       </div>
 
-      {loading && <p className="status-msg">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error">{error}</p>}
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {!loading && !error && (
         <>
@@ -116,9 +120,21 @@ export default function JobsPage() {
 
           {jobs.length > 0 && (
             <div className="pagination">
-              <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>이전</button>
+              <button
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                aria-label="이전 페이지"
+              >
+                이전
+              </button>
               <span>{page}페이지</span>
-              <button disabled={!hasNext} onClick={() => setPage((p) => p + 1)}>다음</button>
+              <button
+                disabled={!hasNext}
+                onClick={() => setPage((p) => p + 1)}
+                aria-label="다음 페이지"
+              >
+                다음
+              </button>
             </div>
           )}
         </>

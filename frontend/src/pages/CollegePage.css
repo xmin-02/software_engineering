@@ -1,4 +1,5 @@
 .college-page {
+  --page-accent: var(--color-college);
   padding: var(--spacing-page);
   background-color: var(--color-bg-page);
   min-height: 100vh;
@@ -6,9 +7,10 @@
 
 .college-page-title {
   font-size: var(--font-size-page-title);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text-primary);
   margin-bottom: 20px;
+  letter-spacing: -0.5px;
 }
 
 /* 탭 바 */
@@ -22,18 +24,18 @@
   padding: 8px 20px;
   min-height: 44px;
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   background: var(--color-bg-card);
   color: #555;
   font-size: var(--font-size-body);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .tab-btn.active {
-  background: var(--color-accent);
+  background: var(--color-college);
   color: #fff;
-  border-color: var(--color-accent);
+  border-color: var(--color-college);
   font-weight: 600;
 }
 
@@ -44,18 +46,31 @@
   gap: var(--spacing-gap-md);
 }
 
+/* 카드 등장 애니메이션 (순차 지연) */
+.card-grid > *:nth-child(n) {
+  animation: card-in 0.3s ease both;
+}
+.card-grid > *:nth-child(1) { animation-delay: 0s; }
+.card-grid > *:nth-child(2) { animation-delay: 0.05s; }
+.card-grid > *:nth-child(3) { animation-delay: 0.1s; }
+.card-grid > *:nth-child(4) { animation-delay: 0.15s; }
+.card-grid > *:nth-child(5) { animation-delay: 0.2s; }
+.card-grid > *:nth-child(6) { animation-delay: 0.25s; }
+
 .college-card {
   background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: var(--spacing-gap-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-gap-xs);
-  transition: box-shadow 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .college-card:hover {
+  transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -74,15 +89,16 @@
 }
 
 .card-badge.scholarship {
-  background: var(--color-badge-green-bg);
-  color: var(--color-badge-green-text);
+  background: var(--color-college-light);
+  color: var(--color-college);
 }
 
 .card-title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-primary);
   line-height: 1.4;
+  letter-spacing: -0.2px;
 }
 
 .card-meta {
@@ -98,7 +114,7 @@
 .card-link {
   margin-top: 4px;
   font-size: var(--font-size-meta);
-  color: var(--color-accent);
+  color: var(--color-college);
   text-decoration: none;
   font-weight: 500;
 }
@@ -116,7 +132,7 @@
 
 .data-table thead tr {
   background: var(--color-bg-thead);
-  border-bottom: 2px solid var(--color-border-thead);
+  border-bottom: 2px solid var(--color-college);
 }
 
 .data-table th {
@@ -156,7 +172,15 @@
   font-size: var(--font-size-badge);
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: var(--radius-badge);
+  border-radius: var(--radius-pill);
   background: #fce7f3;
   color: #be185d;
+}
+
+@media (max-width: 640px) {
+  .college-page { padding: 16px; }
+  .college-page-title { font-size: 22px; }
+  .tab-bar { flex-wrap: wrap; }
+  .tab-btn { font-size: 13px; padding: 6px 14px; }
+  .card-grid { grid-template-columns: 1fr; }
 }
