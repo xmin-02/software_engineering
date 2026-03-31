@@ -1,0 +1,59 @@
+:root {
+  /* 배경 */
+  --color-bg-page: #f5f6fa;
+  --color-bg-card: #fff;
+  --color-bg-thead: #f8f9fc;
+  --color-bg-row-even: #fafafa;
+  --color-bg-row-hover: #f0f4ff;
+
+  /* 텍스트 */
+  --color-text-primary: #1a1a2e;
+  --color-text-body: #4b5563;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9ca3af;
+  --color-text-placeholder: #888;
+  --color-text-input: #444;
+
+  /* 액센트 */
+  --color-accent: #1a73e8;
+  --color-error: #e53935;
+
+  /* 보더 */
+  --color-border: #ddd;
+  --color-border-light: #f0f0f0;
+  --color-border-thead: #e8eaf0;
+
+  /* 그림자 */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* 뱃지 색상 */
+  --color-badge-indigo-bg: #e0e7ff;
+  --color-badge-indigo-text: #3730a3;
+  --color-badge-green-bg: #d1fae5;
+  --color-badge-green-text: #065f46;
+  --color-badge-red-bg: #fee2e2;
+  --color-badge-red-text: #b91c1c;
+  --color-badge-blue-bg: #dbeafe;
+  --color-badge-blue-text: #1e40af;
+
+  /* 타이포 */
+  --font-size-page-title: 28px;
+  --font-size-section-title: 22px;
+  --font-size-body: 14px;
+  --font-size-meta: 13px;
+  --font-size-small: 12px;
+  --font-size-badge: 11px;
+
+  /* 간격 */
+  --spacing-page: 24px;
+  --spacing-gap-md: 16px;
+  --spacing-gap-sm: 12px;
+  --spacing-gap-xs: 8px;
+
+  /* 라운딩 */
+  --radius-card: 12px;
+  --radius-badge: 10px;
+  --radius-input: 6px;
+}
