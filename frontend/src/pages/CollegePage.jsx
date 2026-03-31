@@ -65,11 +65,13 @@ export default function CollegePage() {
     <div className="college-page">
       <h1 className="college-page-title">대학생</h1>
 
-      <div className="tab-bar">
+      <div className="tab-bar" role="tablist">
         {TABS.map(({ key, label }) => (
           <button
             key={key}
             className={`tab-btn${activeTab === key ? ' active' : ''}`}
+            role="tab"
+            aria-selected={activeTab === key}
             onClick={() => setActiveTab(key)}
           >
             {label}
@@ -77,8 +79,8 @@ export default function CollegePage() {
         ))}
       </div>
 
-      {loading && <p className="status-msg">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error">{error}</p>}
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {!loading && !error && data.length === 0 && (
         <p className="status-msg">아직 데이터가 없습니다</p>

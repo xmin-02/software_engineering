@@ -2,34 +2,35 @@ import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import './Layout.css';
 
-// 사이드바 네비게이션 항목 목록
 const navItems = [
-  { to: '/', label: '대시보드', end: true },
-  { to: '/places', label: '맛집/카페' },
-  { to: '/events', label: '관광/명소' },
-  { to: '/youth', label: '청년' },
-  { to: '/college', label: '대학생' },
-  { to: '/jobs', label: '채용' },
-  { to: '/family', label: '가족' },
+  { to: '/', label: '대시보드', icon: '📊', accent: 'var(--color-dashboard)', end: true },
+  { to: '/places', label: '맛집/카페', icon: '🍽️', accent: 'var(--color-places)' },
+  { to: '/events', label: '관광/명소', icon: '🎪', accent: 'var(--color-events)' },
+  { to: '/youth', label: '청년', icon: '🎓', accent: 'var(--color-youth)' },
+  { to: '/college', label: '대학생', icon: '📚', accent: 'var(--color-college)' },
+  { to: '/jobs', label: '채용', icon: '💼', accent: 'var(--color-jobs)' },
+  { to: '/family', label: '가족', icon: '👨‍👩‍👧‍👦', accent: 'var(--color-family)' },
 ];
 
 export default function Layout() {
-  // 모바일 사이드바 열림/닫힘 상태
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="layout">
-      {/* 모바일 오버레이 — 사이드바 외부 클릭 시 닫기 */}
       {menuOpen && (
         <div className="sidebar-overlay" onClick={() => setMenuOpen(false)} />
       )}
 
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-header">
-          <h2>천안 대시보드</h2>
+          <span className="sidebar-logo">天</span>
+          <div>
+            <h2>천안 대시보드</h2>
+            <p className="sidebar-subtitle">지역 여론 & 생활 정보</p>
+          </div>
         </div>
-        <nav className="sidebar-nav">
-          {navItems.map(({ to, label, end }) => (
+        <nav className="sidebar-nav" aria-label="메인 네비게이션">
+          {navItems.map(({ to, label, icon, accent, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -37,17 +38,23 @@ export default function Layout() {
               className={({ isActive }) =>
                 isActive ? 'nav-link nav-link--active' : 'nav-link'
               }
+              style={({ isActive }) =>
+                isActive ? { '--nav-accent': accent } : undefined
+              }
               onClick={() => setMenuOpen(false)}
             >
-              {label}
+              <span className="nav-icon">{icon}</span>
+              <span className="nav-label">{label}</span>
             </NavLink>
           ))}
         </nav>
+        <div className="sidebar-footer">
+          <span className="sidebar-version">v1.0</span>
+        </div>
       </aside>
 
       <div className="content-area">
         <header className="top-bar">
-          {/* 모바일에서만 표시되는 햄버거 버튼 */}
           <button
             className="menu-btn"
             onClick={() => setMenuOpen(!menuOpen)}

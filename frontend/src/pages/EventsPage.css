@@ -1,38 +1,24 @@
 .events-page {
-  padding: 24px;
+  --page-accent: var(--color-events);
+  padding: var(--spacing-page);
+  background-color: var(--color-bg-page);
+  min-height: 100vh;
 }
 
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
+.events-page-title {
+  font-size: var(--font-size-page-title);
+  font-weight: 800;
+  letter-spacing: -0.5px;
   margin-bottom: 20px;
-  color: #1a1a2e;
-}
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.filter-select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #374151;
-  background: #fff;
-  cursor: pointer;
+  color: var(--color-text-primary);
 }
 
 .toggle-label {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: #374151;
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
@@ -45,22 +31,24 @@
 .event-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  gap: var(--spacing-gap-md);
 }
 
 .event-card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-gap-md);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: box-shadow 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .event-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
 }
 
 .event-header {
@@ -69,10 +57,10 @@
 }
 
 .event-category {
-  font-size: 12px;
+  font-size: var(--font-size-small);
   background: #fce7f3;
   color: #be185d;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   padding: 2px 8px;
   font-weight: 500;
 }
@@ -80,7 +68,7 @@
 .event-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
@@ -91,18 +79,18 @@
 }
 
 .meta-item {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: var(--font-size-meta);
+  color: var(--color-text-muted);
 }
 
 .event-link-btn {
   display: inline-block;
   margin-top: 4px;
   padding: 7px 14px;
-  background: #4f46e5;
-  color: #fff;
+  background: var(--color-events);
+  color: var(--color-bg-card);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-meta);
   font-weight: 500;
   text-decoration: none;
   text-align: center;
@@ -110,52 +98,68 @@
 }
 
 .event-link-btn:hover {
-  background: #4338ca;
+  background: #e65100;
 }
 
-.status-msg {
-  padding: 40px;
-  text-align: center;
-  color: #9ca3af;
-  font-size: 15px;
+.events-section {
+  margin-bottom: var(--spacing-page);
 }
 
-.status-msg.error {
-  color: #ef4444;
-}
-
-.section {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 18px;
+.events-section-title {
+  font-size: var(--font-size-section-title);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e0e0e0;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-gap-sm);
+  border-left: 3px solid var(--color-events);
+  padding-left: 12px;
 }
 
 .event-card.festival {
-  border-top: 3px solid #ef6c00;
-  background: linear-gradient(135deg, #fff8f0, #fff);
+  border-top: 3px solid var(--color-events);
+  background: var(--color-events-light);
 }
 
 .festival-tag {
-  background: #ef6c00 !important;
-  color: #fff !important;
+  background: var(--color-events);
+  color: #fff;
 }
 
 .event-location {
-  font-size: 12px;
-  color: #888;
+  font-size: var(--font-size-small);
+  color: var(--color-text-placeholder);
   margin-top: 4px;
 }
 
 .event-desc {
-  font-size: 12px;
-  color: #666;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
   margin-top: 6px;
   line-height: 1.4;
+}
+
+/* 카드 등장 애니메이션 */
+.event-grid > *:nth-child(1) { animation: card-in 0.3s ease both; animation-delay: 0s; }
+.event-grid > *:nth-child(2) { animation: card-in 0.3s ease both; animation-delay: 0.05s; }
+.event-grid > *:nth-child(3) { animation: card-in 0.3s ease both; animation-delay: 0.1s; }
+.event-grid > *:nth-child(4) { animation: card-in 0.3s ease both; animation-delay: 0.15s; }
+.event-grid > *:nth-child(5) { animation: card-in 0.3s ease both; animation-delay: 0.2s; }
+.event-grid > *:nth-child(6) { animation: card-in 0.3s ease both; animation-delay: 0.25s; }
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+  .events-page {
+    padding: 16px;
+  }
+
+  .events-page-title {
+    font-size: 22px;
+  }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .events-section-title {
+    font-size: 16px;
+  }
 }

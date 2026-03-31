@@ -27,19 +27,19 @@ export default function EventsPage() {
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
-  // 축제와 관광지 분리
   const festivals = events.filter((e) => e.category === '축제' || e.category === '빵빵데이');
   const spots = events.filter((e) => e.category !== '축제' && e.category !== '빵빵데이');
 
-  // 카테고리 목록
   const categories = [...new Set(events.map((e) => e.category).filter(Boolean))].sort();
 
   return (
     <div className="events-page">
-      <h1 className="page-title">천안 관광/명소</h1>
+      <h1 className="events-page-title">천안 관광/명소</h1>
 
       <div className="filter-bar">
+        <label className="sr-only" htmlFor="events-category-filter">카테고리 선택</label>
         <select
+          id="events-category-filter"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="filter-select"
@@ -51,15 +51,14 @@ export default function EventsPage() {
         </select>
       </div>
 
-      {loading && <p className="status-msg">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error">{error}</p>}
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {!loading && !error && (
         <>
-          {/* 축제 섹션 */}
           {!category && festivals.length > 0 && (
-            <section className="section">
-              <h2 className="section-title">연례 축제</h2>
+            <section className="events-section" aria-label="연례 축제">
+              <h2 className="events-section-title">연례 축제</h2>
               <div className="event-grid">
                 {festivals.map((ev, i) => (
                   <div key={ev.id ?? i} className="event-card festival">
@@ -79,9 +78,8 @@ export default function EventsPage() {
             </section>
           )}
 
-          {/* 관광지/명소 섹션 */}
-          <section className="section">
-            {!category && <h2 className="section-title">관광지 & 체험</h2>}
+          <section className="events-section" aria-label="관광지 및 체험">
+            {!category && <h2 className="events-section-title">관광지 &amp; 체험</h2>}
             <div className="event-grid">
               {(category ? events : spots).length === 0
                 ? <p className="status-msg">등록된 명소가 없습니다</p>
