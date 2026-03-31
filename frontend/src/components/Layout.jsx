@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import {
+  BarChart3, UtensilsCrossed, MapPin, GraduationCap,
+  BookOpen, Briefcase, Users,
+} from 'lucide-react';
 import './Layout.css';
 
 const navItems = [
-  { to: '/', label: '대시보드', icon: '📊', accent: 'var(--color-dashboard)', end: true },
-  { to: '/places', label: '맛집/카페', icon: '🍽️', accent: 'var(--color-places)' },
-  { to: '/events', label: '관광/명소', icon: '🎪', accent: 'var(--color-events)' },
-  { to: '/youth', label: '청년', icon: '🎓', accent: 'var(--color-youth)' },
-  { to: '/college', label: '대학생', icon: '📚', accent: 'var(--color-college)' },
-  { to: '/jobs', label: '채용', icon: '💼', accent: 'var(--color-jobs)' },
-  { to: '/family', label: '가족', icon: '👨‍👩‍👧‍👦', accent: 'var(--color-family)' },
+  { to: '/', label: '대시보드', Icon: BarChart3, accent: 'var(--color-dashboard)', end: true },
+  { to: '/places', label: '맛집/카페', Icon: UtensilsCrossed, accent: 'var(--color-places)' },
+  { to: '/events', label: '관광/명소', Icon: MapPin, accent: 'var(--color-events)' },
+  { to: '/youth', label: '청년', Icon: GraduationCap, accent: 'var(--color-youth)' },
+  { to: '/college', label: '대학생', Icon: BookOpen, accent: 'var(--color-college)' },
+  { to: '/jobs', label: '채용', Icon: Briefcase, accent: 'var(--color-jobs)' },
+  { to: '/family', label: '가족', Icon: Users, accent: 'var(--color-family)' },
 ];
 
 export default function Layout() {
@@ -30,7 +34,7 @@ export default function Layout() {
           </div>
         </div>
         <nav className="sidebar-nav" aria-label="메인 네비게이션">
-          {navItems.map(({ to, label, icon, accent, end }) => (
+          {navItems.map(({ to, label, Icon, accent, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -43,7 +47,7 @@ export default function Layout() {
               }
               onClick={() => setMenuOpen(false)}
             >
-              <span className="nav-icon">{icon}</span>
+              <Icon size={20} strokeWidth={1.8} className="nav-icon" />
               <span className="nav-label">{label}</span>
             </NavLink>
           ))}
