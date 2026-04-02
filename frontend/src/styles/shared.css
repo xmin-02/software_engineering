@@ -192,3 +192,13 @@
     font-size: 18px;
   }
 }
+.kpi-card {
+  background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+  color: white;
+  box-shadow: 0 10px 20px rgba(59,130,246,0.3);
+}
+
+.kpi-card .kpi-value,
+.kpi-card .kpi-label {
+  color: white;
+}
