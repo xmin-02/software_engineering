@@ -11,6 +11,7 @@ alembic==1.14.*
 selenium==4.27.*
 beautifulsoup4==4.12.*
 requests==2.32.*
+xmltodict==0.13.*
 
 # NLP Preprocessing
 konlpy==0.6.*
