@@ -70,10 +70,12 @@ export default function FamilyPage() {
 
   return (
     <div className="family-page">
-      <h1 className="page-title">부동산</h1>
+      <h1 className="family-page-title">부동산</h1>
 
       <div className="filter-bar">
+        <label htmlFor="family-property-type" className="sr-only">매물유형 필터</label>
         <select
+          id="family-property-type"
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
           className="filter-select"
@@ -84,7 +86,9 @@ export default function FamilyPage() {
           ))}
         </select>
 
+        <label htmlFor="family-trade-type" className="sr-only">거래유형 필터</label>
         <select
+          id="family-trade-type"
           value={tradeType}
           onChange={(e) => setTradeType(e.target.value)}
           className="filter-select"
@@ -96,8 +100,8 @@ export default function FamilyPage() {
         </select>
       </div>
 
-      {loading && <p className="status-msg">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error">{error}</p>}
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {!loading && !error && (
         <div className="table-wrapper">
@@ -105,6 +109,7 @@ export default function FamilyPage() {
             ? <p className="status-msg">아직 데이터가 없습니다</p>
             : (
               <table className="estate-table">
+                <caption className="sr-only">천안 부동산 매물 목록</caption>
                 <thead>
                   <tr>
                     <th>주소</th>
@@ -119,13 +124,13 @@ export default function FamilyPage() {
                 <tbody>
                   {estates.map((item, i) => (
                     <tr key={item.id ?? i}>
-                      <td className="address-cell">{item.address ?? '-'}</td>
-                      <td><span className="type-badge">{item.property_type ?? '-'}</span></td>
-                      <td><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                      <td className="price-cell">{formatPrice(item.price)}</td>
-                      <td>{item.area ?? '-'}</td>
-                      <td>{item.floor != null ? `${item.floor}층` : '-'}</td>
-                      <td className="date-cell">{formatDate(item.transaction_date)}</td>
+                      <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
+                      <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
+                      <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
+                      <td className="family-price-cell" data-label="가격">{formatPrice(item.price)}</td>
+                      <td data-label="면적">{item.area ?? '-'}</td>
+                      <td data-label="층">{item.floor != null ? `${item.floor}층` : '-'}</td>
+                      <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -139,8 +144,8 @@ export default function FamilyPage() {
       <div className="places-section">
         <h2 className="places-title">가족 추천 맛집</h2>
         <p className="places-desc">노키즈존 제외, 키즈시설 우선 — 온 가족이 편안한 천안 맛집</p>
-        {placesLoading && <p className="status-msg">맛집 정보를 불러오는 중...</p>}
-        {placesError && <p className="status-msg error">{placesError}</p>}
+        {placesLoading && <p className="status-msg" aria-live="polite">맛집 정보를 불러오는 중...</p>}
+        {placesError && <p className="status-msg error" role="alert">{placesError}</p>}
         {!placesLoading && !placesError && places.length === 0 && (
           <p className="status-msg">등록된 맛집이 없습니다</p>
         )}
