@@ -60,8 +60,8 @@
   border-radius: var(--radius-pill);
   font-size: var(--font-size-small);
   font-weight: 600;
-  background: var(--color-youth-light);
-  color: var(--color-youth);
+  background: #f0f1f3;
+  color: #4b5563;
 }
 
 .notice-link {
