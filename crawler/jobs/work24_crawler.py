@@ -2,8 +2,8 @@
 
 import logging
 import xml.etree.ElementTree as ET
-from datetime import date
-from typing import Any
+from datetime import date, datetime
+from typing import Any, Optional
 
 import requests
 from sqlalchemy.orm import Session
@@ -158,7 +158,7 @@ class Work24Crawler(BaseCrawler):
         return saved
 
 
-def _parse_deadline(raw: str) -> date | None:
+def _parse_deadline(raw: str) -> Optional[date]:
     """마감일 문자열을 date 객체로 변환"""
     if not raw:
         return None
@@ -166,7 +166,6 @@ def _parse_deadline(raw: str) -> date | None:
     # 상시채용 등 날짜가 아닌 값 처리
     for fmt in ("%Y%m%d", "%Y-%m-%d", "%Y.%m.%d"):
         try:
-            from datetime import datetime
             return datetime.strptime(raw, fmt).date()
         except ValueError:
             continue
