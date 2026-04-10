@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../api/client';
 import './FamilyPage.css';
 
@@ -11,6 +12,7 @@ export default function FamilyPage() {
   const [tradeType, setTradeType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [estateOpen, setEstateOpen] = useState(false);
 
   // 맛집 추천 상태
   const [places, setPlaces] = useState([]);
@@ -65,83 +67,16 @@ export default function FamilyPage() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    return dateStr.slice(0, 10);
+    const d = dateStr.slice(5, 10);
+    return d.replace('-', '.');
   };
 
   return (
     <div className="family-page">
-      <h1 className="family-page-title">부동산</h1>
+      <h1 className="family-page-title">가족</h1>
 
-      <div className="filter-bar">
-        <label htmlFor="family-property-type" className="sr-only">매물유형 필터</label>
-        <select
-          id="family-property-type"
-          value={propertyType}
-          onChange={(e) => setPropertyType(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">전체 매물유형</option>
-          {PROPERTY_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-
-        <label htmlFor="family-trade-type" className="sr-only">거래유형 필터</label>
-        <select
-          id="family-trade-type"
-          value={tradeType}
-          onChange={(e) => setTradeType(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">전체 거래유형</option>
-          {TRADE_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-      </div>
-
-      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error" role="alert">{error}</p>}
-
-      {!loading && !error && (
-        <div className="table-wrapper">
-          {estates.length === 0
-            ? <p className="status-msg">아직 데이터가 없습니다</p>
-            : (
-              <table className="estate-table">
-                <caption className="sr-only">천안 부동산 매물 목록</caption>
-                <thead>
-                  <tr>
-                    <th>주소</th>
-                    <th>매물유형</th>
-                    <th>거래유형</th>
-                    <th>가격</th>
-                    <th>면적(㎡)</th>
-                    <th>층</th>
-                    <th>거래일</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {estates.map((item, i) => (
-                    <tr key={item.id ?? i}>
-                      <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
-                      <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
-                      <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                      <td className="family-price-cell" data-label="가격">{formatPrice(item.price)}</td>
-                      <td data-label="면적">{item.area ?? '-'}</td>
-                      <td data-label="층">{item.floor != null ? `${item.floor}층` : '-'}</td>
-                      <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          }
-        </div>
-      )}
-
-      {/* 가족 추천 맛집 섹션 */}
-      <div className="places-section">
+      {/* 가족 추천 맛집 섹션 (메인) */}
+      <div className="places-section places-section--main">
         <h2 className="places-title">가족 추천 맛집</h2>
         <p className="places-desc">노키즈존 제외, 키즈시설 우선 — 온 가족이 편안한 천안 맛집</p>
         {placesLoading && <p className="status-msg" aria-live="polite">맛집 정보를 불러오는 중...</p>}
@@ -163,6 +98,90 @@ export default function FamilyPage() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* 부동산 섹션 (접이식) */}
+      <div className="estate-section">
+        <button
+          className="estate-toggle"
+          onClick={() => setEstateOpen((v) => !v)}
+          aria-expanded={estateOpen}
+        >
+          <span>부동산 매물 정보</span>
+          {estateOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+
+        {estateOpen && (
+          <>
+            <div className="filter-bar" style={{ marginTop: 12 }}>
+              <label htmlFor="family-property-type" className="sr-only">매물유형 필터</label>
+              <select
+                id="family-property-type"
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value)}
+                className="filter-select"
+              >
+                <option value="">전체 매물유형</option>
+                {PROPERTY_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+
+              <label htmlFor="family-trade-type" className="sr-only">거래유형 필터</label>
+              <select
+                id="family-trade-type"
+                value={tradeType}
+                onChange={(e) => setTradeType(e.target.value)}
+                className="filter-select"
+              >
+                <option value="">전체 거래유형</option>
+                {TRADE_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+            {error && <p className="status-msg error" role="alert">{error}</p>}
+
+            {!loading && !error && (
+              <div className="table-wrapper">
+                {estates.length === 0
+                  ? <p className="status-msg">아직 데이터가 없습니다</p>
+                  : (
+                    <table className="estate-table">
+                      <caption className="sr-only">천안 부동산 매물 목록</caption>
+                      <thead>
+                        <tr>
+                          <th>주소</th>
+                          <th>매물유형</th>
+                          <th>거래유형</th>
+                          <th>가격</th>
+                          <th>면적(㎡)</th>
+                          <th>층</th>
+                          <th>거래일</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {estates.map((item, i) => (
+                          <tr key={item.id ?? i}>
+                            <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
+                            <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
+                            <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
+                            <td className="family-price-cell" data-label="가격">{formatPrice(item.price)}</td>
+                            <td data-label="면적">{item.area ?? '-'}</td>
+                            <td data-label="층">{item.floor != null ? `${item.floor}층` : '-'}</td>
+                            <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )
+                }
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
