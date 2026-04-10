@@ -61,5 +61,15 @@ logs/
 # OMC state
 .omc/
 
+# Claude Code / agents (personal)
+.claude/
+.agents/
+
+# Cloudflare Wrangler cache
+.wrangler/
+
+# Personal notes
+프롬프트.txt
+
 # OS
 Thumbs.db

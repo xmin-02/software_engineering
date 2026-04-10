@@ -13,9 +13,9 @@ import './DashboardPage.css';
 
 // 감성 색상 상수
 const SENTIMENT_COLORS = {
-  positive: '#4CAF50',
-  negative: '#F44336',
-  neutral: '#9E9E9E',
+  positive: '#5a9e6f',
+  negative: '#c75a5a',
+  neutral: '#a0a4ab',
 };
 
 const SENTIMENT_LABELS = {
@@ -37,7 +37,8 @@ function SentimentBadge({ value }) {
 // 날짜 포맷
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  return dateStr.slice(0, 10);
+  const d = dateStr.slice(5, 10);
+  return d.replace('-', '.');
 }
 
 // 모달 컴포넌트
@@ -153,10 +154,10 @@ export default function DashboardPage() {
     min + ((count / keywordMax) * (max - min));
 
   const KEYWORD_COLORS = [
-    '#3730a3', '#1e40af', '#5b21b6', '#0369a1',
-    '#4338ca', '#1d4ed8', '#6d28d9', '#0284c7',
-    '#312e81', '#1e3a5f', '#4c1d95', '#075985',
-    '#3b5bdb', '#364fc7', '#7048e8', '#1971c2',
+    '#4a5078', '#3d5a8a', '#5e5085', '#2b6e8a',
+    '#4e5590', '#3a5e9a', '#6a5095', '#2980a0',
+    '#3e4570', '#2e4a6a', '#554080', '#1e6070',
+    '#4a5e8a', '#445580', '#6050a0', '#2a6590',
   ];
 
   const getKeywordColor = (index) => KEYWORD_COLORS[index % KEYWORD_COLORS.length];

@@ -53,7 +53,8 @@ export default function YouthPage() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    return dateStr.slice(0, 10);
+    const d = dateStr.slice(5, 10);
+    return d.replace('-', '.');
   };
 
   return (

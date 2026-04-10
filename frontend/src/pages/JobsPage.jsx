@@ -41,7 +41,8 @@ export default function JobsPage() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '상시';
-    return dateStr.slice(0, 10);
+    const d = dateStr.slice(5, 10);
+    return d.replace('-', '.');
   };
 
   return (
@@ -108,7 +109,7 @@ export default function JobsPage() {
                           rel="noopener noreferrer"
                           className="apply-btn"
                         >
-                          지원하기
+                          지원하기 →
                         </a>
                       )}
                     </div>

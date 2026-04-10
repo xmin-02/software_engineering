@@ -16,28 +16,28 @@
   --color-text-input: #444;
 
   /* 메인 액센트 */
-  --color-accent: #1a73e8;
-  --color-accent-hover: #1558b0;
-  --color-error: #e53935;
-  --color-positive: #16a34a;
-  --color-positive-bg: #dcfce7;
+  --color-accent: #3b7dd8;
+  --color-accent-hover: #2c5fa0;
+  --color-error: #c0392b;
+  --color-positive: #2d8a56;
+  --color-positive-bg: #e8f5ec;
   --color-neutral-bg: #f3f4f6;
 
-  /* 페이지별 액센트 */
-  --color-dashboard: #6366f1;
-  --color-dashboard-light: #e0e7ff;
-  --color-places: #8b5cf6;
-  --color-places-light: #ede9fe;
-  --color-events: #ef6c00;
-  --color-events-light: #fff3e0;
-  --color-youth: #0891b2;
-  --color-youth-light: #cffafe;
-  --color-college: #2563eb;
-  --color-college-light: #dbeafe;
-  --color-jobs: #059669;
-  --color-jobs-light: #d1fae5;
-  --color-family: #e11d48;
-  --color-family-light: #ffe4e6;
+  /* 페이지별 액센트 (톤 다운) */
+  --color-dashboard: #5b5fc7;
+  --color-dashboard-light: #e8eaf6;
+  --color-places: #7c6bb5;
+  --color-places-light: #f0ecf8;
+  --color-events: #c76a20;
+  --color-events-light: #fef5eb;
+  --color-youth: #1a8a9e;
+  --color-youth-light: #e4f5f7;
+  --color-college: #3a6bc5;
+  --color-college-light: #e6eef8;
+  --color-jobs: #2a7d5f;
+  --color-jobs-light: #e5f2ec;
+  --color-family: #c0445a;
+  --color-family-light: #fbeced;
 
   /* 보더 */
   --color-border: #e5e7eb;
@@ -49,17 +49,17 @@
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(99, 102, 241, 0.1);
   --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-  /* 뱃지 색상 */
-  --color-badge-indigo-bg: #e0e7ff;
-  --color-badge-indigo-text: #3730a3;
-  --color-badge-green-bg: #d1fae5;
-  --color-badge-green-text: #065f46;
-  --color-badge-red-bg: #fee2e2;
-  --color-badge-red-text: #b91c1c;
-  --color-badge-blue-bg: #dbeafe;
-  --color-badge-blue-text: #1e40af;
-  --color-badge-pink-bg: #fce7f3;
-  --color-badge-pink-text: #be185d;
+  /* 뱃지 색상 (톤 다운) */
+  --color-badge-indigo-bg: #eaecf5;
+  --color-badge-indigo-text: #4a4690;
+  --color-badge-green-bg: #e5f2ec;
+  --color-badge-green-text: #1a6b4a;
+  --color-badge-red-bg: #fae8e8;
+  --color-badge-red-text: #a13030;
+  --color-badge-blue-bg: #e6eef8;
+  --color-badge-blue-text: #2e5598;
+  --color-badge-pink-bg: #f5e8ee;
+  --color-badge-pink-text: #9e3060;
 
   /* 타이포 */
   --font-size-page-title: 28px;

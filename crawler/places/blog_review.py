@@ -39,6 +39,20 @@ class BlogReviewCrawler(BaseCrawler):
         except (ValueError, TypeError):
             return None
 
+    def _extract_name_keywords(self, place_name: str) -> list[str]:
+        """장소명에서 핵심 키워드 추출 (지점명 제외)"""
+        # "푸고 천안두정점" → ["푸고"], "스타벅스 천안불당점" → ["스타벅스"]
+        branch_pattern = re.compile(r"(천안|두정|불당|신부|성정|쌍용|백석|아산|병천)\S*[점동로]$")
+        words = place_name.split()
+        keywords = [w for w in words if not branch_pattern.search(w)]
+        return keywords if keywords else [words[0]]
+
+    def _is_relevant_review(self, title: str, description: str, place_name: str) -> bool:
+        """리뷰가 해당 장소와 관련 있는지 판별"""
+        keywords = self._extract_name_keywords(place_name)
+        combined = (title + " " + description).lower()
+        return any(kw.lower() in combined for kw in keywords)
+
     def _fetch_reviews(self, place_name: str) -> list[dict[str, Any]]:
         """특정 장소의 블로그 리뷰 검색"""
         results = []
@@ -59,8 +73,12 @@ class BlogReviewCrawler(BaseCrawler):
                 break
 
             for item in items:
+                title = self._clean_html(item.get("title", ""))
+                description = self._clean_html(item.get("description", ""))
+                if not self._is_relevant_review(title, description, place_name):
+                    continue
                 results.append({
-                    "review_text": self._clean_html(item.get("description", "")),
+                    "review_text": description,
                     "review_url": item.get("link", ""),
                     "published_at": self._parse_date(item.get("postdate")),
                 })

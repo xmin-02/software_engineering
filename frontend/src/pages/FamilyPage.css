@@ -13,6 +13,39 @@
   letter-spacing: -0.5px;
 }
 
+/* 맛집 메인 섹션 */
+.places-section--main {
+  margin-bottom: 28px;
+}
+
+/* 부동산 접이식 섹션 */
+.estate-section {
+  margin-top: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-bg-card);
+  overflow: hidden;
+}
+
+.estate-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--color-bg-thead);
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast);
+}
+
+.estate-toggle:hover {
+  background: var(--color-bg-row-hover);
+}
+
 /* ===== 부동산 테이블 ===== */
 .estate-table {
   width: 100%;

@@ -103,18 +103,20 @@
 
 .apply-btn {
   display: inline-block;
-  padding: 6px 14px;
-  background: var(--color-jobs);
-  color: #fff;
-  border-radius: var(--radius-pill);
+  padding: 4px 0;
+  background: none;
+  color: var(--color-jobs);
+  border-radius: 0;
   font-size: var(--font-size-meta);
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: color 0.2s;
 }
 
 .apply-btn:hover {
-  background: #047857;
+  background: none;
+  color: #1a6b4a;
+  text-decoration: underline;
 }
 
 .pagination {
