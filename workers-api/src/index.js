@@ -200,7 +200,22 @@ app.get('/api/family/real-estate', async (c) => {
   if (deal_type) { where.push('deal_type=?'); params.push(deal_type); }
   const wc = where.length ? 'WHERE ' + where.join(' AND ') : '';
   const rows = await c.env.DB.prepare(`SELECT * FROM real_estate ${wc} ORDER BY deal_date DESC LIMIT 100`).bind(...params).all();
-  return c.json(rows.results);
+  const toInt = (s) => {
+    if (s == null) return null;
+    const n = parseInt(String(s).replace(/[^\d]/g, ''), 10);
+    return Number.isFinite(n) ? n : null;
+  };
+  return c.json(rows.results.map((r) => ({
+    id: r.id,
+    address: r.address || [r.district, r.dong, r.title].filter(Boolean).join(' ') || null,
+    property_type: r.property_type,
+    deal_type: r.deal_type,
+    price: r.deal_type === '매매' ? toInt(r.price) : toInt(r.deposit),
+    monthly_rent: toInt(r.monthly_rent),
+    area: r.area_sqm != null ? Math.round(r.area_sqm) : null,
+    floor: r.floor,
+    transaction_date: r.deal_date,
+  })));
 });
 
 export default app;
