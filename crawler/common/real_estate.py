@@ -9,8 +9,8 @@ from backend.config import settings
 from backend.models.content import RealEstate
 from crawler.base import BaseCrawler
 
-# 천안시 법정동코드: 서북구 44131, 동남구 44133
-CHEONAN_CODES = {"서북구": "44131", "동남구": "44133"}
+# 천안시 법정동코드: 동남구 44131, 서북구 44133
+CHEONAN_CODES = {"동남구": "44131", "서북구": "44133"}
 
 TRADE_API = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev"
 RENT_API = "https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent"

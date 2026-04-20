@@ -73,3 +73,7 @@ logs/
 
 # OS
 Thumbs.db
+
+
+# Local backups (D1 exports, etc.)
+.backups/
