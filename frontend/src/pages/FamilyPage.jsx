@@ -164,17 +164,23 @@ export default function FamilyPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {estates.map((item, i) => (
-                          <tr key={item.id ?? i}>
-                            <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
-                            <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
-                            <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                            <td className="family-price-cell" data-label="가격">{formatPrice(item.price)}</td>
-                            <td data-label="면적">{item.area ?? '-'}</td>
-                            <td data-label="층">{item.floor != null ? `${item.floor}층` : '-'}</td>
-                            <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
-                          </tr>
-                        ))}
+                        {estates.map((item, i) => {
+                          const priceText = item.deal_type === '월세' && item.monthly_rent != null
+                            ? `${formatPrice(item.price)} / ${item.monthly_rent}만원`
+                            : formatPrice(item.price);
+                          const floorText = item.floor && item.floor !== '-' ? `${item.floor}층` : '-';
+                          return (
+                            <tr key={item.id ?? i}>
+                              <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
+                              <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
+                              <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
+                              <td className="family-price-cell" data-label="가격">{priceText}</td>
+                              <td data-label="면적">{item.area ?? '-'}</td>
+                              <td data-label="층">{floorText}</td>
+                              <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   )

@@ -205,17 +205,25 @@ app.get('/api/family/real-estate', async (c) => {
     const n = parseInt(String(s).replace(/[^\d]/g, ''), 10);
     return Number.isFinite(n) ? n : null;
   };
-  return c.json(rows.results.map((r) => ({
-    id: r.id,
-    address: r.address || [r.district, r.dong, r.title].filter(Boolean).join(' ') || null,
-    property_type: r.property_type,
-    deal_type: r.deal_type,
-    price: r.deal_type === '매매' ? toInt(r.price) : toInt(r.deposit),
-    monthly_rent: toInt(r.monthly_rent),
-    area: r.area_sqm != null ? Math.round(r.area_sqm) : null,
-    floor: r.floor,
-    transaction_date: r.deal_date,
-  })));
+  const normFloor = (f) => {
+    const s = f == null ? '' : String(f).trim();
+    return (!s || s === '0' || s === 'None') ? '-' : s;
+  };
+  return c.json(rows.results.map((r) => {
+    const composed = [r.district, r.dong, r.title].filter(Boolean).join(' ');
+    const address = r.address || (composed ? `천안시 ${composed}` : null);
+    return {
+      id: r.id,
+      address,
+      property_type: r.property_type,
+      deal_type: r.deal_type,
+      price: r.deal_type === '매매' ? toInt(r.price) : toInt(r.deposit),
+      monthly_rent: toInt(r.monthly_rent),
+      area: r.area_sqm != null ? Math.round(r.area_sqm) : null,
+      floor: normFloor(r.floor),
+      transaction_date: r.deal_date,
+    };
+  }));
 });
 
 export default app;
