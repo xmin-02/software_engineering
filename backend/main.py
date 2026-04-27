@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -6,19 +7,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import settings
-from backend.scheduler import CrawlScheduler
 
 logger = logging.getLogger(__name__)
-scheduler = CrawlScheduler()
+
+# API 전용 배포(홈서버)에서는 스케줄러 비활성화
+_scheduler_disabled = os.environ.get("DISABLE_SCHEDULER") == "1"
+scheduler = None
+if not _scheduler_disabled:
+    from backend.scheduler import CrawlScheduler
+    scheduler = CrawlScheduler()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    scheduler.start()
-    logger.info("스케줄러 시작됨")
+    if scheduler:
+        scheduler.start()
+        logger.info("스케줄러 시작됨")
+    else:
+        logger.info("스케줄러 비활성화됨 (DISABLE_SCHEDULER=1)")
     yield
-    scheduler.stop()
-    logger.info("스케줄러 중지됨")
+    if scheduler:
+        scheduler.stop()
+        logger.info("스케줄러 중지됨")
 
 
 app = FastAPI(
