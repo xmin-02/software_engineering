@@ -225,8 +225,12 @@ def get_ranking(
     db: Session,
     category: str | None = None,
     limit: int = 10,
+    min_reviews: int = 2,
 ) -> list[dict]:
-    """감성 점수 기준 TOP N 장소"""
+    """감성 점수 기준 TOP N 장소.
+
+    min_reviews를 낮추면 신규 매장(리뷰 1건)도 노출 가능. 기본 2는 신뢰도 위주.
+    """
     query = (
         db.query(
             Place,
@@ -235,7 +239,7 @@ def get_ranking(
         )
         .join(PlaceReview, Place.id == PlaceReview.place_id)
         .group_by(Place.id)
-        .having(func.count(PlaceReview.id) >= 2)
+        .having(func.count(PlaceReview.id) >= min_reviews)
         .order_by(func.avg(PlaceReview.sentiment_score).desc())
     )
 

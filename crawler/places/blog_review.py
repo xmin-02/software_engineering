@@ -93,6 +93,11 @@ class BlogReviewCrawler(BaseCrawler):
         if not any(k in text_c for k in keywords):
             return False
 
+        # 2-1) 핵심 키워드가 2글자 이하면 일반 단어로 오인되기 쉬움 → 풀네임 매치
+        # (위 1단계)만 인정. 예: "푸고", "온", "본가" 같은 매장.
+        if max((len(k) for k in keywords), default=0) <= 2:
+            return False
+
         # 3) 지역 토큰 매치 필수 (이름·주소 어느 쪽에서든 추출됐을 때)
         regions = self._extract_region_tokens(place_name, address)
         if regions and not any(r in text_c for r in regions):

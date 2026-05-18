@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,8 @@ router = APIRouter(prefix="/api/events", tags=["Events"])
 def list_events(
     category: str | None = None,
     upcoming: bool = True,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
     query = db.query(Event)
@@ -25,4 +27,9 @@ def list_events(
         query = query.filter(
             or_(Event.end_date >= date.today(), Event.end_date.is_(None))
         )
-    return query.order_by(Event.start_date.asc().nulls_last()).limit(50).all()
+    return (
+        query.order_by(Event.start_date.asc().nulls_last())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )

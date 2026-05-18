@@ -12,6 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./backend/
 
+# 비루트 유저로 실행 (컨테이너 탈출 시 호스트 root 획득 차단)
+RUN groupadd --system app && useradd --system --gid app --no-create-home appuser \
+    && chown -R appuser:app /app
+USER appuser
+
 ENV PYTHONUNBUFFERED=1 \
     DISABLE_SCHEDULER=1
 

@@ -1,5 +1,7 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import Integer, func
+from sqlalchemy import Integer, func, or_
 from sqlalchemy.orm import Session
 
 from backend.deps import get_db
@@ -12,17 +14,32 @@ router = APIRouter(prefix="/api/college", tags=["College"])
 @router.get("/contests", response_model=list[ContestResponse])
 def list_contests(
     category: str | None = None,
+    upcoming: bool = True,
+    limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     query = db.query(Contest)
     if category:
         query = query.filter(Contest.category == category)
-    return query.order_by(Contest.deadline.asc()).all()
+    if upcoming:
+        query = query.filter(
+            or_(Contest.deadline >= date.today(), Contest.deadline.is_(None))
+        )
+    return query.order_by(Contest.deadline.asc().nullslast()).limit(limit).all()
 
 
 @router.get("/scholarships", response_model=list[ScholarshipResponse])
-def list_scholarships(db: Session = Depends(get_db)):
-    return db.query(Scholarship).order_by(Scholarship.deadline.asc()).all()
+def list_scholarships(
+    upcoming: bool = True,
+    limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
+):
+    query = db.query(Scholarship)
+    if upcoming:
+        query = query.filter(
+            or_(Scholarship.deadline >= date.today(), Scholarship.deadline.is_(None))
+        )
+    return query.order_by(Scholarship.deadline.asc().nullslast()).limit(limit).all()
 
 
 @router.get("/housing", response_model=list[RealEstateResponse])
@@ -38,4 +55,4 @@ def list_housing(
             func.regexp_replace(RealEstate.deposit, r"[^0-9]", "", "g"), ""
         ).cast(Integer)
         query = query.filter(numeric_deposit <= price_max)
-    return query.order_by(RealEstate.deal_date.desc()).limit(100).all()
+    return query.order_by(RealEstate.deal_date.desc().nullslast()).limit(100).all()

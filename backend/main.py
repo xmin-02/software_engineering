@@ -55,18 +55,36 @@ app.add_middleware(
 )
 
 
-# 전역 예외 핸들러
+# 전역 예외 핸들러 — 내부 메시지를 응답으로 노출하지 않음 (스택/SQL 누출 방지).
+# 디버깅용 상세는 서버 로그에 기록.
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal Server Error", "detail": str(exc)},
+        content={"error": "Internal Server Error"},
     )
 
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    """DB 연결까지 검증하는 헬스체크. 컨테이너 재시작 트리거에 사용 가능."""
+    from sqlalchemy import text
+
+    from backend.database import SessionLocal
+
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok", "db": "ok"}
+    except Exception:
+        logger.exception("Health check DB query failed")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "db": "down"},
+        )
+    finally:
+        db.close()
 
 
 # 라우터 등록

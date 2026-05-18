@@ -31,9 +31,12 @@ def list_places(
 def place_ranking(
     category: str | None = None,
     limit: int = Query(10, ge=1, le=50),
+    min_reviews: int = Query(2, ge=1, le=20),
     db: Session = Depends(get_db),
 ):
-    return place_service.get_ranking(db, category=category, limit=limit)
+    return place_service.get_ranking(
+        db, category=category, limit=limit, min_reviews=min_reviews
+    )
 
 
 @router.get("/{place_id}", response_model=PlaceDetail)

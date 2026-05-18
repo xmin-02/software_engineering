@@ -67,8 +67,8 @@ export default function FamilyPage() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    const d = dateStr.slice(5, 10);
-    return d.replace('-', '.');
+    // YYYY-MM-DD → YYYY.MM.DD (연도 노출, 2024 vs 2026 구분 가능)
+    return dateStr.slice(0, 10).replaceAll('-', '.');
   };
 
   return (
