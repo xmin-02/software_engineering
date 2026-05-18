@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   BarChart3, UtensilsCrossed, MapPin, GraduationCap,
   BookOpen, Briefcase, Users,
 } from 'lucide-react';
 import './Layout.css';
+
+const FONT_SCALE_KEY = 'cheonan_font_scale';
 
 const navItems = [
   { to: '/', label: '대시보드', Icon: BarChart3, accent: 'var(--color-dashboard)', end: true },
@@ -18,6 +20,18 @@ const navItems = [
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fontScale, setFontScale] = useState(() => {
+    if (typeof window === 'undefined') return 'normal';
+    return localStorage.getItem(FONT_SCALE_KEY) || 'normal';
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.fontScale = fontScale;
+    localStorage.setItem(FONT_SCALE_KEY, fontScale);
+  }, [fontScale]);
+
+  const toggleFontScale = () =>
+    setFontScale((v) => (v === 'lg' ? 'normal' : 'lg'));
 
   return (
     <div className="layout">
@@ -53,6 +67,17 @@ export default function Layout() {
           ))}
         </nav>
         <div className="sidebar-footer">
+          <button
+            type="button"
+            className="font-scale-toggle"
+            onClick={toggleFontScale}
+            aria-pressed={fontScale === 'lg'}
+            aria-label={
+              fontScale === 'lg' ? '글자 크기 원래대로 줄이기' : '글자 크기 크게 보기'
+            }
+          >
+            {fontScale === 'lg' ? '글자 작게' : '글자 크게'}
+          </button>
           <span className="sidebar-version">v1.0</span>
         </div>
       </aside>
