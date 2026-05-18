@@ -100,6 +100,7 @@ function PlaceDetailModal({ placeId, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const overlayRef = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     setLoading(true);
@@ -123,6 +124,35 @@ function PlaceDetailModal({ placeId, onClose }) {
     return () => { document.body.style.overflow = ''; };
   }, []);
 
+  // 포커스 트랩: 모달 내부로 Tab 순환을 가둠 + 첫 포커스 진입
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const selector =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusables = () =>
+      Array.from(panel.querySelectorAll(selector)).filter(
+        (el) => !el.hasAttribute('disabled')
+      );
+    focusables()[0]?.focus();
+    const onKey = (e) => {
+      if (e.key !== 'Tab') return;
+      const list = focusables();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        last.focus();
+        e.preventDefault();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        first.focus();
+        e.preventDefault();
+      }
+    };
+    panel.addEventListener('keydown', onKey);
+    return () => panel.removeEventListener('keydown', onKey);
+  }, [loading]);
+
   const place = data?.place;
   const reviews = data?.reviews ?? [];
 
@@ -133,7 +163,14 @@ function PlaceDetailModal({ placeId, onClose }) {
 
   return (
     <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
-      <div className="modal-panel" role="dialog" aria-modal="true">
+      <div
+        className="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="장소 상세"
+        ref={panelRef}
+        tabIndex={-1}
+      >
         {/* 닫기 버튼 */}
         <button className="modal-close-btn" onClick={onClose} aria-label="닫기">
           ✕
