@@ -267,8 +267,23 @@ function PlaceCard({ place, rank, onClick }) {
     ? `place-card ranked rank-${rank}`
     : 'place-card';
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
-    <div className={rankClass} onClick={onClick} style={{ cursor: 'pointer' }}>
+    <div
+      className={rankClass}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`${place.name} 상세 보기`}
+      style={{ cursor: 'pointer' }}
+    >
       {/* 랭킹 뱃지 */}
       {rank != null && rank <= 3 && (
         <div className="rank-badge-wrap">
