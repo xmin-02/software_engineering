@@ -104,3 +104,17 @@ class RealEstateResponse(BaseModel):
     longitude: float | None = None
 
     model_config = {"from_attributes": True}
+
+
+class FamilyRealEstateItem(BaseModel):
+    """가족 페이지용 부동산 매물 응답 (백엔드에서 가공된 형태)"""
+    id: int
+    address: str | None = None
+    property_type: str | None = None
+    deal_type: str | None = None
+    price: int | None = None
+    monthly_rent: int | None = None
+    display_price: str
+    area: int | None = None
+    floor: str
+    transaction_date: str | None = None

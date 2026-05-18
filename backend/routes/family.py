@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from backend.deps import get_db
 from backend.models.content import RealEstate
+from backend.schemas.content import FamilyRealEstateItem
 
 router = APIRouter(prefix="/api/family", tags=["Family"])
 
@@ -35,7 +36,7 @@ def _compose_address(r: RealEstate) -> str | None:
     return f"천안시 {' '.join(parts)}" if parts else None
 
 
-@router.get("/real-estate")
+@router.get("/real-estate", response_model=list[FamilyRealEstateItem])
 def list_real_estate(
     property_type: str | None = Query(None),
     deal_type: str | None = Query(None),

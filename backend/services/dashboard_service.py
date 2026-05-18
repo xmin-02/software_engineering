@@ -1,3 +1,4 @@
+import hashlib
 from datetime import date, timedelta
 
 from sqlalchemy import func, case, extract
@@ -6,6 +7,13 @@ from sqlalchemy.orm import Session
 from backend.models.post import Post
 from backend.models.analysis import Analysis
 from backend.models.content import WeeklySummary
+
+
+def _stable_topic_id(name: str) -> int:
+    """토픽명에 대해 호출 간에 안정적인 정수 id (32-bit)"""
+    if not name:
+        return 0
+    return int(hashlib.md5(name.encode("utf-8")).hexdigest()[:8], 16)
 
 
 def get_posts(
@@ -68,13 +76,12 @@ def get_sentiment_stats(
         func.count(Analysis.id).label("total"),
     )
 
+    # Post 컬럼이 필요한 모든 경우에 join 한 번만 적용
+    if source or date_from or date_to:
+        query = query.join(Post, Analysis.post_id == Post.id)
     if source:
-        query = query.join(Post, Analysis.post_id == Post.id).filter(
-            Post.source == source
-        )
+        query = query.filter(Post.source == source)
     if date_from:
-        if not source:
-            query = query.join(Post, Analysis.post_id == Post.id)
         query = query.filter(Post.published_at >= date_from)
     if date_to:
         query = query.filter(Post.published_at <= date_to)
@@ -178,9 +185,8 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
 
     rows = query.group_by(Analysis.topic).order_by(func.count(Analysis.id).desc()).all()
 
-    # 스팸 토픽 + 키워드 필터링
+    # 스팸 토픽 + 키워드 필터링. id는 호출 간 안정적인 토픽명 해시 사용.
     result = []
-    seq = 0
     for row in rows:
         if _is_spam_keyword(row.topic):
             continue
@@ -196,9 +202,8 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
             .limit(5)
             .all()
         )
-        seq += 1
         result.append({
-            "id": seq,
+            "id": _stable_topic_id(row.topic),
             "name": row.topic,
             "keywords": [k.kw for k in top_kws if not _is_spam_keyword(k.kw)],
             "post_count": row.post_count,
