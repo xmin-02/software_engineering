@@ -88,6 +88,16 @@
   --transition-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* 글자 크기 토글: 사이드바의 '글자 크게' 버튼이 html에 data-font-scale="lg"를 부여 */
+:root[data-font-scale="lg"] {
+  --font-size-page-title: 32px;
+  --font-size-section-title: 25px;
+  --font-size-body: 17px;
+  --font-size-meta: 15px;
+  --font-size-small: 14px;
+  --font-size-badge: 13px;
+}
+
 /* 모션 민감 사용자(전정 장애 등)는 OS 설정으로 애니메이션 최소화 */
 @media (prefers-reduced-motion: reduce) {
   *,
