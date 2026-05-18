@@ -101,11 +101,60 @@ def get_places(
             )
             query = query.filter(Place.id.in_(prefer_ids))
 
-    total = query.count()
-    places = query.offset(offset).limit(limit).all()
+    # 리뷰 통계 서브쿼리 — 정렬 키로 사용 (Place 1행 ↔ subquery 1행 보장)
+    stats_subq = (
+        db.query(
+            PlaceReview.place_id.label("pid"),
+            func.avg(PlaceReview.sentiment_score).label("avg_score"),
+            func.count(PlaceReview.id).label("review_count"),
+        )
+        .group_by(PlaceReview.place_id)
+        .subquery()
+    )
+    query = query.outerjoin(stats_subq, Place.id == stats_subq.c.pid)
 
-    # 리뷰 통계 일괄 조회
-    place_ids = [p.id for p in places]
+    # 정렬은 DB 단에서 수행. 페이지마다 결과가 달라지던 후처리 정렬 버그 제거.
+    if sort_by == "rating":
+        query = query.order_by(Place.rating_naver.desc().nullslast(), Place.id)
+    elif sort_by == "review_count":
+        query = query.order_by(stats_subq.c.review_count.desc().nullslast(), Place.id)
+    else:  # sentiment_score (기본)
+        query = query.order_by(stats_subq.c.avg_score.desc().nullslast(), Place.id)
+
+    def _stats_for(p: Place) -> dict | None:
+        # outerjoin 결과에서 직접 꺼내려면 entity가 다중이 되므로, 별도 매핑이 단순.
+        row = stats_map.get(p.id)
+        return row
+
+    # open_now는 business_hours JSON 파싱이 필요해 후처리. 페이지 결과 일관성을 위해
+    # 전체를 한 번에 로드하고 필터→슬라이스. 매장 수가 충분히 작다고 가정(<5k).
+    if open_now:
+        all_rows = query.all()
+        stats_rows = db.query(
+            stats_subq.c.pid, stats_subq.c.avg_score, stats_subq.c.review_count
+        ).all()
+        stats_map = {
+            r.pid: {
+                "avg_score": float(r.avg_score) if r.avg_score is not None else None,
+                "review_count": r.review_count,
+            }
+            for r in stats_rows
+        }
+        all_items = [_build_place_response(p, _stats_for(p)) for p in all_rows]
+        filtered = [i for i in all_items if i["is_open_now"]]
+        return filtered[offset:offset + limit], len(filtered)
+
+    # 일반 페이지네이션: DISTINCT count(Place.id)로 tag join 중복 방지.
+    # count 쿼리에는 ORDER BY가 따라가면 PG가 GROUP BY 검증에서 실패하므로 제거.
+    total = (
+        query.order_by(None)
+        .with_entities(func.count(func.distinct(Place.id)))
+        .scalar()
+        or 0
+    )
+    rows = query.offset(offset).limit(limit).all()
+
+    place_ids = [p.id for p in rows]
     stats_rows = (
         db.query(
             PlaceReview.place_id,
@@ -117,24 +166,14 @@ def get_places(
         .all()
     )
     stats_map = {
-        row.place_id: {"avg_score": float(row.avg_score) if row.avg_score else None, "review_count": row.review_count}
+        row.place_id: {
+            "avg_score": float(row.avg_score) if row.avg_score is not None else None,
+            "review_count": row.review_count,
+        }
         for row in stats_rows
     }
 
-    items = [_build_place_response(p, stats_map.get(p.id)) for p in places]
-
-    # open_now 필터 (후처리)
-    if open_now:
-        items = [i for i in items if i["is_open_now"]]
-
-    # 정렬
-    if sort_by == "sentiment_score":
-        items.sort(key=lambda x: x.get("avg_sentiment_score") or 0, reverse=True)
-    elif sort_by == "rating":
-        items.sort(key=lambda x: x.get("rating_naver") or 0, reverse=True)
-    elif sort_by == "review_count":
-        items.sort(key=lambda x: x.get("review_count") or 0, reverse=True)
-
+    items = [_build_place_response(p, _stats_for(p)) for p in rows]
     return items, total
 
 

@@ -38,10 +38,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
+# CORS — credentials 사용 시 와일드카드 금지(브라우저가 무음 차단).
+# CORS_ORIGINS 환경변수(콤마 구분)로 운영 도메인 명시. 기본값은 운영 프론트.
+_cors_env = os.environ.get("CORS_ORIGINS")
+_cors_origins = (
+    [o.strip() for o in _cors_env.split(",") if o.strip()]
+    if _cors_env
+    else ["https://cheonan.xmin.cloud"]
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

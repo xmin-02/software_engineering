@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import Integer, func
 from sqlalchemy.orm import Session
 
 from backend.deps import get_db
@@ -31,5 +32,10 @@ def list_housing(
 ):
     query = db.query(RealEstate).filter(RealEstate.deal_type.in_(["월세", "전세"]))
     if price_max:
-        query = query.filter(RealEstate.deposit <= str(price_max))
+        # deposit은 문자열 컬럼이라 문자열 비교 시 '9000' > '10000'이 되어 잘못된 결과가 나옴.
+        # 숫자만 추출해서 Integer로 캐스팅해 비교.
+        numeric_deposit = func.nullif(
+            func.regexp_replace(RealEstate.deposit, r"[^0-9]", "", "g"), ""
+        ).cast(Integer)
+        query = query.filter(numeric_deposit <= price_max)
     return query.order_by(RealEstate.deal_date.desc()).limit(100).all()
