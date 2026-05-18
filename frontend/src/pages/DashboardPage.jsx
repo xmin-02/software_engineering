@@ -58,10 +58,16 @@ function DashboardModal({ open, onClose, title, children }) {
 
   return (
     <div className="dash-modal-overlay" onClick={onClose}>
-      <div className="dash-modal-panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="dash-modal-panel"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         <div className="dash-modal-header">
           <h2 className="dash-modal-title">{title}</h2>
-          <button className="dash-modal-close" onClick={onClose}>
+          <button className="dash-modal-close" onClick={onClose} aria-label="닫기">
             <X size={20} />
           </button>
         </div>
@@ -94,6 +100,19 @@ export default function DashboardPage() {
   // 모달 상태
   const [activeModal, setActiveModal] = useState(null);
   const closeModal = useCallback(() => setActiveModal(null), []);
+
+  // 클릭 가능한 div 카드의 키보드 접근 속성 묶음
+  const openModalProps = useCallback((modal) => ({
+    onClick: () => setActiveModal(modal),
+    onKeyDown: (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setActiveModal(modal);
+      }
+    },
+    role: 'button',
+    tabIndex: 0,
+  }), []);
 
   // 우측 탭 상태
   const [rightTab, setRightTab] = useState('events');
@@ -254,7 +273,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="dash-card" onClick={() => setActiveModal('sentiment')}>
+        <div className="dash-card" {...openModalProps('sentiment')} aria-label="감성 분포 자세히 보기">
           <div className="dash-card-title">
             감성 분포
             <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
@@ -290,7 +309,7 @@ export default function DashboardPage() {
       {/* Row 3: 콘텐츠 */}
       <div className="content-grid">
         {/* 주간 토픽 Top 5 */}
-        <div className="dash-card" onClick={() => setActiveModal('topics')}>
+        <div className="dash-card" {...openModalProps('topics')} aria-label="주간 토픽 자세히 보기">
           <div className="dash-card-title">
             주간 토픽
             <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
@@ -315,7 +334,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 키워드 Top 10 */}
-        <div className="dash-card" onClick={() => setActiveModal('keywords')}>
+        <div className="dash-card" {...openModalProps('keywords')} aria-label="키워드 자세히 보기">
           <div className="dash-card-title">
             키워드
             <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
@@ -361,7 +380,7 @@ export default function DashboardPage() {
           </div>
 
           {rightTab === 'events' ? (
-            <div onClick={() => setActiveModal('events')}>
+            <div {...openModalProps('events')} aria-label="명소 행사 자세히 보기">
               <div className="dash-card-title" style={{ marginTop: 12 }}>
                 <span />
                 <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
@@ -391,7 +410,7 @@ export default function DashboardPage() {
               )}
             </div>
           ) : (
-            <div onClick={() => setActiveModal('posts')}>
+            <div {...openModalProps('posts')} aria-label="최근 게시글 자세히 보기">
               <div className="dash-card-title" style={{ marginTop: 12 }}>
                 <span />
                 <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
