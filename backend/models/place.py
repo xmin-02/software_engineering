@@ -39,7 +39,7 @@ class PlaceReview(Base):
     __tablename__ = "place_reviews"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), index=True)
     source: Mapped[str] = mapped_column(String(20), nullable=False)
     review_text: Mapped[str] = mapped_column(Text, nullable=False)
     review_url: Mapped[str | None] = mapped_column(Text)
@@ -56,7 +56,7 @@ class PlaceTag(Base):
     __tablename__ = "place_tags"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), index=True)
     tag: Mapped[str] = mapped_column(String(50), nullable=False)
     confidence: Mapped[float] = mapped_column(Float, default=0.0)
     source_count: Mapped[int] = mapped_column(default=1)
