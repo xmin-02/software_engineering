@@ -13,7 +13,7 @@ services:
     environment:
       - DISABLE_SCHEDULER=1
       - PYTHONUNBUFFERED=1
-      - CORS_ORIGINS=https://cheonan.xmin.cloud
+      - CORS_ORIGINS=https://cheonan.xmin.cloud,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3001/health').read()"]
       interval: 30s
