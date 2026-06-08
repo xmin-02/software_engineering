@@ -25,15 +25,26 @@ CREATE TABLE IF NOT EXISTS places (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   category TEXT,
+  sub_category TEXT,
   address TEXT,
+  phone TEXT,
   rating_naver REAL,
   rating_kakao REAL,
   latitude REAL,
   longitude REAL,
   business_hours TEXT,
+  last_order_time TEXT,
   has_parking INTEGER,
+  has_kids_facility INTEGER,
+  is_no_kids_zone INTEGER,
+  is_alcohol_only INTEGER DEFAULT 0,
   price_range TEXT,
-  collected_at TEXT DEFAULT (datetime('now'))
+  naver_place_id TEXT,
+  kakao_place_id TEXT,
+  image_url TEXT,
+  image_source TEXT,
+  collected_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS place_reviews (
@@ -65,7 +76,10 @@ CREATE TABLE IF NOT EXISTS events (
   end_date TEXT,
   url TEXT,
   source TEXT,
-  category TEXT
+  category TEXT,
+  image_url TEXT,
+  image_source TEXT,
+  collected_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS university_notices (
@@ -107,7 +121,10 @@ CREATE TABLE IF NOT EXISTS real_estate (
   floor TEXT,
   build_year TEXT,
   deal_date TEXT,
-  source_id TEXT UNIQUE
+  latitude REAL,
+  longitude REAL,
+  source_id TEXT UNIQUE,
+  collected_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS weekly_summaries (
