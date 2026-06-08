@@ -543,8 +543,8 @@ export default function PlacesPage() {
     <div className="places-page">
       {/* 헤더 */}
       <div className="page-header">
-        <h1 className="places-page-title">맛집 · 카페</h1>
-        <span className="page-subtitle">천안시 음식점 감성 분석</span>
+        <h1 className="places-page-title">맛집 & 카페</h1>
+        <span className="page-subtitle">천안시 시민들이 추천하는 로컬 큐레이션</span>
       </div>
 
       {/* 탭 바 */}
@@ -580,12 +580,12 @@ export default function PlacesPage() {
             필터
           </span>
           <select value={category} onChange={handleCategoryChange} className="filter-select">
-            <option value="">전체 카테고리</option>
+            <option value="">전체</option>
             <option value="한식">한식</option>
-            <option value="중식">중식</option>
-            <option value="일식">일식</option>
+            <option value="중식">일식/중식</option>
+            <option value="일식">일식/중식</option>
             <option value="양식">양식</option>
-            <option value="카페">카페</option>
+            <option value="카페">카페/디저트</option>
             <option value="술집">술집</option>
           </select>
           <button

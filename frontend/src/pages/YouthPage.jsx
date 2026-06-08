@@ -119,7 +119,7 @@ export default function YouthPage() {
                           : n.title
                         }
                       </td>
-                      <td data-label="날짜" className="youth-date-cell">{formatDate(n.date ?? n.created_at)}</td>
+                      <td data-label="날짜" className="youth-date-cell">{formatDate(n.published_at ?? n.date ?? n.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>

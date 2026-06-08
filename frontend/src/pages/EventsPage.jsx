@@ -97,7 +97,7 @@ function EventCard({ event, festival = false, index = 0 }) {
     <div className={`event-card${festival ? ' festival' : ''}`}>
       <div className="event-image-wrap">
         <img
-          src={EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]}
+          src={event.image_url ?? EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]}
           alt=""
           className="event-image"
           loading="lazy"

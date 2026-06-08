@@ -1,52 +1,219 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  Accessibility, Pill, Globe2, School, Home, BellRing,
-  MapPin, Phone, CalendarDays, ExternalLink,
+  Accessibility,
+  BellRing,
+  CalendarDays,
+  ExternalLink,
+  Globe2,
+  Home,
+  MapPin,
+  Phone,
+  Pill,
+  School,
 } from 'lucide-react';
 import api from '../api/client';
 import './InfoPage.css';
 
-const PAGE_CONTENT = {
+const FIGMA_PAGES = {
   '/accessibility': {
     section: 'accessibility',
     title: '무장애 정보',
-    eyebrow: 'Barrier-free',
-    description: '휠체어 접근, 엘리베이터, 장애인 화장실, 저상버스 주변 시설을 한곳에서 확인합니다.',
+    eyebrow: '실시간 업데이트',
+    description:
+      '천안시는 모든 시민이 편리하게 이용할 수 있는 무장애 환경을 구축하고 있습니다. 휠체어 접근 가능 시설, 장애인 화장실, 저상버스, 콜택시 정보를 확인하세요.',
     Icon: Accessibility,
     accent: '#2563eb',
+    chips: ['전체', '휠체어 접근', '장애인 화장실', '저상버스', '콜택시'],
+    countLabel: '총 12개의 시설',
+    cards: [
+      {
+        title: '천안시청',
+        subtitle: '공공기관',
+        status: '✓ 이용가능',
+        address: '천안시 서북구 번영로 156',
+        description: '주출입구 경사로, 엘리베이터, 장애인 주차구역 10면 완비',
+        phone: '041-521-2000',
+      },
+      {
+        title: '신세계백화점 천안점',
+        subtitle: '쇼핑센터',
+        status: '✓ 이용가능',
+        address: '천안시 서북구 불당21로 93',
+        description: '모든 층 경사로 및 엘리베이터 접근 가능, 장애인 주차 20면',
+        phone: '041-621-1234',
+      },
+      {
+        title: '천안종합터미널',
+        subtitle: '교통시설',
+        status: '✓ 이용가능',
+        address: '천안시 동남구 터미널9길 36',
+        description: '터미널 전체 경사로, 휠체어 리프트, 장애인 전용 대기실',
+        phone: '041-551-1814',
+      },
+      {
+        title: '천안역',
+        subtitle: '교통시설',
+        status: '✓ 이용가능',
+        address: '천안시 동남구 만남로 23',
+        description: '1층 대합실 장애인 화장실, 전동휠체어 충전 가능',
+        phone: '041-570-2114',
+      },
+    ],
   },
   '/high-school': {
     section: 'high-school',
     title: '고등학생',
-    eyebrow: 'High school',
-    description: '천안 지역 고등학생을 위한 진학, 공모전, 봉사활동, 청소년 공간 정보를 모읍니다.',
+    eyebrow: '실시간 업데이트',
+    description:
+      '천안시 주요 학원가 정보와 스터디카페, 청소년수련관, 입시설명회 일정을 확인하세요. 체계적인 학습 계획으로 목표를 달성하세요!',
     Icon: School,
     accent: '#7c3aed',
+    chips: ['신부동 학원가', '두정동 학원가', '불당동 학원가', '스터디카페', '청소년수련관', '입시설명회'],
+    special: { label: '2027 수능까지', value: 'D-544' },
+    countLabel: '총 4개의 정보',
+    mapTitle: '신부동 학원가 지도',
+    mapMeta: '총 4개 학원',
+    cards: [
+      {
+        title: '메가스터디 천안신부점',
+        distance: '0.3km',
+        status: '운영중',
+        address: '충남 천안시 동남구 신부동 432-5',
+        hours: '평일 14:00-22:00, 주말 09:00-22:00',
+        phone: '041-555-1001',
+        description: '수학, 영어, 국어, 과학',
+      },
+      {
+        title: '대성학원 신부캠퍼스',
+        distance: '0.5km',
+        status: '운영중',
+        address: '충남 천안시 동남구 신부동 512-8',
+        hours: '평일 13:00-22:00, 토 09:00-18:00',
+        phone: '041-555-2002',
+        description: '종합반, 수학특강',
+      },
+      {
+        title: '이투스 247 천안신부',
+        distance: '0.4km',
+        status: '운영중',
+        address: '충남 천안시 동남구 신부동 398-12',
+        hours: '평일 15:00-23:00, 주말 10:00-20:00',
+        phone: '041-555-3003',
+        description: '영어, 수학, 논술',
+      },
+      {
+        title: '시대인재 천안점',
+        distance: '0.6km',
+        status: '운영중',
+        address: '충남 천안시 동남구 신부동 456-3',
+        hours: '평일 14:00-22:00',
+        phone: '041-555-4004',
+        description: '과목별 심화반',
+      },
+    ],
   },
   '/medical': {
     section: 'medical',
-    title: '의료/약국',
-    eyebrow: 'Medical',
-    description: '야간/휴일 진료, 약국, 응급실, 소아과 등 생활 의료 정보를 빠르게 찾습니다.',
+    title: '의료 약국',
+    eyebrow: '실시간 업데이트',
+    description:
+      '천안시는 모든 시민이 편리하게 이용할 수 있는 의료 서비스를 제공하고 있습니다. 가까운 병원, 의원, 약국 정보를 확인하세요.',
     Icon: Pill,
     accent: '#059669',
+    chips: ['야간/응급진료', '분만가능 산부인과', '보건소 검진', '정형외과', '내과', '한의원'],
+    countLabel: '총 3개의 시설',
+    cards: [
+      {
+        title: '단국대학교병원 응급실',
+        distance: '1.2km',
+        status: '✓ 운영중',
+        address: '충남 천안시 동남구 단대로 119',
+        hours: '24시간 운영',
+        phone: '041-550-6119',
+      },
+      {
+        title: '천안의료원 응급의료센터',
+        distance: '2.5km',
+        status: '✓ 운영중',
+        address: '충남 천안시 동남구 천안대로 795',
+        hours: '24시간 운영',
+        phone: '041-570-7119',
+      },
+      {
+        title: '순천향대학교 천안병원',
+        distance: '3.1km',
+        status: '✓ 운영중',
+        address: '충남 천안시 동남구 순천향6길 31',
+        hours: '24시간 응급실 운영',
+        phone: '041-570-5119',
+      },
+    ],
   },
   '/foreign-life': {
     section: 'foreign-life',
     title: '외국인 생활',
-    eyebrow: 'Foreign life',
-    description: '천안 거주 외국인을 위한 행정, 의료, 언어, 생활 편의 정보를 다국어 기준으로 정리합니다.',
+    eyebrow: '실시간 업데이트',
+    description:
+      '천안시는 외국인 주민을 위한 다양한 지원 서비스를 제공합니다. 출입국, 의료, 생활, 긴급상담 등 필요한 정보를 확인하세요.',
     Icon: Globe2,
     accent: '#0f766e',
+    chips: ['출입국·외국인청', '외국인노동자지원', '다국어 의료', '할랄/베트남 식료품', '모스크', '1345 긴급상담'],
+    countLabel: '총 2개의 시설',
+    cards: [
+      {
+        title: '천안출입국·외국인청',
+        distance: '2.3km',
+        status: '운영중',
+        address: '충남 천안시 서북구 불당22대로 114',
+        hours: '평일 09:00-18:00',
+        phone: '041-564-6700',
+        description: '영어, 중국어, 베트남어',
+      },
+      {
+        title: '천안시 외국인주민지원센터',
+        distance: '1.5km',
+        status: '운영중',
+        address: '충남 천안시 동남구 천안대로 400',
+        hours: '평일 09:00-18:00',
+        phone: '041-521-2961',
+        description: '영어, 중국어, 베트남어, 타갈로그어',
+      },
+    ],
   },
   '/single-household': {
     section: 'single-household',
     title: '1인 가구',
-    eyebrow: 'Single household',
-    description: '혼자 사는 시민을 위한 주거, 안전, 식사, 지원 정책 정보를 맞춤형으로 제공합니다.',
+    eyebrow: '실시간 업데이트',
+    description: '천안에서 혼자 살아도 든든하게. 주거·식사·생활·취미를 한 곳에서 확인하세요.',
     Icon: Home,
     accent: '#e11d48',
+    chips: ['주거', '혼밥', '안전', '생활지원', '취미', '정책'],
+    special: { label: '1인가구 추천', value: 'NEW' },
+    countLabel: '총 128건',
+    cards: [
+      {
+        title: '원룸/오피스텔 월세',
+        subtitle: '주거',
+        status: '최신 거래',
+        address: '천안 시내 전 지역 최신 주거 후보',
+        description: '월세·전세 조건과 접근성을 함께 확인하세요.',
+      },
+      {
+        title: '혼밥/카페 추천',
+        subtitle: '식사',
+        status: '추천',
+        address: '카페·분식·한식 위주',
+        description: '혼자 방문하기 좋은 조용한 장소를 우선 표시합니다.',
+      },
+      {
+        title: '안심 귀가/위급 상황',
+        subtitle: '안전',
+        status: '체크',
+        address: '112 / 119 / 천안시 생활 안전 정보',
+        description: '위급 상황과 생활 안전 정보를 빠르게 확인합니다.',
+      },
+    ],
   },
 };
 
@@ -54,7 +221,7 @@ const STATUS_FALLBACK = '데이터 확인 중';
 
 export default function InfoPage() {
   const location = useLocation();
-  const content = PAGE_CONTENT[location.pathname] ?? PAGE_CONTENT['/accessibility'];
+  const content = FIGMA_PAGES[location.pathname] ?? FIGMA_PAGES['/accessibility'];
   const Icon = content.Icon;
   const [data, setData] = useState(null);
   const [loadedSection, setLoadedSection] = useState(null);
@@ -78,27 +245,41 @@ export default function InfoPage() {
   const loading = loadedSection !== content.section && !error;
   const currentData = loadedSection === content.section ? data : null;
   const stats = useMemo(() => currentData?.stats ?? [], [currentData]);
-  const sections = useMemo(() => currentData?.sections ?? [], [currentData]);
   const sourceLinks = useMemo(() => currentData?.source_links ?? [], [currentData]);
 
   return (
-    <div className="info-page" style={{ '--info-accent': content.accent }}>
-      <section className="info-hero">
+    <div className="info-page figma-info-page" style={{ '--info-accent': content.accent }}>
+      <section className="info-figma-topline">
+        <h1>{content.title}</h1>
+        <span className="info-live-pill">
+          <BellRing size={14} /> {loading ? STATUS_FALLBACK : content.eyebrow}
+        </span>
+      </section>
+
+      <section className="info-search-row" aria-label="검색 및 상태">
+        <div className="info-search-box">전체 검색 (시설명, 주소, 전화번호...)</div>
+        <span>KO</span>
+        <span>A</span>
+      </section>
+
+      <section className="info-figma-hero">
         <div className="info-hero-icon"><Icon size={30} /></div>
         <div>
-          <p className="info-eyebrow">{content.eyebrow}</p>
-          <h1 className="info-page-title">{content.title}</h1>
-          <p className="info-description">{content.description}</p>
+          <h2>천안시 {content.title.endsWith('정보') ? content.title : `${content.title} 정보`} 안내</h2>
+          <p>{content.description}</p>
+          {content.special && (
+            <div className="info-special-pill">
+              <span>{content.special.label}</span>
+              <strong>{content.special.value}</strong>
+            </div>
+          )}
         </div>
-        <span className="info-live-pill">
-          <BellRing size={14} /> {loading ? STATUS_FALLBACK : currentData?.status ?? '데이터 연동'}
-        </span>
       </section>
 
       {error && <p className="status-msg error" role="alert">{error}</p>}
 
       {stats.length > 0 && (
-        <div className="info-stat-grid" aria-label="연동 데이터 현황">
+        <div className="info-stat-grid compact" aria-label="연동 데이터 현황">
           {stats.map((stat) => (
             <article key={stat.label} className="info-stat-card">
               <span>{stat.label}</span>
@@ -108,21 +289,35 @@ export default function InfoPage() {
         </div>
       )}
 
-      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      <nav className="info-chip-row" aria-label="카테고리">
+        {content.chips.map((chip, index) => (
+          <button key={chip} type="button" className={index === 0 ? 'active' : ''}>{chip}</button>
+        ))}
+      </nav>
 
-      {!loading && !error && sections.map((section) => (
-        <section key={section.title} className="info-data-section">
-          <div className="info-section-head">
-            <h2>{section.title}</h2>
-            {section.caption && <p>{section.caption}</p>}
+      {content.mapTitle && (
+        <section className="info-map-panel">
+          <div>
+            <h2>{content.mapTitle}</h2>
+            <p>{content.mapMeta}</p>
           </div>
-          <div className="info-card-grid">
-            {(section.items ?? []).map((item, index) => (
-              <InfoCard key={`${section.title}-${item.id ?? item.title ?? index}`} item={item} />
-            ))}
+          <div className="info-map-placeholder">
+            <strong>N</strong>
+            <span>학원 위치 | 마커에 마우스를 올려 학원명을 확인하세요</span>
           </div>
         </section>
-      ))}
+      )}
+
+      <section className="info-facility-section">
+        <div className="info-section-head figma">
+          <h2>{content.countLabel}</h2>
+        </div>
+        <div className="info-facility-list">
+          {content.cards.map((item, index) => (
+            <FacilityCard key={`${item.title}-${index}`} item={item} />
+          ))}
+        </div>
+      </section>
 
       {sourceLinks.length > 0 && (
         <section className="info-panel" aria-label="공식 확인 링크">
@@ -135,42 +330,33 @@ export default function InfoPage() {
           ))}
         </section>
       )}
-
-      <section className="info-panel">
-        <div className="info-panel-row">
-          <MapPin size={18} />
-          <span>주변 시설</span>
-          <strong>천안시 생활권 데이터 기준</strong>
-        </div>
-        <div className="info-panel-row">
-          <Phone size={18} />
-          <span>문의</span>
-          <strong>기관별 공식 링크 및 전화 확인 권장</strong>
-        </div>
-        <div className="info-panel-row">
-          <CalendarDays size={18} />
-          <span>업데이트</span>
-          <strong>백엔드 API 연동 완료</strong>
-        </div>
-      </section>
     </div>
   );
 }
 
-function InfoCard({ item }) {
-  const body = (
-    <article className="info-card data-card">
-      <span className="info-card-kicker">{item.subtitle ?? item.meta ?? 'Cheonan'}</span>
-      <h2>{item.title}</h2>
-      {item.description && <p>{item.description}</p>}
-      {item.meta && <strong className="info-card-meta">{item.meta}</strong>}
-    </article>
-  );
-
-  if (!item.url) return body;
+function FacilityCard({ item }) {
   return (
-    <a className="info-card-link" href={item.url} target="_blank" rel="noreferrer">
-      {body}
-    </a>
+    <article className="info-facility-card">
+      <div className="facility-head">
+        <div>
+          <h2>{item.title}</h2>
+          {(item.subtitle || item.distance) && (
+            <p>{[item.subtitle, item.distance].filter(Boolean).join(' · ')}</p>
+          )}
+        </div>
+        {item.status && <span>{item.status}</span>}
+      </div>
+      {item.address && (
+        <p className="facility-row"><MapPin size={16} /> {item.address}</p>
+      )}
+      {item.hours && (
+        <p className="facility-row"><CalendarDays size={16} /> {item.hours}</p>
+      )}
+      {item.phone && (
+        <p className="facility-row"><Phone size={16} /> {item.phone}</p>
+      )}
+      {item.description && <p className="facility-desc">{item.description}</p>}
+      <button type="button" className="facility-route-btn">길찾기</button>
+    </article>
   );
 }
