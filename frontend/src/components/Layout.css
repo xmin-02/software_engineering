@@ -25,7 +25,7 @@
 }
 
 .sidebar-header {
-  padding: 92px 18px 30px;
+  padding: 40px 18px 26px;
 }
 
 .sidebar-brand-card {
@@ -38,8 +38,8 @@
   position: absolute;
   left: -18px;
   right: -10px;
-  top: -24px;
-  height: 130px;
+  top: -14px;
+  height: 154px;
   border-radius: 0 32px 32px 0;
   background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
   border-left: 3px solid rgba(112, 229, 138, 0.72);
@@ -85,12 +85,13 @@
 
 .sidebar-subtitle {
   margin-top: 12px;
-  font-size: 11px;
+  font-size: 9px;
   color: rgba(112, 229, 138, 0.92);
   font-weight: 760;
   line-height: 1.55;
   letter-spacing: -0.2px;
   text-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  white-space: nowrap;
 }
 
 .sidebar-nav {

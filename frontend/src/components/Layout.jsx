@@ -145,7 +145,7 @@ export default function Layout() {
               </div>
               <div className="sidebar-brand-copy">
                 <h2>천안 인사이트</h2>
-                <p className="sidebar-subtitle">시민의 생각이 모여,<br />더 나은 천안으로</p>
+                <p className="sidebar-subtitle">시민의 생각이 모여, 더 나은 천안으로</p>
               </div>
             </div>
           </div>
