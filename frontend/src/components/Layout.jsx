@@ -7,7 +7,7 @@ import {
   Check, ChevronDown, X, ExternalLink,
 } from 'lucide-react';
 import './Layout.css';
-import logoSymbol from '../assets/brand/cheonan-insight-symbol.png';
+import sidebarLogo from '../assets/brand/cheonan-insight-sidebar.png';
 
 const FONT_SCALE_KEY = 'cheonan_font_scale';
 const LANGUAGE_KEY = 'cheonan_language';
@@ -139,15 +139,7 @@ export default function Layout() {
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand-card">
-            <div className="sidebar-brand-row">
-              <div className="sidebar-mini-mark" aria-hidden="true">
-                <img src={logoSymbol} alt="" draggable="false" />
-              </div>
-              <div className="sidebar-brand-copy">
-                <h2>천안 인사이트</h2>
-                <p className="sidebar-subtitle">시민의 생각이 모여, 더 나은 천안으로</p>
-              </div>
-            </div>
+            <img className="sidebar-brand-logo" src={sidebarLogo} alt="천안 인사이트 - 시민의 생각이 모여, 더 나은 천안으로" draggable="false" />
           </div>
         </div>
         <nav className="sidebar-nav" aria-label="메인 네비게이션">
