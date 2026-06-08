@@ -1,44 +1,42 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
 import './CollegePage.css';
 import collegePlaceImage1 from '../assets/figma/college-place-1.jpg';
 import collegePlaceImage2 from '../assets/figma/college-place-2.jpg';
 import collegePlaceImage3 from '../assets/figma/college-place-3.jpg';
 
-const TABS = [
-  { key: 'contests', label: '공모전' },
-  { key: 'scholarships', label: '장학금' },
-  { key: 'housing', label: '주거' },
-];
+const UNIVERSITIES = ['단국대', '호서대', '백석대', '상명대'];
+const CATEGORIES = ['학사', '취업', '장학', '행사', '공모전'];
 const COLLEGE_PLACE_IMAGES = [collegePlaceImage1, collegePlaceImage2, collegePlaceImage3];
 
 export default function CollegePage() {
-  const [activeTab, setActiveTab] = useState('contests');
-  const [data, setData] = useState([]);
+  const [notices, setNotices] = useState([]);
+  const [university, setUniversity] = useState('');
+  const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // 맛집 추천 상태
   const [places, setPlaces] = useState([]);
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchNotices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(`/api/college/${activeTab}`);
-      setData(Array.isArray(res.data) ? res.data : res.data.items ?? []);
+      const params = {};
+      if (university) params.university = university;
+      if (category) params.category = category;
+      const res = await api.get('/api/youth/university-notices', { params });
+      setNotices(Array.isArray(res.data) ? res.data : res.data.items ?? []);
     } catch {
       setError('데이터를 불러올 수 없습니다');
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [university, category]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchNotices(); }, [fetchNotices]);
 
-  // 대학생 추천 맛집 로드
   useEffect(() => {
     const fetchPlaces = async () => {
       setPlacesLoading(true);
@@ -55,133 +53,80 @@ export default function CollegePage() {
     fetchPlaces();
   }, []);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    const d = dateStr.slice(5, 10);
-    return d.replace('-', '.');
-  };
-
-  const formatPrice = (item) => {
-    if (!item) return '-';
-    if (item.deal_type === '월세') {
-      const deposit = item.deposit ?? item.price;
-      const rent = item.monthly_rent;
-      if (deposit && rent) return `보증금 ${deposit}만원 / 월 ${rent}만원`;
-      if (deposit) return `보증금 ${deposit}만원`;
-    }
-    if (item.deal_type === '전세') {
-      const deposit = item.deposit ?? item.price;
-      return deposit ? `${deposit}만원` : '-';
-    }
-    if (item.price == null) return '-';
-    return `${item.price}만원`;
-  };
-
-  const formatAddress = (item) => {
-    if (item.address) return item.address;
-    return [item.district, item.dong, item.title].filter(Boolean).join(' ') || '-';
-  };
+  const visibleNotices = useMemo(() => notices.slice(0, 8), [notices]);
+  const formatDate = (dateStr) => (dateStr ? dateStr.slice(0, 10).replaceAll('-', '.') : '-');
 
   return (
-    <div className="college-page">
-      <h1 className="college-page-title">대학생</h1>
+    <div className="college-page college-figma-page">
+      <div className="college-page-head">
+        <div>
+          <p>대학 공지</p>
+          <h1>대학교</h1>
+        </div>
+        <span>실시간 운영 중</span>
+      </div>
 
-      <div className="tab-bar" role="tablist">
-        {TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            className={`tab-btn${activeTab === key ? ' active' : ''}`}
-            role="tab"
-            aria-selected={activeTab === key}
-            onClick={() => setActiveTab(key)}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="filter-bar college-filter-bar">
+        <label className="sr-only" htmlFor="college-univ-filter">대학 필터</label>
+        <select id="college-univ-filter" value={university} onChange={(e) => setUniversity(e.target.value)} className="filter-select">
+          <option value="">전체 대학</option>
+          {UNIVERSITIES.map((u) => <option key={u} value={u}>{u}</option>)}
+        </select>
+        <label className="sr-only" htmlFor="college-category-filter">카테고리 필터</label>
+        <select id="college-category-filter" value={category} onChange={(e) => setCategory(e.target.value)} className="filter-select">
+          <option value="">전체 카테고리</option>
+          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <span className="college-sort-pill">최신순</span>
       </div>
 
       {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
       {error && <p className="status-msg error" role="alert">{error}</p>}
 
-      {!loading && !error && data.length === 0 && (
-        <p className="status-msg">아직 데이터가 없습니다</p>
-      )}
-
-      {/* 공모전 */}
-      {!loading && !error && activeTab === 'contests' && data.length > 0 && (
-        <div className="card-grid">
-          {data.map((item, i) => (
-            <div key={item.id ?? i} className="college-card">
-              <span className="card-badge contest">{item.category ?? '공모전'}</span>
-              <h3 className="card-title">{item.title}</h3>
-              <p className="card-meta">주최: {item.organizer ?? '-'}</p>
-              <p className="card-meta deadline">마감: {formatDate(item.deadline)}</p>
-              {item.url && (
-                <a href={item.url} target="_blank" rel="noopener noreferrer" className="card-link">자세히 →</a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 장학금 */}
-      {!loading && !error && activeTab === 'scholarships' && data.length > 0 && (
-        <div className="card-grid">
-          {data.map((item, i) => (
-            <div key={item.id ?? i} className="college-card">
-              <span className="card-badge scholarship">장학금</span>
-              <h3 className="card-title">{item.title}</h3>
-              <p className="card-meta">기관: {item.organization ?? '-'}</p>
-              <p className="card-meta">금액: {item.amount ?? '-'}</p>
-              <p className="card-meta">자격: {item.eligibility ?? '-'}</p>
-              <p className="card-meta deadline">마감: {formatDate(item.deadline)}</p>
-              {item.url && (
-                <a href={item.url} target="_blank" rel="noopener noreferrer" className="card-link">자세히 →</a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 주거 */}
-      {!loading && !error && activeTab === 'housing' && data.length > 0 && (
-        <div className="table-wrapper">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>주소</th>
-                <th>거래유형</th>
-                <th>가격</th>
-                <th>면적(㎡)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item, i) => (
-                <tr key={item.id ?? i}>
-                  <td>{formatAddress(item)}</td>
-                  <td><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                  <td>{formatPrice(item)}</td>
-                  <td>{item.area_sqm ?? '-'}</td>
+      {!loading && !error && (
+        <div className="table-wrapper college-notice-panel">
+          {visibleNotices.length === 0 ? <p className="status-msg">아직 데이터가 없습니다</p> : (
+            <table className="notice-table college-notice-table">
+              <caption className="sr-only">대학교 공지 목록</caption>
+              <thead>
+                <tr>
+                  <th>대학교</th>
+                  <th>공지 제목</th>
+                  <th>카테고리</th>
+                  <th>등록일</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibleNotices.map((notice, index) => (
+                  <tr key={notice.id ?? index}>
+                    <td data-label="대학교"><span className="univ-badge">{notice.university ?? '-'}</span></td>
+                    <td data-label="공지 제목">
+                      {notice.url ? <a href={notice.url} target="_blank" rel="noreferrer" className="notice-link">{notice.title}</a> : notice.title}
+                    </td>
+                    <td data-label="카테고리">{notice.category ?? '-'}</td>
+                    <td data-label="등록일" className="youth-date-cell">{formatDate(notice.published_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
-      {/* 대학생 추천 맛집 섹션 */}
-      <div className="places-section">
-        <h2 className="places-title">대학생 추천 맛집</h2>
-        <p className="places-desc">카공, 가성비, 데이트 — 대학생 취향 맞춤 천안 맛집</p>
+      <section className="places-section college-recommend-section">
+        <div className="college-section-title-row">
+          <div>
+            <h2 className="places-title">대학교 추천 맛집</h2>
+            <p className="places-desc">대학생들이 가장 많이 찾는 로컬 플레이스</p>
+          </div>
+          <button type="button">전체 보기</button>
+        </div>
         {placesLoading && <p className="status-msg">맛집 정보를 불러오는 중...</p>}
         {placesError && <p className="status-msg error">{placesError}</p>}
-        {!placesLoading && !placesError && places.length === 0 && (
-          <p className="status-msg">등록된 맛집이 없습니다</p>
-        )}
         {!placesLoading && !placesError && places.length > 0 && (
           <div className="places-grid">
-            {places.map((place, i) => (
-              <div key={place.id ?? i} className="place-card college-place-card">
+            {places.slice(0, 3).map((place, i) => (
+              <article key={place.id ?? i} className="place-card college-place-card">
                 <img
                   className="college-place-image"
                   src={place.image_url ?? COLLEGE_PLACE_IMAGES[i % COLLEGE_PLACE_IMAGES.length]}
@@ -189,25 +134,15 @@ export default function CollegePage() {
                   loading="lazy"
                   onError={(e) => { e.currentTarget.src = COLLEGE_PLACE_IMAGES[i % COLLEGE_PLACE_IMAGES.length]; }}
                 />
+                <div className="college-place-rating">{place.rating ?? place.avg_rating ?? '4.8'}</div>
+                <span className="place-category">{place.category ?? '로컬'}</span>
                 <h3 className="place-name">{place.name}</h3>
-                {place.tags && place.tags.length > 0 && (
-                  <div className="college-place-tags">
-                    {place.tags.map((tag, ti) => (
-                      <span key={ti} className="college-place-tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-                {place.category && (
-                  <span className="place-category">{place.category}</span>
-                )}
-                {place.address && (
-                  <p className="place-address">{place.address}</p>
-                )}
-              </div>
+                <p className="place-address">{place.address ?? '천안시'}</p>
+              </article>
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

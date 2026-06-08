@@ -259,3 +259,97 @@
   margin-left: 16px;
   margin-right: 16px;
 }
+
+/* ===== Figma university notice page ===== */
+.college-figma-page {
+  padding: 32px;
+  background: #f6f8fc;
+}
+
+.college-page-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.college-page-head p {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.college-page-head h1 {
+  color: #111827;
+  font-size: clamp(32px, 4vw, 46px);
+  letter-spacing: -1.3px;
+}
+
+.college-page-head span,
+.college-sort-pill {
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #059669;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.college-filter-bar {
+  margin-bottom: 20px;
+}
+
+.college-notice-panel {
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 20px 46px rgba(17, 24, 39, 0.07);
+  overflow: hidden;
+}
+
+.college-notice-table th {
+  text-transform: none;
+  background: #f8fafc;
+}
+
+.college-notice-table td {
+  padding: 18px 22px;
+}
+
+.college-recommend-section {
+  margin-top: 34px;
+}
+
+.college-section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.college-section-title-row button {
+  border: 0;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  padding: 10px 16px;
+  font-weight: 800;
+}
+
+.college-place-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.college-place-rating {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.82);
+  color: white;
+  padding: 6px 10px;
+  font-weight: 900;
+}

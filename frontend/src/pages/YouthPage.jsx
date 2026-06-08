@@ -1,159 +1,99 @@
-import { useState, useEffect, useCallback } from 'react';
-import api from '../api/client';
 import './YouthPage.css';
 
-const UNIVERSITIES = ['단국대', '호서대', '백석대'];
+const POLICIES = [
+  {
+    title: '청년 주택 임차보증금',
+    description: '천안시에 거주하는 무주택 청년을 대상으로 주택 임차보증금 대출 이자를 지원하여 주거 부담을 완화합니다.',
+  },
+  {
+    title: '청년 마음건강 지원',
+    description: '심리적 어려움을 겪는 청년들에게 전문 상담 서비스와 바우처를 제공하여 건강한 일상을 되찾아줍니다.',
+  },
+  {
+    title: '청년 문화카드',
+    description: '연간 10만원 상당의 문화예술 향유 기회를 제공하여 청년들의 문화 생활을 장려하고 삶의 질을 높입니다.',
+  },
+];
+
+const RESOURCES = [
+  { title: 'AI 자기소개서 클리닉', description: '빅데이터 분석을 통한 맞춤형 첨삭 지도', action: '서비스 이용하기' },
+  { title: '언택트 모의 면접', description: '화면 너머 면접관과의 실전 연습 피드백', action: '예약 신청하기' },
+  { title: '청년 창업 커뮤니티', description: '지역 스타트업 네트워크 및 멘토링', action: '커뮤니티 가입' },
+];
+
+const SPACES = [
+  { title: '청년센터 이음', description: '성정동 위치 | 스터디룸 & 미팅룸', status: 'AVAILABLE' },
+  { title: '청년 창업 거점센터', description: '불당동 위치 | 공유 오피스 & 메이커스페이스', status: 'AVAILABLE' },
+  { title: '북카페 휴(休)', description: '신안동 위치 | 독서 및 휴식 전용', status: 'LIMITED' },
+];
 
 export default function YouthPage() {
-  const [notices, setNotices] = useState([]);
-  const [university, setUniversity] = useState('');
-  const [category, setCategory] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // 맛집 추천 상태
-  const [places, setPlaces] = useState([]);
-  const [placesLoading, setPlacesLoading] = useState(false);
-  const [placesError, setPlacesError] = useState(null);
-
-  const fetchNotices = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {};
-      if (university) params.university = university;
-      if (category) params.category = category;
-      const res = await api.get('/api/youth/university-notices', { params });
-      setNotices(Array.isArray(res.data) ? res.data : res.data.items ?? []);
-    } catch {
-      setError('데이터를 불러올 수 없습니다');
-    } finally {
-      setLoading(false);
-    }
-  }, [university, category]);
-
-  useEffect(() => { fetchNotices(); }, [fetchNotices]);
-
-  // 청소년 추천 맛집 로드
-  useEffect(() => {
-    const fetchPlaces = async () => {
-      setPlacesLoading(true);
-      setPlacesError(null);
-      try {
-        const res = await api.get('/api/places', { params: { age_group: 'youth', size: 6 } });
-        setPlaces(Array.isArray(res.data) ? res.data : res.data.items ?? []);
-      } catch {
-        setPlacesError('맛집 데이터를 불러올 수 없습니다');
-      } finally {
-        setPlacesLoading(false);
-      }
-    };
-    fetchPlaces();
-  }, []);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    const d = dateStr.slice(5, 10);
-    return d.replace('-', '.');
-  };
-
   return (
-    <div className="youth-page">
-      <h1 className="youth-page-title">대학 공지</h1>
-
-      <div className="filter-bar">
-        <label className="sr-only" htmlFor="youth-univ-filter">대학 필터</label>
-        <select
-          id="youth-univ-filter"
-          value={university}
-          onChange={(e) => setUniversity(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">전체 대학</option>
-          {UNIVERSITIES.map((u) => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </select>
-
-        <label className="sr-only" htmlFor="youth-cat-filter">카테고리 필터</label>
-        <select
-          id="youth-cat-filter"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">전체 카테고리</option>
-          <option value="admission">입학</option>
-          <option value="contest">공모전</option>
-          <option value="scholarship">장학금</option>
-          <option value="general">일반</option>
-        </select>
-      </div>
-
-      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error" role="alert">{error}</p>}
-
-      {!loading && !error && (
-        <div className="table-wrapper">
-          {notices.length === 0
-            ? <p className="status-msg">아직 데이터가 없습니다</p>
-            : (
-              <table className="notice-table">
-                <caption className="sr-only">대학 공지사항 목록</caption>
-                <thead>
-                  <tr>
-                    <th>대학</th>
-                    <th>카테고리</th>
-                    <th>제목</th>
-                    <th>날짜</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {notices.map((n, i) => (
-                    <tr key={n.id ?? i}>
-                      <td data-label="대학"><span className="univ-badge">{n.university ?? '-'}</span></td>
-                      <td data-label="카테고리">{n.category ?? '-'}</td>
-                      <td data-label="제목">
-                        {n.url
-                          ? <a href={n.url} target="_blank" rel="noopener noreferrer" className="notice-link">{n.title}</a>
-                          : n.title
-                        }
-                      </td>
-                      <td data-label="날짜" className="youth-date-cell">{formatDate(n.published_at ?? n.date ?? n.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-          }
+    <div className="youth-page youth-portal-page">
+      <section className="youth-hero">
+        <div className="youth-hero-stat">
+          <span>지원 완료 청년 수</span>
+          <strong>12,482명</strong>
         </div>
-      )}
+        <p className="youth-eyebrow">CHEONAN YOUTH PORTAL</p>
+        <h1>당신의 성장을 돕는<br />천안 청년 지원 공간</h1>
+        <p className="youth-hero-desc">천안시의 모든 청년들이 꿈을 펼칠 수 있도록 정책부터 일자리, 공간까지 한곳에서 지원합니다.</p>
+      </section>
 
-      {/* 청소년 추천 맛집 섹션 */}
-      <div className="places-section">
-        <h2 className="places-title">청소년 추천 맛집</h2>
-        <p className="places-desc">술집 제외, 청소년이 방문하기 좋은 천안 맛집</p>
-        {placesLoading && <p className="status-msg">맛집 정보를 불러오는 중...</p>}
-        {placesError && <p className="status-msg error">{placesError}</p>}
-        {!placesLoading && !placesError && places.length === 0 && (
-          <p className="status-msg">등록된 맛집이 없습니다</p>
-        )}
-        {!placesLoading && !placesError && places.length > 0 && (
-          <div className="places-grid">
-            {places.map((place, i) => (
-              <div key={place.id ?? i} className="place-card">
-                <h3 className="place-name">{place.name}</h3>
-                {place.category && (
-                  <span className="place-category">{place.category}</span>
-                )}
-                {place.address && (
-                  <p className="place-address">{place.address}</p>
-                )}
-              </div>
-            ))}
+      <section className="youth-section">
+        <div className="youth-section-head">
+          <p>Policy Support</p>
+          <h2>천안 청년을 위한 맞춤형 정책 지원 시스템</h2>
+          <button type="button">전체 보기</button>
+        </div>
+        <div className="youth-policy-grid">
+          {POLICIES.map((policy) => (
+            <article key={policy.title} className="youth-policy-card">
+              <h3>{policy.title}</h3>
+              <p>{policy.description}</p>
+              <a href="https://www.cheonan.go.kr/" target="_blank" rel="noreferrer">Learn More</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="youth-opportunity">
+        <div>
+          <p>Employment Resources</p>
+          <span>HOT OPPORTUNITY</span>
+          <h2>2024 상반기<br />천안 청년 인턴쉽</h2>
+          <p>시청, 산하기관, 관내 우수기업에서 실무 경험을 쌓고 취업 역량을 강화할 인재를 모집합니다.</p>
+          <div className="youth-action-row">
+            <button type="button">Apply Now</button>
+            <button type="button" className="ghost">View PDF Guide</button>
           </div>
-        )}
-      </div>
+        </div>
+        <div className="youth-resource-list">
+          {RESOURCES.map((item) => (
+            <article key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <button type="button">{item.action}</button>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="youth-section">
+        <div className="youth-section-head">
+          <p>Youth Spaces</p>
+          <h2>자유롭게 이용 가능한 천안시 청년 전용 복합 공간</h2>
+        </div>
+        <div className="youth-space-grid">
+          {SPACES.map((space) => (
+            <article key={space.title} className="youth-space-card">
+              <h3>{space.title}</h3>
+              <p>{space.description}</p>
+              <span className={space.status === 'LIMITED' ? 'limited' : ''}>{space.status}</span>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

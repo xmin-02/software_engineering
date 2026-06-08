@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../api/client';
 import './FamilyPage.css';
 import homeImage1 from '../assets/figma/home-1.jpg';
@@ -20,9 +19,6 @@ export default function FamilyPage() {
   const [tradeType, setTradeType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [estateOpen, setEstateOpen] = useState(true);
-
-  // 맛집 추천 상태
   const [places, setPlaces] = useState([]);
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState(null);
@@ -45,7 +41,6 @@ export default function FamilyPage() {
 
   useEffect(() => { fetchEstates(); }, [fetchEstates]);
 
-  // 가족 추천 맛집 로드
   useEffect(() => {
     const fetchPlaces = async () => {
       setPlacesLoading(true);
@@ -62,152 +57,97 @@ export default function FamilyPage() {
     fetchPlaces();
   }, []);
 
-  const formatPrice = (price) => {
-    if (price == null) return '-';
-    const num = Number(price);
-    if (num >= 10000) {
+  const formatPrice = (item) => {
+    if (!item) return '-';
+    if (item.deal_type === '월세') return `보증금 ${item.price?.toLocaleString?.() ?? item.price ?? '-'} / 월 ${item.monthly_rent ?? '-'}만원`;
+    if (item.price == null) return '-';
+    const num = Number(item.price);
+    if (Number.isFinite(num) && num >= 10000) {
       const eok = Math.floor(num / 10000);
       const man = num % 10000;
       return man > 0 ? `${eok}억 ${man.toLocaleString()}만원` : `${eok}억원`;
     }
-    return `${num.toLocaleString()}만원`;
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    // YYYY-MM-DD → YYYY.MM.DD (연도 노출, 2024 vs 2026 구분 가능)
-    return dateStr.slice(0, 10).replaceAll('-', '.');
+    return `${Number.isFinite(num) ? num.toLocaleString() : item.price}만원`;
   };
 
   return (
-    <div className="family-page">
-      <h1 className="family-page-title">가족</h1>
+    <div className="family-page family-figma-page">
+      <div className="family-page-head">
+        <h1>가족</h1>
+        <div className="family-filter-summary">
+          <span>필터</span>
+          <strong>거래 유형: {tradeType || '전체'}</strong>
+          <strong>매물 유형: {propertyType || '전체'}</strong>
+        </div>
+      </div>
 
-      {/* 가족 추천 맛집 섹션 (메인) */}
-      <div className="places-section places-section--main">
-        <h2 className="places-title">가족 추천 맛집</h2>
-        <p className="places-desc">노키즈존 제외, 키즈시설 우선 — 온 가족이 편안한 천안 맛집</p>
+      <div className="filter-bar family-filter-bar">
+        <label htmlFor="family-property-type" className="sr-only">매물유형 필터</label>
+        <select id="family-property-type" value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className="filter-select">
+          <option value="">전체 매물유형</option>
+          {PROPERTY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <label htmlFor="family-trade-type" className="sr-only">거래유형 필터</label>
+        <select id="family-trade-type" value={tradeType} onChange={(e) => setTradeType(e.target.value)} className="filter-select">
+          <option value="">전체 거래유형</option>
+          {TRADE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+
+      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
+      {error && <p className="status-msg error" role="alert">{error}</p>}
+
+      {!loading && !error && (
+        <section className="family-estate-grid" aria-label="부동산 매물 정보">
+          {estates.slice(0, 3).map((item, index) => (
+            <article key={item.id ?? index} className="family-estate-card">
+              <img src={HOME_IMAGES[index % HOME_IMAGES.length]} alt="" loading="lazy" />
+              <div className="family-estate-body">
+                <div className="family-estate-badges">
+                  <span>{item.property_type ?? '주거'}</span>
+                  <span>{item.deal_type ?? '-'}</span>
+                </div>
+                <h2>{item.address ?? '천안시 주거 매물'}</h2>
+                <strong>{formatPrice(item)}</strong>
+                <dl>
+                  <div><dt>면적</dt><dd>{item.area ?? '-'}㎡</dd></div>
+                  <div><dt>최근 거래일</dt><dd>{item.transaction_date?.slice(2, 10).replaceAll('-', '.') ?? '-'}</dd></div>
+                </dl>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <section className="places-section places-section--main family-places-section">
+        <div className="family-section-title-row">
+          <div>
+            <h2 className="places-title">가족 추천 맛집</h2>
+            <p className="places-desc">부동산 인근 아이와 함께 가기 좋은 식당</p>
+          </div>
+          <button type="button">전체보기</button>
+        </div>
         {placesLoading && <p className="status-msg" aria-live="polite">맛집 정보를 불러오는 중...</p>}
         {placesError && <p className="status-msg error" role="alert">{placesError}</p>}
-        {!placesLoading && !placesError && places.length === 0 && (
-          <p className="status-msg">등록된 맛집이 없습니다</p>
-        )}
         {!placesLoading && !placesError && places.length > 0 && (
           <div className="places-grid">
-            {places.map((place, i) => (
-              <div key={place.id ?? i} className="place-card family-place-card">
+            {places.slice(0, 4).map((place, i) => (
+              <article key={place.id ?? i} className="place-card family-place-card">
                 <img
                   className="family-place-image"
-                  src={FAMILY_PLACE_IMAGES[i % FAMILY_PLACE_IMAGES.length]}
+                  src={place.image_url ?? FAMILY_PLACE_IMAGES[i % FAMILY_PLACE_IMAGES.length]}
                   alt=""
                   loading="lazy"
                   onError={(e) => { e.currentTarget.src = FAMILY_PLACE_IMAGES[i % FAMILY_PLACE_IMAGES.length]; }}
                 />
                 <h3 className="place-name">{place.name}</h3>
-                {place.category && (
-                  <span className="place-category">{place.category}</span>
-                )}
-                {place.address && (
-                  <p className="place-address">{place.address}</p>
-                )}
-              </div>
+                <span className="place-category">{place.category ?? '맛집'}</span>
+                <p className="place-address">{place.address ?? '천안시'}</p>
+              </article>
             ))}
           </div>
         )}
-      </div>
-
-      {/* 부동산 섹션 (접이식) */}
-      <div className="estate-section">
-        <button
-          className="estate-toggle"
-          onClick={() => setEstateOpen((v) => !v)}
-          aria-expanded={estateOpen}
-        >
-          <span>부동산 매물 정보</span>
-          {estateOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
-
-        {estateOpen && (
-          <>
-            <div className="filter-bar" style={{ marginTop: 12 }}>
-              <label htmlFor="family-property-type" className="sr-only">매물유형 필터</label>
-              <select
-                id="family-property-type"
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
-                className="filter-select"
-              >
-                <option value="">전체 매물유형</option>
-                {PROPERTY_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-
-              <label htmlFor="family-trade-type" className="sr-only">거래유형 필터</label>
-              <select
-                id="family-trade-type"
-                value={tradeType}
-                onChange={(e) => setTradeType(e.target.value)}
-                className="filter-select"
-              >
-                <option value="">전체 거래유형</option>
-                {TRADE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-
-            {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
-            {error && <p className="status-msg error" role="alert">{error}</p>}
-
-            {!loading && !error && (
-              <div className="table-wrapper">
-                {estates.length === 0
-                  ? <p className="status-msg">아직 데이터가 없습니다</p>
-                  : (
-                    <table className="estate-table">
-                      <caption className="sr-only">천안 부동산 매물 목록</caption>
-                      <thead>
-                        <tr>
-                          <th>주소</th>
-                          <th>매물유형</th>
-                          <th>거래유형</th>
-                          <th>가격</th>
-                          <th>면적(㎡)</th>
-                          <th>층</th>
-                          <th>거래일</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {estates.map((item, i) => {
-                          const priceText = item.deal_type === '월세' && item.monthly_rent != null
-                            ? `${formatPrice(item.price)} / ${item.monthly_rent}만원`
-                            : formatPrice(item.price);
-                          const floorText = item.floor && item.floor !== '-' ? `${item.floor}층` : '-';
-                          return (
-                            <tr
-                              key={item.id ?? i}
-                              style={{ '--estate-image': `url(${HOME_IMAGES[i % HOME_IMAGES.length]})` }}
-                            >
-                              <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
-                              <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
-                              <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                              <td className="family-price-cell" data-label="가격">{priceText}</td>
-                              <td data-label="면적">{item.area ?? '-'}</td>
-                              <td data-label="층">{floorText}</td>
-                              <td className="family-date-cell" data-label="거래일">{formatDate(item.transaction_date)}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )
-                }
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      </section>
     </div>
   );
 }
