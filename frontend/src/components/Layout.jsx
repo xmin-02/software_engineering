@@ -139,7 +139,14 @@ export default function Layout() {
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand-card">
-            <img className="sidebar-brand-logo" src={logoBi} alt="천안 인사이트" />
+            <img className="sidebar-brand-watermark" src={logoBi} alt="" aria-hidden="true" />
+            <div className="sidebar-brand-symbol" aria-hidden="true">
+              <span className="symbol-dot symbol-dot-left" />
+              <span className="symbol-line symbol-line-a" />
+              <span className="symbol-line symbol-line-b" />
+              <span className="symbol-line symbol-line-c" />
+              <span className="symbol-dot symbol-dot-right" />
+            </div>
             <div className="sidebar-brand-copy">
               <h2>천안 인사이트</h2>
               <p className="sidebar-subtitle">시민의 생각이 모여, 더 나은 천안으로</p>
