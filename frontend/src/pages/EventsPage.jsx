@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import './EventsPage.css';
+import eventImage1 from '../assets/figma/home-1.jpg';
+import eventImage2 from '../assets/figma/home-2.jpg';
+import eventImage3 from '../assets/figma/home-3.jpg';
 
 const MAIN_CATEGORIES = ['축제', '전시관', '천안8경', '천안12경', '자연관광', '유적지', '산', '사찰', '명소', '관광농원', '박물관'];
+const EVENT_FALLBACK_IMAGES = [eventImage1, eventImage2, eventImage3];
+
+function normalizeCategory(category) {
+  return category === '자연광광' ? '자연관광' : category;
+}
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
@@ -27,10 +35,10 @@ export default function EventsPage() {
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
-  const festivals = events.filter((e) => e.category === '축제' || e.category === '빵빵데이');
-  const spots = events.filter((e) => e.category !== '축제' && e.category !== '빵빵데이');
+  const festivals = events.filter((e) => normalizeCategory(e.category) === '축제' || normalizeCategory(e.category) === '빵빵데이');
+  const spots = events.filter((e) => normalizeCategory(e.category) !== '축제' && normalizeCategory(e.category) !== '빵빵데이');
 
-  const categories = [...new Set(events.map((e) => e.category).filter(Boolean))].sort();
+  const categories = [...new Set(events.map((e) => normalizeCategory(e.category)).filter(Boolean))].sort();
 
   return (
     <div className="events-page">
@@ -61,18 +69,7 @@ export default function EventsPage() {
               <h2 className="events-section-title">연례 축제</h2>
               <div className="event-grid">
                 {festivals.map((ev, i) => (
-                  <div key={ev.id ?? i} className="event-card festival">
-                    <div className="event-header">
-                      <span className="event-category festival-tag">{ev.category ?? '축제'}</span>
-                    </div>
-                    <h3 className="event-title">{ev.title}</h3>
-                    {ev.location && <p className="event-location">📍 {ev.location}</p>}
-                    {ev.url && (
-                      <a href={ev.url} target="_blank" rel="noopener noreferrer" className="event-link-btn">
-                        자세히 보기 →
-                      </a>
-                    )}
-                  </div>
+                  <EventCard key={ev.id ?? i} event={ev} festival index={i} />
                 ))}
               </div>
             </section>
@@ -84,27 +81,46 @@ export default function EventsPage() {
               {(category ? events : spots).length === 0
                 ? <p className="status-msg">등록된 명소가 없습니다</p>
                 : (category ? events : spots).map((ev, i) => (
-                  <div key={ev.id ?? i} className="event-card">
-                    <div className="event-header">
-                      <span className="event-category">{ev.category ?? '기타'}</span>
-                    </div>
-                    <h3 className="event-title">{ev.title}</h3>
-                    {ev.location && <p className="event-location">📍 {ev.location}</p>}
-                    {ev.description && ev.description !== ev.category && (
-                      <p className="event-desc">{ev.description}</p>
-                    )}
-                    {ev.url && (
-                      <a href={ev.url} target="_blank" rel="noopener noreferrer" className="event-link-btn">
-                        자세히 보기 →
-                      </a>
-                    )}
-                  </div>
+                  <EventCard key={ev.id ?? i} event={ev} index={i} />
                 ))
               }
             </div>
           </section>
         </>
       )}
+    </div>
+  );
+}
+
+function EventCard({ event, festival = false, index = 0 }) {
+  return (
+    <div className={`event-card${festival ? ' festival' : ''}`}>
+      <div className="event-image-wrap">
+        <img
+          src={EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]}
+          alt=""
+          className="event-image"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]; }}
+        />
+      </div>
+      <div className="event-card-body">
+        <div className="event-header">
+          <span className={`event-category${festival ? ' festival-tag' : ''}`}>
+            {normalizeCategory(event.category) ?? (festival ? '축제' : '기타')}
+          </span>
+        </div>
+        <h3 className="event-title">{event.title}</h3>
+        {event.location && <p className="event-location">📍 {event.location}</p>}
+        {event.description && event.description !== event.category && (
+          <p className="event-desc">{event.description}</p>
+        )}
+        {event.url && (
+          <a href={event.url} target="_blank" rel="noopener noreferrer" className="event-link-btn">
+            자세히 보기 →
+          </a>
+        )}
+      </div>
     </div>
   );
 }

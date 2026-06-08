@@ -192,3 +192,90 @@
     font-size: 18px;
   }
 }
+
+/* ===== Figma visual system overlay ===== */
+body {
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+}
+
+[class$="-page"],
+.dashboard,
+.places-page {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+[class$="-page-title"],
+.dashboard-title,
+.places-page-title {
+  font-weight: 500 !important;
+  letter-spacing: -0.75px !important;
+  margin-bottom: 10px !important;
+}
+
+[class$="-page-title"]::after,
+.dashboard-title::after {
+  display: none !important;
+}
+
+.filter-bar {
+  background: #fff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  border: 0;
+}
+
+.filter-select {
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background-color: #f2f3f7;
+  color: #414754;
+  padding-left: 16px;
+}
+
+.table-wrapper,
+.dash-card,
+.kpi-card,
+.place-card,
+.event-card,
+.college-card,
+.job-card,
+.estate-section {
+  border: 0 !important;
+  box-shadow: 0 20px 40px rgba(26, 26, 46, 0.06) !important;
+}
+
+.places-section {
+  border-top: 0;
+}
+
+.places-title {
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.places-desc,
+.page-subtitle {
+  color: #414754;
+}
+
+.places-grid .place-card {
+  min-height: 136px;
+}
+
+.pagination button {
+  border-radius: 14px !important;
+  background: #fff !important;
+  border: 1px solid #f1f5f9 !important;
+}
+
+@media (max-width: 768px) {
+  [class$="-page"],
+  .dashboard,
+  .places-page {
+    max-width: none;
+  }
+}

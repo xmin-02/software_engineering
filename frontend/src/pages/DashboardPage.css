@@ -560,6 +560,57 @@
   margin-top: 2px;
 }
 
+/* 맛집 목록 (모달용) */
+.place-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-gap-sm);
+}
+
+.place-item {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-input);
+  background: var(--color-bg-card);
+}
+
+.place-title {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.place-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-gap-xs);
+  margin-bottom: 4px;
+}
+
+.place-category,
+.place-review-count {
+  font-size: var(--font-size-small);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.place-category {
+  background: var(--color-places-light);
+  color: var(--color-places);
+  font-weight: 700;
+}
+
+.place-review-count {
+  background: var(--color-bg-thead);
+  color: var(--color-text-muted);
+}
+
+.place-address {
+  color: var(--color-text-placeholder);
+  font-size: var(--font-size-small);
+}
+
 /* 주간 요약 (모달용) */
 .summary-list {
   display: flex;

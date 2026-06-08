@@ -16,6 +16,7 @@ class PlaceResponse(BaseModel):
     business_hours: dict | None = None
     has_parking: bool | None = None
     price_range: str | None = None
+    image_url: str | None = None
     is_open_now: bool = False
     tags: list[str] = []
     avg_sentiment_score: float | None = None
@@ -54,5 +55,6 @@ class PlaceRanking(BaseModel):
     review_count: int = 0
     rating_naver: float | None = None
     rating_kakao: float | None = None
+    image_url: str | None = None
 
     model_config = {"from_attributes": True}

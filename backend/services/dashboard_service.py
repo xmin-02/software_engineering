@@ -16,6 +16,20 @@ def _stable_topic_id(name: str) -> int:
     return int(hashlib.md5(name.encode("utf-8")).hexdigest()[:8], 16)
 
 
+def _latest_post_date(db: Session) -> date:
+    """데이터셋의 최신 게시글 날짜를 반환한다.
+
+    로컬/데모 DB는 현재 날짜보다 과거 수집분일 수 있으므로, 기간 필터의
+    기본 기준은 시스템 오늘이 아니라 DB에 실제 존재하는 최신 게시글 날짜다.
+    """
+    latest = db.query(func.max(Post.published_at)).scalar()
+    if not latest:
+        return date.today()
+    if hasattr(latest, "date"):
+        return latest.date()
+    return latest
+
+
 def get_posts(
     db: Session,
     source: str | None = None,
@@ -103,9 +117,10 @@ def get_trend(
     date_to: date | None = None,
 ) -> list[dict]:
     """감성 트렌드 (일별/주별)"""
-    # date_from이 없으면 최근 30일만
+    # date_from이 없으면 DB 최신 게시글 기준 최근 30일.
+    # 시스템 날짜 기준으로 잡으면 과거 수집 데이터셋에서 빈 차트가 된다.
     if not date_from:
-        date_from = date.today() - timedelta(days=30)
+        date_from = _latest_post_date(db) - timedelta(days=30)
 
     if interval == "weekly":
         date_col = func.date_trunc("week", Post.published_at).label("period")
@@ -177,10 +192,11 @@ def get_topics(db: Session, period: str = "today") -> list[dict]:
 
     query = query.join(Post, Analysis.post_id == Post.id)
 
+    latest_date = _latest_post_date(db)
     if period == "today":
-        query = query.filter(func.date(Post.published_at) == date.today())
+        query = query.filter(func.date(Post.published_at) == latest_date)
     elif period == "weekly":
-        week_ago = date.today() - timedelta(days=7)
+        week_ago = latest_date - timedelta(days=7)
         query = query.filter(Post.published_at >= week_ago)
 
     rows = query.group_by(Analysis.topic).order_by(func.count(Analysis.id).desc()).all()

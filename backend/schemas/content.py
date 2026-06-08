@@ -13,6 +13,7 @@ class EventResponse(BaseModel):
     end_date: date | None = None
     url: str | None = None
     category: str | None = None
+    image_url: str | None = None
 
     model_config = {"from_attributes": True}
 

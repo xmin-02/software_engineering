@@ -41,6 +41,11 @@ function formatDate(dateStr) {
   return d.replace('-', '.');
 }
 
+function getPlaceItems(places) {
+  if (Array.isArray(places)) return places;
+  return places?.items ?? [];
+}
+
 // 모달 컴포넌트
 function DashboardModal({ open, onClose, title, children }) {
   useEffect(() => {
@@ -118,37 +123,49 @@ export default function DashboardPage() {
   const [rightTab, setRightTab] = useState('events');
 
   useEffect(() => {
-    const fetchData = async () => {
+    let ignore = false;
+
+    const fetchData = () => {
       setLoading(true);
-      const results = await Promise.allSettled([
-        api.get('/api/stats/sentiment'),
-        api.get('/api/stats/trend', { params: { interval: 'daily' } }),
-        api.get('/api/stats/sources'),
-        api.get('/api/keywords', { params: { limit: 30 } }),
-        api.get('/api/summaries'),
-        api.get('/api/posts', { params: { page: 1, size: 50 } }),
-        api.get('/api/topics', { params: { period: 'weekly' } }),
-        api.get('/api/events'),
-        api.get('/api/places', { params: { page: 1, size: 1 } }),
-      ]);
+      setErrors({});
 
-      const keys = ['sentiment', 'trend', 'sources', 'keywords', 'summaries', 'posts', 'topics', 'events', 'places'];
-      const setters = [setSentiment, setTrend, setSources, setKeywords, setSummaries, setPosts, setTopics, setEvents, setPlaces];
-      const newErrors = {};
+      const requests = [
+        { key: 'sentiment', setter: setSentiment, request: api.get('/api/stats/sentiment') },
+        { key: 'trend', setter: setTrend, request: api.get('/api/stats/trend', { params: { interval: 'daily' } }) },
+        { key: 'sources', setter: setSources, request: api.get('/api/stats/sources') },
+        { key: 'keywords', setter: setKeywords, request: api.get('/api/keywords', { params: { limit: 30 } }) },
+        { key: 'summaries', setter: setSummaries, request: api.get('/api/summaries') },
+        { key: 'posts', setter: setPosts, request: api.get('/api/posts', { params: { page: 1, size: 50 } }) },
+        { key: 'topics', setter: setTopics, request: api.get('/api/topics', { params: { period: 'weekly' } }) },
+        { key: 'events', setter: setEvents, request: api.get('/api/events') },
+        { key: 'places', setter: setPlaces, request: api.get('/api/places', { params: { page: 1, size: 6 } }) },
+      ];
 
-      results.forEach((result, i) => {
-        if (result.status === 'fulfilled') {
-          setters[i](result.value.data);
-        } else {
-          newErrors[keys[i]] = true;
-        }
+      const criticalRequests = new Set(['sentiment', 'sources', 'posts', 'events', 'places']);
+      let remainingCritical = criticalRequests.size;
+
+      requests.forEach(({ key, setter, request }) => {
+        request
+          .then((res) => {
+            if (!ignore) setter(res.data);
+          })
+          .catch(() => {
+            if (!ignore) setErrors((current) => ({ ...current, [key]: true }));
+          })
+          .finally(() => {
+            if (ignore || !criticalRequests.has(key)) return;
+            remainingCritical -= 1;
+            if (remainingCritical === 0) setLoading(false);
+          });
       });
 
-      setErrors(newErrors);
-      setLoading(false);
+      window.setTimeout(() => {
+        if (!ignore) setLoading(false);
+      }, 1200);
     };
 
     fetchData();
+    return () => { ignore = true; };
   }, []);
 
   // 감성 분포 데이터
@@ -224,18 +241,16 @@ export default function DashboardPage() {
     <div className="dashboard">
       <h1 className="dashboard-title">천안 여론 대시보드</h1>
 
-      {/* Row 1: KPI 카드 */}
       <div className="kpi-grid">
         {[
           { icon: FileText, label: '총 게시글', value: `${totalPosts.toLocaleString()}건`, modal: 'posts' },
           { icon: SmilePlus, label: '긍정률', value: `${positiveRate}%`, modal: 'sentiment' },
-          { icon: UtensilsCrossed, label: '맛집', value: `${placeCount}곳`, modal: 'events' },
+          { icon: UtensilsCrossed, label: '맛집', value: `${placeCount}곳`, modal: 'places' },
           { icon: MapPin, label: '명소 & 행사', value: `${eventCount}곳`, modal: 'events' },
-        ].map((kpi, i) => (
+        ].map((kpi) => (
           <div
             key={kpi.label}
             className="kpi-card"
-            style={{ animationDelay: `${i * 0.08}s` }}
             onClick={() => setActiveModal(kpi.modal)}
           >
             <div className="kpi-icon-wrap">
@@ -247,7 +262,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Row 2: 차트 */}
       <div className="charts-grid">
         <div className="dash-card">
           <div className="dash-card-title">
@@ -306,9 +320,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Row 3: 콘텐츠 */}
       <div className="content-grid">
-        {/* 주간 토픽 Top 5 */}
         <div className="dash-card" {...openModalProps('topics')} aria-label="주간 토픽 자세히 보기">
           <div className="dash-card-title">
             주간 토픽
@@ -333,7 +345,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* 키워드 Top 10 */}
         <div className="dash-card" {...openModalProps('keywords')} aria-label="키워드 자세히 보기">
           <div className="dash-card-title">
             키워드
@@ -362,7 +373,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* 우측: 탭 (명소&행사 / 최근 게시글) */}
         <div className="dash-card dash-card-tabbed">
           <div className="dash-tab-bar">
             <button
@@ -567,6 +577,30 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : null}
+      </DashboardModal>
+
+      {/* 맛집 모달 */}
+      <DashboardModal open={activeModal === 'places'} onClose={closeModal} title="천안 맛집">
+        {errors.places ? (
+          <p className="empty-text">맛집 데이터를 불러올 수 없습니다</p>
+        ) : getPlaceItems(places).length === 0 ? (
+          <p className="empty-text">등록된 맛집이 없습니다</p>
+        ) : (
+          <div className="place-list">
+            {getPlaceItems(places).map((place) => (
+              <div key={place.id} className="place-item">
+                <div className="place-title">{place.name}</div>
+                <div className="place-meta-row">
+                  {place.category && <span className="place-category">{place.category}</span>}
+                  {place.review_count != null && (
+                    <span className="place-review-count">리뷰 {place.review_count}건</span>
+                  )}
+                </div>
+                {place.address && <div className="place-address">{place.address}</div>}
+              </div>
+            ))}
+          </div>
+        )}
       </DashboardModal>
 
       {/* 명소 & 행사 모달 */}

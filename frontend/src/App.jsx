@@ -7,6 +7,7 @@ import YouthPage from './pages/YouthPage';
 import CollegePage from './pages/CollegePage';
 import JobsPage from './pages/JobsPage';
 import FamilyPage from './pages/FamilyPage';
+import InfoPage from './pages/InfoPage';
 
 function App() {
   return (
@@ -20,6 +21,11 @@ function App() {
           <Route path="college" element={<CollegePage />} />
           <Route path="jobs" element={<JobsPage />} />
           <Route path="family" element={<FamilyPage />} />
+          <Route path="accessibility" element={<InfoPage />} />
+          <Route path="high-school" element={<InfoPage />} />
+          <Route path="medical" element={<InfoPage />} />
+          <Route path="foreign-life" element={<InfoPage />} />
+          <Route path="single-household" element={<InfoPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -809,6 +809,86 @@
   font-size: 13px;
 }
 
+.fallback-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(139, 92, 246, 0.12), transparent 32%),
+    linear-gradient(135deg, #eef6ff 0%, #f8fafc 52%, #f1f5f9 100%);
+}
+
+.fallback-map.compact {
+  min-height: 300px;
+}
+
+.fallback-map-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.fallback-map-label {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(15, 23, 42, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
+}
+
+.fallback-map-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-faint);
+  font-size: 13px;
+}
+
+.fallback-map-marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translate(-10px, -50%);
+  max-width: 180px;
+}
+
+.fallback-map-dot {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--color-places);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.28);
+}
+
+.fallback-map-name {
+  padding: 5px 8px;
+  border-radius: var(--radius-input);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: var(--shadow-card);
+}
+
 /* ===== 모달 반응형 (700px 이하 → 상하 분할) ===== */
 @media (max-width: 700px) {
   .modal-body {
@@ -840,7 +920,147 @@
     height: 240px;
   }
 
+  .fallback-map {
+    min-height: 240px;
+  }
+
   .modal-place-name {
     font-size: 20px;
+  }
+}
+
+/* ===== Figma restaurant card treatment ===== */
+.places-page {
+  padding: 32px;
+}
+
+.page-header {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.places-page-title {
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 500;
+}
+
+.places-page .tab-bar {
+  float: right;
+  margin-top: -74px;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.places-page .tab-btn.active {
+  background: #005bbf;
+  color: #fff;
+  box-shadow: none;
+}
+
+.places-page .filter-bar {
+  clear: both;
+  min-height: 71px;
+  justify-content: space-between;
+}
+
+.places-page .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(286px, 1fr));
+  gap: 24px;
+}
+
+.places-page .place-card {
+  overflow: hidden;
+  padding: 0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.place-card-image-wrap {
+  position: relative;
+  height: 192px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.place-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.places-page .place-card:hover .place-card-image {
+  transform: scale(1.04);
+}
+
+.place-rating-pill {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.places-page .place-card-header,
+.places-page .place-address,
+.places-page .review-count,
+.places-page .sentiment-dual-bar {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.places-page .place-card-header {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  padding-right: 28px;
+}
+
+.places-page .place-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.places-page .category-badge {
+  order: -1;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(0, 91, 191, 0.05);
+  color: #005bbf;
+}
+
+.places-page .place-address {
+  color: #64748b;
+  line-height: 1.55;
+  min-height: 40px;
+}
+
+.places-page .review-count {
+  display: inline-block;
+  color: #94a3b8;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.places-page .sentiment-dual-bar {
+  padding-bottom: 18px;
+}
+
+@media (max-width: 768px) {
+  .places-page .tab-bar {
+    float: none;
+    margin-top: 0;
   }
 }

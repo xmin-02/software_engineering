@@ -135,10 +135,12 @@ class BlogReviewCrawler(BaseCrawler):
 
         return bool(DISALLOW_PATTERN.search(text))
 
-    def _fetch_reviews(self, place: Place) -> list[dict[str, Any]]:
+    def _fetch_reviews(self, place: Place | str) -> list[dict[str, Any]]:
         """특정 장소의 블로그 리뷰 검색"""
         results = []
-        query = f"천안 {place.name} 후기"
+        place_name = place if isinstance(place, str) else place.name
+        place_address = None if isinstance(place, str) else place.address
+        query = f"천안 {place_name} 후기"
 
         for start in range(1, self.max_start, self.display):
             self.rate_limiter.wait()
@@ -157,7 +159,9 @@ class BlogReviewCrawler(BaseCrawler):
             for item in items:
                 title = self._clean_html(item.get("title", ""))
                 description = self._clean_html(item.get("description", ""))
-                if not self._is_relevant_review(title, description, place.name, place.address):
+                if not isinstance(place, str) and not self._is_relevant_review(
+                    title, description, place_name, place_address
+                ):
                     continue
                 results.append({
                     "review_text": description,

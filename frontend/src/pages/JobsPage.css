@@ -185,3 +185,100 @@
     min-height: 44px;
   }
 }
+
+/* ===== Figma jobs page ===== */
+.jobs-page {
+  padding: 32px 48px;
+}
+
+.jobs-page-title {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.jobs-page::after {
+  content: '천안시의 최신 채용 정보와 일자리를 한눈에 확인하세요.';
+  display: block;
+  color: #414754;
+  font-size: 16px;
+  margin: -4px 0 28px;
+}
+
+.jobs-page .filter-bar {
+  min-height: 121px;
+  border-radius: 24px;
+  padding: 32px 24px 24px;
+  align-items: flex-end;
+}
+
+.jobs-page .filter-select {
+  flex: 1 1 320px;
+  min-height: 44px;
+}
+
+.job-list {
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.job-card {
+  min-height: 172px;
+  border-radius: 24px;
+  padding: 32px;
+  border-left: 0;
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+}
+
+.job-title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 800;
+  margin: 12px 0;
+}
+
+.job-company {
+  display: inline;
+  color: #94a3b8;
+  font-size: 14px;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.job-company::after {
+  content: ' · 천안시';
+  color: #64748b;
+  text-transform: none;
+}
+
+.tag {
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+.tag.experience,
+.tag.salary {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+}
+
+.apply-btn {
+  color: #1a1a2e;
+}
+
+.pagination span {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 999px;
+  background: #1a1a2e;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}

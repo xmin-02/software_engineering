@@ -1,6 +1,6 @@
 :root {
   /* 배경 */
-  --color-bg-page: #f5f6fa;
+  --color-bg-page: #f8f9fd;
   --color-bg-card: #fff;
   --color-bg-thead: #f8f9fc;
   --color-bg-row-even: #fafafa;
@@ -16,7 +16,7 @@
   --color-text-input: #444;
 
   /* 메인 액센트 */
-  --color-accent: #3b7dd8;
+  --color-accent: #005bbf;
   --color-accent-hover: #2c5fa0;
   --color-error: #c0392b;
   --color-positive: #2d8a56;
@@ -45,8 +45,8 @@
   --color-border-thead: #e8eaf0;
 
   /* 그림자 */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(99, 102, 241, 0.1);
+  --shadow-card: 0 20px 40px rgba(26, 26, 46, 0.06);
+  --shadow-card-hover: 0 24px 48px rgba(26, 26, 46, 0.1);
   --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.12);
 
   /* 뱃지 색상 (톤 다운) */
@@ -77,7 +77,7 @@
   --spacing-gap-xs: 8px;
 
   /* 라운딩 */
-  --radius-card: 14px;
+  --radius-card: 24px;
   --radius-badge: 10px;
   --radius-input: 8px;
   --radius-pill: 20px;

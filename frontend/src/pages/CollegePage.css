@@ -186,3 +186,76 @@
   .tab-btn { font-size: 13px; padding: 6px 14px; }
   .card-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== Figma university notices ===== */
+.college-page {
+  padding: 32px;
+}
+
+.college-page-title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+}
+
+.college-page .tab-bar {
+  display: inline-flex;
+  background: #fff;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.college-page .tab-btn {
+  border: 0;
+  border-radius: 8px;
+  min-height: 36px;
+}
+
+.college-page .tab-btn.active {
+  background: #005bbf;
+}
+
+.college-page .table-wrapper {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.data-table thead tr {
+  border-bottom: 0;
+  background: #f2f3f7;
+}
+
+.data-table th {
+  color: #414754;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.58px;
+}
+
+.data-table td {
+  padding: 18px 22px;
+}
+
+.college-place-card {
+  overflow: hidden;
+  padding: 0 0 16px;
+  border-radius: 14px;
+}
+
+.college-place-image {
+  width: calc(100% - 24px);
+  height: 136px;
+  margin: 12px 12px 10px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+.college-place-card .place-name,
+.college-place-card .place-category,
+.college-place-card .place-address,
+.college-place-card .college-place-tags {
+  margin-left: 16px;
+  margin-right: 16px;
+}

@@ -1,12 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import './CollegePage.css';
+import collegePlaceImage1 from '../assets/figma/college-place-1.jpg';
+import collegePlaceImage2 from '../assets/figma/college-place-2.jpg';
+import collegePlaceImage3 from '../assets/figma/college-place-3.jpg';
 
 const TABS = [
   { key: 'contests', label: '공모전' },
   { key: 'scholarships', label: '장학금' },
   { key: 'housing', label: '주거' },
 ];
+const COLLEGE_PLACE_IMAGES = [collegePlaceImage1, collegePlaceImage2, collegePlaceImage3];
 
 export default function CollegePage() {
   const [activeTab, setActiveTab] = useState('contests');
@@ -57,9 +61,25 @@ export default function CollegePage() {
     return d.replace('-', '.');
   };
 
-  const formatPrice = (price) => {
-    if (price == null) return '-';
-    return Number(price).toLocaleString() + '원';
+  const formatPrice = (item) => {
+    if (!item) return '-';
+    if (item.deal_type === '월세') {
+      const deposit = item.deposit ?? item.price;
+      const rent = item.monthly_rent;
+      if (deposit && rent) return `보증금 ${deposit}만원 / 월 ${rent}만원`;
+      if (deposit) return `보증금 ${deposit}만원`;
+    }
+    if (item.deal_type === '전세') {
+      const deposit = item.deposit ?? item.price;
+      return deposit ? `${deposit}만원` : '-';
+    }
+    if (item.price == null) return '-';
+    return `${item.price}만원`;
+  };
+
+  const formatAddress = (item) => {
+    if (item.address) return item.address;
+    return [item.district, item.dong, item.title].filter(Boolean).join(' ') || '-';
   };
 
   return (
@@ -138,9 +158,9 @@ export default function CollegePage() {
             <tbody>
               {data.map((item, i) => (
                 <tr key={item.id ?? i}>
-                  <td>{item.address ?? '-'}</td>
+                  <td>{formatAddress(item)}</td>
                   <td><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>
-                  <td>{formatPrice(item.price)}</td>
+                  <td>{formatPrice(item)}</td>
                   <td>{item.area_sqm ?? '-'}</td>
                 </tr>
               ))}
@@ -161,7 +181,14 @@ export default function CollegePage() {
         {!placesLoading && !placesError && places.length > 0 && (
           <div className="places-grid">
             {places.map((place, i) => (
-              <div key={place.id ?? i} className="place-card">
+              <div key={place.id ?? i} className="place-card college-place-card">
+                <img
+                  className="college-place-image"
+                  src={place.image_url ?? COLLEGE_PLACE_IMAGES[i % COLLEGE_PLACE_IMAGES.length]}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = COLLEGE_PLACE_IMAGES[i % COLLEGE_PLACE_IMAGES.length]; }}
+                />
                 <h3 className="place-name">{place.name}</h3>
                 {place.tags && place.tags.length > 0 && (
                   <div className="college-place-tags">

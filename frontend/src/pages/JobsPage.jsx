@@ -29,7 +29,7 @@ export default function JobsPage() {
       const res = await api.get('/api/jobs', { params });
       const data = res.data;
       setJobs(Array.isArray(data) ? data : data.items ?? []);
-      setHasNext(data.has_next ?? false);
+      setHasNext(!Array.isArray(data) && ((data.page ?? page) * (data.size ?? params.size) < (data.total ?? 0)));
     } catch {
       setError('데이터를 불러올 수 없습니다');
     } finally {
