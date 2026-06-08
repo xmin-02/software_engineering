@@ -6,7 +6,6 @@ import {
   Type, Grid3X3, Accessibility, School, Pill, Globe2, Home,
   Check, ChevronDown, X, ExternalLink,
 } from 'lucide-react';
-import logoBi from '../assets/brand/cheonan-insight-bi.png';
 import './Layout.css';
 
 const FONT_SCALE_KEY = 'cheonan_font_scale';
@@ -139,17 +138,16 @@ export default function Layout() {
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand-card">
-            <img className="sidebar-brand-watermark" src={logoBi} alt="" aria-hidden="true" />
-            <div className="sidebar-brand-symbol" aria-hidden="true">
-              <span className="symbol-dot symbol-dot-left" />
-              <span className="symbol-line symbol-line-a" />
-              <span className="symbol-line symbol-line-b" />
-              <span className="symbol-line symbol-line-c" />
-              <span className="symbol-dot symbol-dot-right" />
-            </div>
-            <div className="sidebar-brand-copy">
-              <h2>천안 인사이트</h2>
-              <p className="sidebar-subtitle">시민의 생각이 모여, 더 나은 천안으로</p>
+            <div className="sidebar-brand-row">
+              <div className="sidebar-mini-mark" aria-hidden="true">
+                <span className="mark-dot mark-dot-left" />
+                <span className="mark-curve" />
+                <span className="mark-dot mark-dot-right" />
+              </div>
+              <div className="sidebar-brand-copy">
+                <h2>천안 인사이트</h2>
+                <p className="sidebar-subtitle">시민의 생각이 모여,<br />더 나은 천안으로</p>
+              </div>
             </div>
           </div>
         </div>

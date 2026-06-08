@@ -369,16 +369,45 @@ app.get('/api/places', async (c) => {
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
 	if (age_group === 'family') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가족','키즈시설'))");
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
-	const rows = await c.env.DB.prepare(
-		`SELECT p.*, (SELECT CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) FROM place_reviews WHERE place_id=p.id) AS avg_sentiment_score, (SELECT COUNT(*) FROM place_reviews WHERE place_id=p.id) AS review_count FROM places p ${wc} ORDER BY COALESCE(p.updated_at, p.collected_at) DESC, p.id DESC LIMIT ?`,
-	)
-		.bind(...params, PLACE_FETCH_LIMIT)
-		.all();
-	const hydrated = [];
-	for (const row of rows.results) hydrated.push(await placeResponse(c.env.DB, row));
-	const filtered = open_now === 'true' ? hydrated.filter((row) => row.is_open_now) : hydrated;
-	const pageItems = filtered.slice(offset, offset + limit);
-	return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
+	const baseSelect = `
+		SELECT
+			p.*,
+			COALESCE(rs.avg_sentiment_score, 0) AS avg_sentiment_score,
+			COALESCE(rs.review_count, 0) AS review_count,
+			COALESCE(GROUP_CONCAT(DISTINCT pt.tag), '') AS tag_list
+		FROM places p
+		LEFT JOIN (
+			SELECT
+				place_id,
+				CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) AS avg_sentiment_score,
+				COUNT(*) AS review_count
+			FROM place_reviews
+			GROUP BY place_id
+		) rs ON rs.place_id = p.id
+		LEFT JOIN place_tags pt ON pt.place_id = p.id
+		${wc}
+		GROUP BY p.id
+		ORDER BY COALESCE(p.updated_at, p.collected_at) DESC, p.id DESC
+	`;
+	const toPlace = (row) => ({
+		...row,
+		tags: row.tag_list ? String(row.tag_list).split(',').filter(Boolean) : [],
+		business_hours: normalizeBusinessHours(row.business_hours),
+		is_open_now: isOpenNow(row.business_hours),
+		rating: row.rating_naver ?? row.rating_kakao ?? null,
+		tag_list: undefined,
+	});
+
+	if (open_now === 'true') {
+		const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ?`).bind(...params, Math.min(PLACE_FETCH_LIMIT, 500)).all();
+		const filtered = rows.results.map(toPlace).filter((row) => row.is_open_now);
+		const pageItems = filtered.slice(offset, offset + limit);
+		return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
+	}
+
+	const total = await c.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM places p ${wc}`).bind(...params).first('cnt');
+	const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ? OFFSET ?`).bind(...params, limit, offset).all();
+	return c.json({ items: rows.results.map(toPlace), total: total || 0, page: pageNum, size: limit, has_next: offset + limit < (total || 0) });
 });
 
 app.get('/api/places/ranking', async (c) => {
