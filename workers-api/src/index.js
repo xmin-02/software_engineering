@@ -27,6 +27,29 @@ const parseJson = (value, fallback = null) => {
 
 const parseDateOnly = (value) => (value ? String(value).slice(0, 10) : null);
 
+const categoryAliases = (category) => {
+	if (!category) return [];
+	const normalized = String(category).trim();
+	if (!normalized) return [];
+	if (['카페/디저트', '카페,디저트', '디저트', '카페 · 디저트', '카페·디저트'].includes(normalized)) {
+		return ['카페', '카페,디저트', '간식'];
+	}
+	if (['맛집', '맛집/카페', '맛집 · 카페', '맛집·카페', '식당'].includes(normalized)) {
+		return ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식'];
+	}
+	if (['일식/중식', '일식 · 중식', '일식·중식'].includes(normalized)) {
+		return ['일식', '중식'];
+	}
+	return [normalized];
+};
+
+const addCategoryFilter = (where, params, column, category) => {
+	const aliases = categoryAliases(category);
+	if (!aliases.length) return;
+	where.push(`${column} IN (${aliases.map(() => '?').join(',')})`);
+	params.push(...aliases);
+};
+
 const latestPostDate = async (db) => {
 	const row = await db.prepare('SELECT date(MAX(published_at)) AS latest FROM posts WHERE published_at IS NOT NULL').first();
 	return row?.latest || null;
@@ -360,10 +383,7 @@ app.get('/api/places', async (c) => {
 	const offset = (pageNum - 1) * limit;
 	const where = [];
 	const params = [];
-	if (category) {
-		where.push('p.category = ?');
-		params.push(category);
-	}
+	addCategoryFilter(where, params, 'p.category', category);
 	if (age_group === 'youth') where.push("p.category NOT IN ('술집','주점')");
 	if (age_group === 'family') where.push("p.id NOT IN (SELECT place_id FROM place_tags WHERE tag='노키즈존')");
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
@@ -416,8 +436,9 @@ app.get('/api/places/ranking', async (c) => {
 	let where = '';
 	const params = [];
 	if (category) {
-		where = 'WHERE p.category = ?';
-		params.push(category);
+		const aliases = categoryAliases(category);
+		where = `WHERE p.category IN (${aliases.map(() => '?').join(',')})`;
+		params.push(...aliases);
 	}
 	params.push(maxRows);
 	const rows = await c.env.DB.prepare(

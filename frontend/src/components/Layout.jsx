@@ -140,9 +140,30 @@ export default function Layout() {
           <div className="sidebar-brand-card">
             <div className="sidebar-brand-row">
               <div className="sidebar-mini-mark" aria-hidden="true">
-                <span className="mark-dot mark-dot-left" />
-                <span className="mark-curve" />
-                <span className="mark-dot mark-dot-right" />
+                <svg viewBox="0 0 220 120" role="img" focusable="false">
+                  <defs>
+                    <linearGradient id="sidebarLogoGradient" x1="0%" y1="20%" x2="100%" y2="80%">
+                      <stop offset="0%" stopColor="#45d85e" />
+                      <stop offset="48%" stopColor="#5fd05a" />
+                      <stop offset="100%" stopColor="#329cf2" />
+                    </linearGradient>
+                    <linearGradient id="sidebarLogoSoft" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#68e17c" stopOpacity="0.18" />
+                      <stop offset="100%" stopColor="#4ab0f3" stopOpacity="0.18" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    className="mark-wave"
+                    d="M12 88 C12 58 28 47 45 60 C68 76 78 98 104 72 C124 52 121 16 150 12 C179 8 187 42 190 70 C193 98 211 76 212 99"
+                  />
+                  <circle className="mark-dot-left" cx="39" cy="38" r="14" />
+                  <circle className="mark-dot-right" cx="199" cy="43" r="14" />
+                  <line className="mark-bar mark-bar-left" x1="91" y1="83" x2="91" y2="108" />
+                  <line className="mark-bar mark-bar-center" x1="111" y1="72" x2="111" y2="108" />
+                  <line className="mark-bar mark-bar-right" x1="131" y1="87" x2="131" y2="108" />
+                  <line className="mark-rail mark-rail-left" x1="30" y1="112" x2="78" y2="112" />
+                  <line className="mark-rail mark-rail-right" x1="166" y1="112" x2="210" y2="112" />
+                </svg>
               </div>
               <div className="sidebar-brand-copy">
                 <h2>천안 인사이트</h2>
