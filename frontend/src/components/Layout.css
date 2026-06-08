@@ -25,35 +25,41 @@
 }
 
 .sidebar-header {
-  padding: 0 16px 64px;
-}
-
-.sidebar-brand-card {
   position: relative;
-  color: #fff;
+  height: 198px;
+  padding: 0 16px;
 }
 
-.sidebar-brand-card::before {
+.sidebar-header::before {
   content: '';
   position: absolute;
-  left: -16px;
+  left: 0;
   right: -8px;
   top: 0;
   height: 172px;
   border-radius: 0 28px 28px 0;
   background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
   border-left: 3px solid rgba(112, 229, 138, 0.72);
-  z-index: -1;
+  z-index: 0;
+}
+
+.sidebar-brand-card {
+  position: relative;
+  z-index: 1;
+  height: 172px;
+  color: #fff;
 }
 
 .sidebar-brand-logo {
-  position: relative;
+  position: absolute;
+  top: 19px;
+  left: 12px;
   width: 154px;
   height: auto;
   display: block;
   max-width: 154px;
   margin-left: 0;
-  margin-top: 19px;
+  margin-top: 0;
   filter: drop-shadow(0 10px 16px rgba(5, 12, 30, 0.22));
   user-select: none;
   -webkit-user-drag: none;
