@@ -2,9 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import api from '../api/client';
 import './FamilyPage.css';
+import homeImage1 from '../assets/figma/home-1.jpg';
+import homeImage2 from '../assets/figma/home-2.jpg';
+import homeImage3 from '../assets/figma/home-3.jpg';
+import familyPlaceImage1 from '../assets/figma/family-place-1.jpg';
+import familyPlaceImage2 from '../assets/figma/family-place-2.jpg';
+import familyPlaceImage3 from '../assets/figma/family-place-4.jpg';
 
 const PROPERTY_TYPES = ['아파트', '빌라', '오피스텔', '단독주택', '상가'];
 const TRADE_TYPES = ['매매', '전세', '월세'];
+const HOME_IMAGES = [homeImage1, homeImage2, homeImage3];
+const FAMILY_PLACE_IMAGES = [familyPlaceImage1, familyPlaceImage2, familyPlaceImage3];
 
 export default function FamilyPage() {
   const [estates, setEstates] = useState([]);
@@ -12,7 +20,7 @@ export default function FamilyPage() {
   const [tradeType, setTradeType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [estateOpen, setEstateOpen] = useState(false);
+  const [estateOpen, setEstateOpen] = useState(true);
 
   // 맛집 추천 상태
   const [places, setPlaces] = useState([]);
@@ -87,7 +95,14 @@ export default function FamilyPage() {
         {!placesLoading && !placesError && places.length > 0 && (
           <div className="places-grid">
             {places.map((place, i) => (
-              <div key={place.id ?? i} className="place-card">
+              <div key={place.id ?? i} className="place-card family-place-card">
+                <img
+                  className="family-place-image"
+                  src={FAMILY_PLACE_IMAGES[i % FAMILY_PLACE_IMAGES.length]}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.src = FAMILY_PLACE_IMAGES[i % FAMILY_PLACE_IMAGES.length]; }}
+                />
                 <h3 className="place-name">{place.name}</h3>
                 {place.category && (
                   <span className="place-category">{place.category}</span>
@@ -170,7 +185,10 @@ export default function FamilyPage() {
                             : formatPrice(item.price);
                           const floorText = item.floor && item.floor !== '-' ? `${item.floor}층` : '-';
                           return (
-                            <tr key={item.id ?? i}>
+                            <tr
+                              key={item.id ?? i}
+                              style={{ '--estate-image': `url(${HOME_IMAGES[i % HOME_IMAGES.length]})` }}
+                            >
                               <td className="family-address-cell" data-label="주소" title={item.address ?? ''}>{item.address ?? '-'}</td>
                               <td data-label="매물유형"><span className="family-type-badge">{item.property_type ?? '-'}</span></td>
                               <td data-label="거래유형"><span className={`trade-badge ${item.deal_type}`}>{item.deal_type ?? '-'}</span></td>

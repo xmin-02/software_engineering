@@ -49,6 +49,9 @@ class CrawlScheduler:
             from crawler.places.blog_review import BlogReviewCrawler
             from crawler.events.cheonan_events import CheonanEventsCrawler
             from crawler.youth.university_notice import UniversityNoticeCrawler
+            from crawler.youth.notice_content_crawler import NoticeContentCrawler
+            from crawler.jobs.work24_crawler import Work24Crawler
+            from crawler.jobs.saramin_crawler import SaraminCrawler
             from crawler.common.real_estate import RealEstateCrawler
 
             crawlers: list[Any] = [
@@ -60,6 +63,9 @@ class CrawlScheduler:
                 BlogReviewCrawler(),
                 CheonanEventsCrawler(),
                 UniversityNoticeCrawler(),
+                NoticeContentCrawler(),
+                Work24Crawler(),
+                SaraminCrawler(),
                 RealEstateCrawler(),
             ]
 

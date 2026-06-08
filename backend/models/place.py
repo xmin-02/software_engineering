@@ -28,6 +28,8 @@ class Place(Base):
     price_range: Mapped[str | None] = mapped_column(String(20))
     naver_place_id: Mapped[str | None] = mapped_column(String(100))
     kakao_place_id: Mapped[str | None] = mapped_column(String(100))
+    image_url: Mapped[str | None] = mapped_column(Text)
+    image_source: Mapped[str | None] = mapped_column(String(50))
     collected_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -41,11 +41,13 @@ def _build_place_response(place: Place, stats: dict | None = None) -> dict:
         "address": place.address,
         "rating_naver": place.rating_naver,
         "rating_kakao": place.rating_kakao,
+        "image_url": place.image_url,
         "latitude": place.latitude,
         "longitude": place.longitude,
         "business_hours": place.business_hours,
         "has_parking": place.has_parking,
         "price_range": place.price_range,
+        "image_url": place.image_url,
         "is_open_now": is_open_now(place.business_hours),
         "tags": [t.tag for t in place.tags] if place.tags else [],
         "avg_sentiment_score": stats.get("avg_score") if stats else None,
@@ -177,11 +179,15 @@ def get_places(
     return items, total
 
 
-def get_place_detail(db: Session, place_id: int) -> dict | None:
+def get_place_detail(
+    db: Session,
+    place_id: int,
+    review_limit: int = 10,
+) -> dict | None:
     """장소 상세 (리뷰 포함, eager loading)"""
     place = (
         db.query(Place)
-        .options(selectinload(Place.reviews), selectinload(Place.tags))
+        .options(selectinload(Place.tags))
         .filter(Place.id == place_id)
         .first()
     )
@@ -203,6 +209,16 @@ def get_place_detail(db: Session, place_id: int) -> dict | None:
         "review_count": stats_row.review_count,
     }
 
+    reviews = (
+        db.query(PlaceReview)
+        .filter(PlaceReview.place_id == place_id)
+        .order_by(PlaceReview.published_at.desc().nullslast(), PlaceReview.id.desc())
+        .limit(review_limit)
+        .all()
+        if review_limit > 0
+        else []
+    )
+
     return {
         "place": _build_place_response(place, stats),
         "reviews": [
@@ -216,7 +232,7 @@ def get_place_detail(db: Session, place_id: int) -> dict | None:
                 "keywords": r.keywords,
                 "published_at": r.published_at,
             }
-            for r in place.reviews
+            for r in reviews
         ],
     }
 
@@ -258,6 +274,7 @@ def get_ranking(
             "review_count": review_count,
             "rating_naver": place.rating_naver,
             "rating_kakao": place.rating_kakao,
+        "image_url": place.image_url,
         }
         for place, avg_score, review_count in rows
     ]

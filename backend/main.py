@@ -39,16 +39,19 @@ app = FastAPI(
 )
 
 # CORS — credentials 사용 시 와일드카드 금지(브라우저가 무음 차단).
-# CORS_ORIGINS 환경변수(콤마 구분)로 운영 도메인 명시. 기본값은 운영 프론트.
+# CORS_ORIGINS 환경변수(콤마 구분)로 운영 도메인 명시.
+# 로컬 개발은 Vite가 5173 외 포트로 재시작될 수 있어 localhost 포트 전체를 정규식으로 허용.
 _cors_env = os.environ.get("CORS_ORIGINS")
 _cors_origins = (
     [o.strip() for o in _cors_env.split(",") if o.strip()]
     if _cors_env
     else ["https://cheonan.xmin.cloud"]
 )
+_local_cors_regex = r"https?://(localhost|127\.0\.0\.1):\d+"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
+    allow_origin_regex=_local_cors_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,6 +100,7 @@ from backend.routes.jobs import router as jobs_router
 from backend.routes.certifications import router as certifications_router
 from backend.routes.family import router as family_router
 from backend.routes.pipeline import router as pipeline_router
+from backend.routes.life_info import router as life_info_router
 
 app.include_router(dashboard_router)
 app.include_router(places_router)
@@ -107,3 +111,4 @@ app.include_router(jobs_router)
 app.include_router(certifications_router)
 app.include_router(family_router)
 app.include_router(pipeline_router)
+app.include_router(life_info_router)

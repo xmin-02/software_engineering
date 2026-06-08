@@ -166,7 +166,7 @@ python run_pipeline.py
 uvicorn backend.main:app --reload
 
 # Start frontend (in another terminal)
-cd frontend && npm start
+cd frontend && npm run dev
 ```
 
 ## Git Workflow

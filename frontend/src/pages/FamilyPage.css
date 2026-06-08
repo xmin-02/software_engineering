@@ -183,3 +183,185 @@
     white-space: normal;
   }
 }
+
+/* ===== Figma family page card layout ===== */
+.family-page {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+}
+
+.family-page-title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+}
+
+.estate-section {
+  order: 1;
+  border: 0;
+  background: transparent;
+  box-shadow: none !important;
+  overflow: visible;
+}
+
+.places-section--main {
+  order: 2;
+  margin-top: 34px;
+}
+
+.estate-toggle {
+  width: auto;
+  min-height: 40px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+}
+
+.family-page .filter-bar {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+.estate-section .table-wrapper {
+  background: transparent;
+  box-shadow: none !important;
+  border: 0;
+  overflow: visible;
+}
+
+.estate-table,
+.estate-table tbody {
+  display: block;
+}
+
+.estate-table thead {
+  display: none;
+}
+
+.estate-table tbody {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(20px, 5vw, 64px);
+}
+
+.estate-table tbody tr {
+  display: block;
+  min-height: 404px;
+  border: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 20px 40px rgba(26, 26, 46, 0.06);
+  position: relative;
+}
+
+.estate-table tbody tr::before {
+  content: '';
+  display: block;
+  height: 192px;
+  background-image: var(--estate-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.estate-table tbody tr::after {
+  content: '매물';
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #191c1f;
+  font-size: 10px;
+}
+
+.estate-table td {
+  display: block;
+  padding: 3px 24px;
+  border: 0;
+}
+
+.estate-table td::before {
+  content: attr(data-label);
+  display: block;
+  color: #727785;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.estate-table td:nth-child(1)::before,
+.estate-table td:nth-child(2)::before,
+.estate-table td:nth-child(3)::before {
+  display: none;
+}
+
+.family-address-cell {
+  max-width: none;
+  white-space: nowrap;
+  font-size: 18px;
+  color: #191c1f !important;
+  margin-top: 20px;
+}
+
+.family-address-cell::after {
+  content: '천안시 생활권 매물';
+  display: block;
+  color: #414754;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 8px;
+}
+
+.estate-table td:nth-child(2),
+.estate-table td:nth-child(3) {
+  display: inline-block;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.estate-table td:nth-child(2) {
+  padding-left: 24px;
+}
+
+.family-price-cell {
+  color: #191c1f !important;
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.family-place-card {
+  overflow: hidden;
+  padding: 0 0 14px;
+  border-radius: 14px;
+}
+
+.family-place-image {
+  width: calc(100% - 24px);
+  height: 110px;
+  margin: 12px 12px 10px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+.family-place-card .place-name,
+.family-place-card .place-category,
+.family-place-card .place-address {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+@media (max-width: 640px) {
+  .estate-table tbody {
+    grid-template-columns: 1fr;
+  }
+}

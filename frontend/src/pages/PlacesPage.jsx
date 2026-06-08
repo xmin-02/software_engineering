@@ -1,6 +1,73 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api/client';
 import './PlacesPage.css';
+import placeImage1 from '../assets/figma/place-1.jpg';
+import placeImage2 from '../assets/figma/place-2.jpg';
+import placeImage3 from '../assets/figma/place-3.jpg';
+import placeImage4 from '../assets/figma/place-4.jpg';
+import placeImage5 from '../assets/figma/place-6.jpg';
+
+
+function formatBusinessHours(hours) {
+  if (!hours) return '';
+  if (typeof hours === 'string') return hours;
+  const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const today = dayNames[new Date().getDay()];
+  return hours[today] || hours.everyday || Object.values(hours).find(Boolean) || '';
+}
+
+function getKakaoMaps() {
+  return window.kakao?.maps ?? null;
+}
+
+const PLACE_IMAGES = [placeImage1, placeImage2, placeImage3, placeImage4, placeImage5];
+
+function getPlacePositionStyle(place, index = 0) {
+  if (!place.latitude || !place.longitude) {
+    return {
+      left: `${18 + (index % 5) * 15}%`,
+      top: `${24 + (index % 4) * 14}%`,
+    };
+  }
+
+  const minLat = 36.76;
+  const maxLat = 36.9;
+  const minLng = 127.05;
+  const maxLng = 127.24;
+  const left = ((place.longitude - minLng) / (maxLng - minLng)) * 100;
+  const top = (1 - ((place.latitude - minLat) / (maxLat - minLat))) * 100;
+
+  return {
+    left: `${Math.min(94, Math.max(6, left))}%`,
+    top: `${Math.min(90, Math.max(10, top))}%`,
+  };
+}
+
+function FallbackMap({ places, place, compact = false }) {
+  const items = place ? [place] : places.filter((p) => p.latitude && p.longitude);
+
+  return (
+    <div className={`fallback-map${compact ? ' compact' : ''}`}>
+      <div className="fallback-map-grid" />
+      <div className="fallback-map-label">천안 좌표 지도</div>
+      {items.length === 0 ? (
+        <div className="fallback-map-empty">표시할 좌표 정보가 없습니다</div>
+      ) : (
+        items.map((item, index) => (
+          <div
+            key={item.id ?? item.name ?? index}
+            className="fallback-map-marker"
+            style={getPlacePositionStyle(item, index)}
+            title={item.name}
+          >
+            <span className="fallback-map-dot" />
+            <span className="fallback-map-name">{item.name}</span>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
 
 // 감성 뱃지 (리뷰용)
 function SentimentBadge({ sentiment }) {
@@ -58,16 +125,17 @@ function ReviewItem({ review }) {
 // 모달 내 미니맵
 function ModalMiniMap({ place }) {
   const mapRef = useRef(null);
+  const hasCoordinates = Boolean(place.latitude && place.longitude);
+  const maps = getKakaoMaps();
 
   useEffect(() => {
-    if (!mapRef.current || !place.latitude || !place.longitude || !window.kakao) return;
+    if (!mapRef.current || !hasCoordinates || !maps) return;
 
     const init = () => {
-      const kakao = window.kakao;
-      const pos = new kakao.maps.LatLng(place.latitude, place.longitude);
-      const map = new kakao.maps.Map(mapRef.current, { center: pos, level: 4 });
-
-      new kakao.maps.Marker({ map, position: pos });
+      const pos = new maps.LatLng(place.latitude, place.longitude);
+      mapRef.current.innerHTML = '';
+      const map = new maps.Map(mapRef.current, { center: pos, level: 4 });
+      const marker = new maps.Marker({ map, position: pos });
 
       const content = `
         <div style="padding:8px 12px;font-size:12px;font-weight:600;
@@ -76,14 +144,14 @@ function ModalMiniMap({ place }) {
           ${place.name}
         </div>
       `;
-      const iw = new kakao.maps.InfoWindow({ content, removable: false });
-      iw.open(map, new kakao.maps.Marker({ map, position: pos }));
+      const iw = new maps.InfoWindow({ content, removable: false });
+      iw.open(map, marker);
     };
 
-    kakao.maps.load(init);
-  }, [place]);
+    maps.load(init);
+  }, [hasCoordinates, maps, place]);
 
-  if (!place.latitude || !place.longitude) {
+  if (!hasCoordinates) {
     return (
       <div className="modal-map-placeholder">
         <span>좌표 정보 없음</span>
@@ -91,25 +159,41 @@ function ModalMiniMap({ place }) {
     );
   }
 
+  if (!maps) {
+    return <FallbackMap place={place} compact />;
+  }
+
   return <div className="modal-map-container" ref={mapRef} />;
 }
 
 // 장소 상세 모달
-function PlaceDetailModal({ placeId, onClose }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+function PlaceDetailModal({ cachedDetail, onClose, onDetailLoaded, placeSummary }) {
+  const [data, setData] = useState(
+    cachedDetail ?? (placeSummary ? { place: placeSummary, reviews: [] } : null)
+  );
+  const [loading, setLoading] = useState(!cachedDetail);
   const [error, setError] = useState(null);
   const overlayRef = useRef(null);
   const panelRef = useRef(null);
+  const placeId = placeSummary?.id ?? cachedDetail?.place?.id;
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    api.get(`/api/places/${placeId}`)
-      .then((res) => setData(res.data))
-      .catch(() => setError('상세 정보를 불러올 수 없습니다'))
-      .finally(() => setLoading(false));
-  }, [placeId]);
+    if (!placeId || cachedDetail) return undefined;
+    let ignore = false;
+    api.get(`/api/places/${placeId}`, { params: { review_limit: 10 } })
+      .then((res) => {
+        if (ignore) return;
+        setData(res.data);
+        onDetailLoaded(placeId, res.data);
+      })
+      .catch(() => {
+        if (!ignore) setError('상세 정보를 불러올 수 없습니다');
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => { ignore = true; };
+  }, [cachedDetail, onDetailLoaded, placeId]);
 
   // ESC 키 닫기
   useEffect(() => {
@@ -176,10 +260,10 @@ function PlaceDetailModal({ placeId, onClose }) {
           ✕
         </button>
 
-        {loading && <p className="modal-status">불러오는 중...</p>}
-        {error   && <p className="modal-status error">{error}</p>}
+        {loading && !place && <p className="modal-status">불러오는 중...</p>}
+        {error && !place && <p className="modal-status error">{error}</p>}
 
-        {!loading && !error && place && (
+        {place && (
           <div className="modal-body">
             {/* 왼쪽 패널 */}
             <div className="modal-left">
@@ -212,7 +296,7 @@ function PlaceDetailModal({ placeId, onClose }) {
               {/* 부가 정보 (있는 경우만) */}
               <div className="modal-info-row">
                 {place.business_hours && (
-                  <span className="modal-info-chip">🕐 {place.business_hours}</span>
+                  <span className="modal-info-chip">🕐 {formatBusinessHours(place.business_hours)}</span>
                 )}
                 {place.has_parking != null && (
                   <span className="modal-info-chip">
@@ -237,12 +321,18 @@ function PlaceDetailModal({ placeId, onClose }) {
               <div className="modal-reviews">
                 <h3 className="modal-reviews-title">
                   블로그 리뷰
-                  <span className="modal-reviews-count">{reviews.length}건</span>
+                  <span className="modal-reviews-count">
+                    {loading ? '불러오는 중' : `${reviews.length}건`}
+                  </span>
                 </h3>
-                {reviews.length === 0
-                  ? <p className="modal-status">리뷰 데이터가 없습니다</p>
-                  : reviews.map((r) => <ReviewItem key={r.id} review={r} />)
-                }
+                {loading && <p className="modal-status">리뷰를 불러오는 중...</p>}
+                {!loading && error && <p className="modal-status error">{error}</p>}
+                {!loading && !error && reviews.length === 0 && (
+                  <p className="modal-status">리뷰 데이터가 없습니다</p>
+                )}
+                {!loading && !error && reviews.map((r) => (
+                  <ReviewItem key={r.id} review={r} />
+                ))}
               </div>
             </div>
 
@@ -297,8 +387,9 @@ function SentimentDualBar({ score }) {
 }
 
 // 장소 카드 컴포넌트
-function PlaceCard({ place, rank, onClick }) {
+function PlaceCard({ place, rank, index = 0, onClick, onPrefetch }) {
   const catClass = CATEGORY_CLASS[place.category] ?? 'cat-default';
+  const imageSrc = place.image_url ?? place.photo_url ?? PLACE_IMAGES[index % PLACE_IMAGES.length];
 
   const rankClass = rank != null
     ? `place-card ranked rank-${rank}`
@@ -316,11 +407,23 @@ function PlaceCard({ place, rank, onClick }) {
       className={rankClass}
       onClick={onClick}
       onKeyDown={handleKeyDown}
+      onFocus={onPrefetch}
+      onMouseEnter={onPrefetch}
       role="button"
       tabIndex={0}
       aria-label={`${place.name} 상세 보기`}
       style={{ cursor: 'pointer' }}
     >
+      <div className="place-card-image-wrap">
+        <img
+          src={imageSrc}
+          alt=""
+          className="place-card-image"
+          loading="lazy"
+          onError={(e) => { e.currentTarget.src = PLACE_IMAGES[index % PLACE_IMAGES.length]; }}
+        />
+        <span className="place-rating-pill">★ {place.rating ?? place.avg_rating ?? '4.8'}</span>
+      </div>
       {/* 랭킹 뱃지 */}
       {rank != null && rank <= 3 && (
         <div className="rank-badge-wrap">
@@ -367,7 +470,29 @@ export default function PlacesPage() {
   const [openNow, setOpenNow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedPlaceId, setSelectedPlaceId] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [detailCache, setDetailCache] = useState({});
+  const pendingDetailIdsRef = useRef(new Set());
+
+  const handleDetailLoaded = useCallback((placeId, detail) => {
+    setDetailCache((cache) => ({ ...cache, [placeId]: detail }));
+  }, []);
+
+  const prefetchPlaceDetail = useCallback((place) => {
+    if (!place?.id || detailCache[place.id] || pendingDetailIdsRef.current.has(place.id)) {
+      return;
+    }
+
+    pendingDetailIdsRef.current.add(place.id);
+    api.get(`/api/places/${place.id}`, { params: { review_limit: 10 } })
+      .then((res) => {
+        setDetailCache((cache) => ({ ...cache, [place.id]: res.data }));
+      })
+      .catch(() => {})
+      .finally(() => {
+        pendingDetailIdsRef.current.delete(place.id);
+      });
+  }, [detailCache]);
 
   const fetchPlaces = useCallback(async () => {
     setLoading(true);
@@ -379,7 +504,7 @@ export default function PlacesPage() {
       const res = await api.get('/api/places', { params });
       const data = res.data;
       setPlaces(Array.isArray(data) ? data : (data.items ?? []));
-      setHasNext(data.has_next ?? false);
+      setHasNext(!Array.isArray(data) && ((data.page ?? page) * (data.size ?? params.size) < (data.total ?? 0)));
     } catch {
       setError('데이터를 불러올 수 없습니다');
     } finally {
@@ -404,6 +529,10 @@ export default function PlacesPage() {
     if (activeTab === 'list') fetchPlaces();
     else if (activeTab === 'ranking') fetchRanking();
   }, [activeTab, fetchPlaces, fetchRanking]);
+
+  useEffect(() => {
+    places.slice(0, 3).forEach((place) => prefetchPlaceDetail(place));
+  }, [places, prefetchPlaceDetail]);
 
   const handleCategoryChange = (e) => {
     setCategory(e.target.value);
@@ -480,7 +609,13 @@ export default function PlacesPage() {
             {places.length === 0
               ? <p className="status-msg">아직 데이터가 없습니다</p>
               : places.map((p, i) => (
-                  <PlaceCard key={p.id ?? i} place={p} onClick={() => setSelectedPlaceId(p.id)} />
+                  <PlaceCard
+                    key={p.id ?? i}
+                    place={p}
+                    index={i}
+                    onClick={() => setSelectedPlace(p)}
+                    onPrefetch={() => prefetchPlaceDetail(p)}
+                  />
                 ))
             }
           </div>
@@ -502,7 +637,14 @@ export default function PlacesPage() {
           {ranking.length === 0
             ? <p className="status-msg">아직 데이터가 없습니다</p>
             : ranking.map((p, i) => (
-                <PlaceCard key={p.id ?? i} place={p} rank={i + 1} onClick={() => setSelectedPlaceId(p.id)} />
+                <PlaceCard
+                  key={p.id ?? i}
+                  place={p}
+                  rank={i + 1}
+                  index={i}
+                  onClick={() => setSelectedPlace(p)}
+                  onPrefetch={() => prefetchPlaceDetail(p)}
+                />
               ))
           }
         </div>
@@ -512,10 +654,13 @@ export default function PlacesPage() {
       {activeTab === 'map' && <KakaoMap places={places} />}
 
       {/* 장소 상세 모달 */}
-      {selectedPlaceId != null && (
+      {selectedPlace != null && (
         <PlaceDetailModal
-          placeId={selectedPlaceId}
-          onClose={() => setSelectedPlaceId(null)}
+          key={selectedPlace.id}
+          cachedDetail={detailCache[selectedPlace.id]}
+          onClose={() => setSelectedPlace(null)}
+          onDetailLoaded={handleDetailLoaded}
+          placeSummary={selectedPlace}
         />
       )}
     </div>
@@ -524,30 +669,30 @@ export default function PlacesPage() {
 
 function KakaoMap({ places }) {
   const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+  const maps = getKakaoMaps();
 
   useEffect(() => {
-    if (!mapRef.current || !window.kakao) return;
+    const mapNode = mapRef.current;
+    if (!mapNode || !maps) return;
 
     const initMap = () => {
-      const kakao = window.kakao;
-      const center = new kakao.maps.LatLng(36.8151, 127.1139);
-      const map = new kakao.maps.Map(mapRef.current, {
+      mapNode.innerHTML = '';
+      const center = new maps.LatLng(36.8151, 127.1139);
+      const map = new maps.Map(mapNode, {
         center,
         level: 7,
       });
-      mapInstanceRef.current = map;
 
-      const bounds = new kakao.maps.LatLngBounds();
+      const bounds = new maps.LatLngBounds();
       let hasMarker = false;
 
       places.forEach((place) => {
         if (!place.latitude || !place.longitude) return;
-        const pos = new kakao.maps.LatLng(place.latitude, place.longitude);
+        const pos = new maps.LatLng(place.latitude, place.longitude);
         bounds.extend(pos);
         hasMarker = true;
 
-        const marker = new kakao.maps.Marker({ map, position: pos });
+        const marker = new maps.Marker({ map, position: pos });
 
         const content = `
           <div style="padding:10px 14px;font-size:13px;max-width:220px;line-height:1.5;border-radius:8px">
@@ -557,9 +702,9 @@ function KakaoMap({ places }) {
             ${place.review_count ? `<br/><span style="color:#4f46e5;font-size:12px">💬 리뷰 ${place.review_count}건</span>` : ''}
           </div>
         `;
-        const infowindow = new kakao.maps.InfoWindow({ content });
+        const infowindow = new maps.InfoWindow({ content });
 
-        kakao.maps.event.addListener(marker, 'click', () => {
+        maps.event.addListener(marker, 'click', () => {
           infowindow.open(map, marker);
         });
       });
@@ -569,10 +714,11 @@ function KakaoMap({ places }) {
       }
     };
 
-    if (window.kakao.maps) {
-      kakao.maps.load(initMap);
-    }
-  }, [places]);
+    maps.load(initMap);
+    return () => {
+      mapNode.innerHTML = '';
+    };
+  }, [maps, places]);
 
   const visibleCount = places.filter((p) => p.latitude).length;
 
@@ -585,7 +731,9 @@ function KakaoMap({ places }) {
         className="map-container"
         ref={mapRef}
         style={{ width: '100%', height: 'calc(100vh - 220px)', minHeight: '480px' }}
-      />
+      >
+        {!maps && <FallbackMap places={places} />}
+      </div>
     </div>
   );
 }

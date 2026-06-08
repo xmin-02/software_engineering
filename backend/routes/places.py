@@ -40,8 +40,12 @@ def place_ranking(
 
 
 @router.get("/{place_id}", response_model=PlaceDetail)
-def place_detail(place_id: int, db: Session = Depends(get_db)):
-    result = place_service.get_place_detail(db, place_id)
+def place_detail(
+    place_id: int,
+    review_limit: int = Query(10, ge=0, le=50),
+    db: Session = Depends(get_db),
+):
+    result = place_service.get_place_detail(db, place_id, review_limit=review_limit)
     if not result:
         raise HTTPException(status_code=404, detail="Place not found")
     return result

@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS places (
     price_range VARCHAR(20),
     naver_place_id VARCHAR(100),
     kakao_place_id VARCHAR(100),
+    image_url TEXT,
+    image_source VARCHAR(50),
     collected_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -117,6 +119,8 @@ CREATE TABLE IF NOT EXISTS events (
     url TEXT,
     source VARCHAR(50),
     category VARCHAR(50),
+    image_url TEXT,
+    image_source VARCHAR(50),
     collected_at TIMESTAMP DEFAULT NOW()
 );
 

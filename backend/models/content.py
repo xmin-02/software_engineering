@@ -31,6 +31,8 @@ class Event(Base):
     url: Mapped[str | None] = mapped_column(Text)
     source: Mapped[str | None] = mapped_column(String(50))
     category: Mapped[str | None] = mapped_column(String(50))
+    image_url: Mapped[str | None] = mapped_column(Text)
+    image_source: Mapped[str | None] = mapped_column(String(50))
     collected_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
