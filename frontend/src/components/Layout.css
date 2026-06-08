@@ -54,53 +54,20 @@
 }
 
 .sidebar-mini-mark {
-  width: 138px;
-  height: 76px;
-  margin-left: -3px;
-  margin-bottom: -2px;
+  width: 156px;
+  height: 82px;
+  margin-left: -7px;
+  margin-bottom: -8px;
 }
 
-.sidebar-mini-mark svg {
+.sidebar-mini-mark img {
   width: 100%;
   height: 100%;
   display: block;
-  overflow: visible;
-  filter: drop-shadow(0 10px 18px rgba(8, 17, 38, 0.28));
-}
-
-.mark-wave {
-  fill: none;
-  stroke: url('#sidebarLogoGradient');
-  stroke-width: 13;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.mark-dot-left,
-.mark-dot-right {
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.16));
-}
-
-.mark-dot-left {
-  fill: #4fd767;
-}
-
-.mark-dot-right {
-  fill: #3aa4f2;
-}
-
-.mark-bar,
-.mark-rail {
-  stroke-linecap: round;
-  stroke-width: 9;
-}
-
-.mark-bar {
-  stroke: url('#sidebarLogoGradient');
-}
-
-.mark-rail {
-  stroke: url('#sidebarLogoSoft');
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(5, 12, 30, 0.24));
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .sidebar-brand-copy {
