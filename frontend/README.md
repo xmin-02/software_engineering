@@ -1,16 +1,41 @@
-# React + Vite
+# Cheonan Insight Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite dashboard frontend for the Cheonan community sentiment and lifestyle information service.
 
-Currently, two official plugins are available:
+## Production
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Dashboard: https://ch.xmin.io/
+- API: https://cheonan-api.xmincloud.com
+- Hosting: Cloudflare Pages (`software-engineering`)
 
-## React Compiler
+## Current UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Figma-inspired dashboard layout with a dark gradient sidebar and Cheonan Insight brand panel.
+- Main tabs: dashboard, `맛집 · 카페`, tourism, youth, college, jobs, family.
+- Expanded lifestyle tabs: accessibility, high-school, medical/pharmacy, foreign-life, single-household.
+- Top-right controls: favorites, notifications, language, font size, widgets.
+- Favorites dropdown actions open modals before navigating to the target section.
 
-## Expanding the ESLint configuration
+## Local Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+Local `.env` may point to `http://127.0.0.1:8000` for backend development.
+
+## Production Build
+
+Always pass the production API URL when building a deployable bundle:
+
+```bash
+VITE_API_URL=https://cheonan-api.xmincloud.com npm run build
+```
+
+## Verification
+
+```bash
+npm run lint
+npm run build
+```

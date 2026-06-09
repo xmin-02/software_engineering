@@ -4,6 +4,28 @@ A web-based dashboard that collects posts from Cheonan-area online communities a
 
 > Software Engineering Course Project
 
+
+## Current Deployment Status (2026-06-09)
+
+- **Production dashboard:** https://ch.xmin.io/
+- **Production API:** https://cheonan-api.xmincloud.com
+- **Frontend hosting:** Cloudflare Pages (`software-engineering`)
+- **Edge/API layer:** Cloudflare Workers (`cheonan-api`)
+- **Latest UI pass:** Figma-inspired dashboard shell, dark gradient sidebar, Cheonan Insight brand panel, expanded lifestyle tabs, top-right dropdowns and modal actions.
+- **Production build note:** when deploying the frontend manually, build with `VITE_API_URL=https://cheonan-api.xmincloud.com` so the deployed app does not point at local `127.0.0.1:8000`.
+
+### Live UI Coverage
+
+The current deployed UI includes:
+
+- Main dashboard with sentiment trend, weekly topics, keyword/source cards, summaries, and recent posts.
+- `맛집 · 카페` tab with restaurant/cafe cards, filters, currently-open control, and detail interactions.
+- `관광`, `청년`, `대학교`, `일자리`, `가족` sections.
+- Additional lifestyle side tabs: `무장애 정보`, `고등학생`, `의료/약국`, `외국인 생활`, `1인 가구`.
+- Right-top controls for favorites, notifications, language, font size, and widgets.
+- Dropdown-driven modals for favorite shortcuts, favorite management, notifications, language changes, and widget previews.
+- Real place/tourism imagery where available, with local fallback assets for stable rendering.
+
 ## Overview
 
 This system crawls posts from local online communities (Naver Blog, DCInside Cheonan Gallery, Cheonan City Hall) and restaurant/cafe reviews (Naver Place, KakaoMap) related to Cheonan city. It analyzes sentiment and topics using locally-run AI models, and presents the results through an interactive web dashboard with two main features: regional opinion analysis and restaurant/cafe recommendations.
@@ -55,7 +77,7 @@ This system crawls posts from local online communities (Naver Blog, DCInside Che
 | Backend | FastAPI |
 | Frontend | React + Recharts |
 | Database | PostgreSQL |
-| Hosting | Cloudflare (Tunnel / Pages) |
+| Hosting | Cloudflare Pages + Cloudflare Workers |
 
 > All AI models run locally. No external API calls for inference. Models run sequentially to prevent memory contention.
 
@@ -90,7 +112,7 @@ This system crawls posts from local online communities (Naver Blog, DCInside Che
 ```
 [Opinion Crawlers]                 [Cloudflare]
  ├─ Naver Blog (Search API)       ├─ Pages (React Dashboard)
- ├─ DCInside (BeautifulSoup)      └─ Tunnel (FastAPI Proxy)
+ ├─ DCInside (BeautifulSoup)      └─ Workers API / Edge Proxy
  └─ Cheonan City (BeautifulSoup)        ↑
         │                           [FastAPI]
 [Review Crawlers]                       ↑
@@ -167,6 +189,9 @@ uvicorn backend.main:app --reload
 
 # Start frontend (in another terminal)
 cd frontend && npm run dev
+
+# Production frontend build
+cd frontend && VITE_API_URL=https://cheonan-api.xmincloud.com npm run build
 ```
 
 ## Git Workflow
@@ -241,7 +266,7 @@ This project is for educational purposes only.
 | 백엔드 | FastAPI |
 | 프론트엔드 | React + Recharts |
 | 데이터베이스 | PostgreSQL |
-| 호스팅 | Cloudflare (Tunnel / Pages) |
+| 호스팅 | Cloudflare Pages + Cloudflare Workers |
 
 > 모든 AI 모델은 로컬에서 실행됩니다. 추론을 위한 외부 API 호출이 없습니다. 메모리 경합 방지를 위해 모델은 순차 실행됩니다.
 
@@ -276,7 +301,7 @@ This project is for educational purposes only.
 ```
 [여론 크롤러]                       [Cloudflare]
  ├─ 네이버 블로그 (검색 API)       ├─ Pages (React 대시보드)
- ├─ 디시인사이드 (BeautifulSoup)   └─ Tunnel (FastAPI 프록시)
+ ├─ 디시인사이드 (BeautifulSoup)   └─ Workers API / 엣지 프록시
  └─ 천안시청 (BeautifulSoup)             ↑
         │                           [FastAPI]
 [리뷰 크롤러]                           ↑
@@ -352,7 +377,10 @@ python run_pipeline.py
 uvicorn backend.main:app --reload
 
 # 프론트엔드 시작 (다른 터미널에서)
-cd frontend && npm start
+cd frontend && npm run dev
+
+# 프로덕션 프론트엔드 빌드
+cd frontend && VITE_API_URL=https://cheonan-api.xmincloud.com npm run build
 ```
 
 ## Git 작업 플로우
