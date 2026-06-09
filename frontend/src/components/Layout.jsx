@@ -256,8 +256,28 @@ export default function Layout() {
                 {openPanel === 'favorites' && (
                   <>
                     <h3>{text.favorite}</h3>
-                    <button type="button" onClick={() => goTo('/places')}>찜한 맛집 보기</button>
-                    <button type="button" onClick={() => goTo('/events')}>찜 관광지 보기</button>
+                    <button
+                      type="button"
+                      onClick={() => openModal('favorites', {
+                        title: '찜한 맛집 보기',
+                        message: '저장해 둔 맛집 · 카페 목록을 모달에서 먼저 확인한 뒤 화면으로 이동할 수 있어요.',
+                        primaryPath: '/places',
+                        primaryLabel: '맛집 · 카페로 이동',
+                      })}
+                    >
+                      찜한 맛집 보기
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openModal('favorites', {
+                        title: '찜 관광지 보기',
+                        message: '저장해 둔 관광지와 행사를 모달에서 먼저 확인한 뒤 관광 화면으로 이동할 수 있어요.',
+                        primaryPath: '/events',
+                        primaryLabel: '관광으로 이동',
+                      })}
+                    >
+                      찜 관광지 보기
+                    </button>
                     <button type="button" onClick={() => openModal('favorites')}>즐겨찾기 관리</button>
                     <p>자주 보는 콘텐츠를 빠르게 열 수 있어요.</p>
                   </>
@@ -321,7 +341,10 @@ export default function Layout() {
           modal={modal}
           language={language}
           onClose={() => setModal(null)}
-          onNavigate={goTo}
+          onNavigate={(path) => {
+            setModal(null);
+            goTo(path);
+          }}
         />
       )}
     </div>
@@ -355,10 +378,21 @@ function ModalBody({ modal, languageLabel, onNavigate }) {
   if (modal.type === 'favorites') {
     return (
       <>
-        <p>즐겨찾기 기능은 현재 로컬 상태 기반으로 준비되어 있어요. 아래 바로가기로 주요 화면을 열 수 있습니다.</p>
+        <p>
+          {modal.message
+            || '즐겨찾기 기능은 현재 로컬 상태 기반으로 준비되어 있어요. 아래 바로가기로 주요 화면을 열 수 있습니다.'}
+        </p>
         <div className="action-modal-actions">
-          <button type="button" onClick={() => onNavigate('/places')}>맛집 · 카페 바로가기</button>
-          <button type="button" onClick={() => onNavigate('/events')}>관광 바로가기</button>
+          {modal.primaryPath ? (
+            <button type="button" onClick={() => onNavigate(modal.primaryPath)}>
+              {modal.primaryLabel || '바로가기'}
+            </button>
+          ) : (
+            <>
+              <button type="button" onClick={() => onNavigate('/places')}>맛집 · 카페 바로가기</button>
+              <button type="button" onClick={() => onNavigate('/events')}>관광 바로가기</button>
+            </>
+          )}
         </div>
       </>
     );
@@ -383,7 +417,7 @@ function ModalBody({ modal, languageLabel, onNavigate }) {
 }
 
 function getModalTitle(modal, languageLabel) {
-  if (modal.type === 'favorites') return '즐겨찾기 관리';
+  if (modal.type === 'favorites') return modal.title || '즐겨찾기 관리';
   if (modal.type === 'language') return `${languageLabel} 적용 완료`;
   if (modal.type === 'notification') return modal.title || '알림 상세';
   if (modal.type === 'widget') return `${modal.title} 위젯`;
