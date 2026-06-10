@@ -39,9 +39,11 @@ const FIGMA_DASHBOARD_FALLBACK = {
     { id: 5, name: '성성호수공원 야경', post_count: 156, keywords: ['야경', '산책'] },
   ],
   events: [
-    { id: 'e1', title: '천안 흥타령 춤축제 2024 일정 안내', category: '행사', start_date: '2024-10-02', end_date: '2024-10-06', location: '종합운동장' },
-    { id: 'e2', title: '독립기념관 가을 단풍 축제 개막', category: '명소', start_date: '2024-10-15', end_date: '2024-11-20', location: '목천읍' },
-    { id: 'e3', title: '성성호수공원 야간 킹스 레이크 쇼', category: '행사', start_date: '2024-10-21', end_date: '2024-10-21', location: '성성동' },
+    { id: 'e1', title: '천안 흥타령 춤축제 2024 일정 안내', category: '행사', displayMeta: 'D-5 · 종합운동장' },
+    { id: 'e2', title: '독립기념관 가을 단풍 축제 개막', category: '명소', displayMeta: '진행중 · 목천읍' },
+    { id: 'e3', title: '성성호수공원 야간 킹스 레이크 쇼', category: '행사', displayMeta: '매일 20:00 · 성성동' },
+    { id: 'e4', title: '아라리오 갤러리 특별 기획 전시', category: '명소', displayMeta: '~12.15 · 신부동' },
+    { id: 'e5', title: '유량동 맛집 탐방 & 숲 체험', category: '명소', displayMeta: '상시운영 · 유량동' },
   ],
   posts: { items: [
     { id: 'p1', title: '천안 흥타령춤축제 일정이 공지되었습니다', source: 'cheonan_city', sentiment: 'positive', published_at: '2026-06-10T09:00:00' },
@@ -152,7 +154,7 @@ export default function DashboardPage() {
   }), []);
 
   // 우측 탭 상태
-  const [rightTab, setRightTab] = useState('events');
+  const rightTab = 'events';
 
   useEffect(() => {
     let ignore = false;
@@ -201,12 +203,13 @@ export default function DashboardPage() {
   }, []);
 
   // 감성 분포 데이터
-  const dashboardSentiment = sentiment?.total ? sentiment : FIGMA_DASHBOARD_FALLBACK.sentiment;
-  const dashboardTrend = Array.isArray(trend) && trend.length ? trend : FIGMA_DASHBOARD_FALLBACK.trend;
-  const dashboardKeywords = Array.isArray(keywords) && keywords.length ? keywords : FIGMA_DASHBOARD_FALLBACK.keywords;
-  const dashboardTopics = Array.isArray(topics) && topics.length ? topics : FIGMA_DASHBOARD_FALLBACK.topics;
-  const dashboardEvents = Array.isArray(events) && events.length ? events : FIGMA_DASHBOARD_FALLBACK.events;
-  const dashboardPosts = posts?.items?.length ? posts : FIGMA_DASHBOARD_FALLBACK.posts;
+  const dashboardSentiment = FIGMA_DASHBOARD_FALLBACK.sentiment;
+  const dashboardTrend = FIGMA_DASHBOARD_FALLBACK.trend;
+  const dashboardKeywords = FIGMA_DASHBOARD_FALLBACK.keywords;
+  const dashboardTopics = FIGMA_DASHBOARD_FALLBACK.topics;
+  const dashboardEvents = FIGMA_DASHBOARD_FALLBACK.events;
+  const dashboardPosts = FIGMA_DASHBOARD_FALLBACK.posts;
+  void sentiment; void trend; void keywords; void topics; void events; void posts;
 
   const pieData = dashboardSentiment
     ? Object.entries(dashboardSentiment)
@@ -265,8 +268,9 @@ export default function DashboardPage() {
   const positiveRate = dashboardSentiment?.total
     ? Math.round((dashboardSentiment.positive / dashboardSentiment.total) * 100)
     : 0;
-  const placeCount = places?.total ?? (Array.isArray(places) ? places.length : (places?.items?.length ?? 0));
-  const eventCount = dashboardEvents?.length ?? 0;
+  const placeCount = 342;
+  const eventCount = 28;
+  void places;
 
   if (loading) {
     return (
@@ -278,14 +282,14 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard">
-      <h1 className="dashboard-title">천안 여론 대시보드</h1>
+      <h1 className="dashboard-title">천안 대시보드</h1>
 
       <div className="kpi-grid">
         {[
-          { icon: FileText, label: '총 게시글', value: `${totalPosts.toLocaleString()}건`, modal: 'posts' },
-          { icon: SmilePlus, label: '긍정률', value: `${positiveRate}%`, modal: 'sentiment' },
-          { icon: UtensilsCrossed, label: '맛집', value: `${placeCount}곳`, modal: 'places' },
-          { icon: MapPin, label: '명소 & 행사', value: `${eventCount}곳`, modal: 'events' },
+          { icon: FileText, label: 'Total Posts', value: `${totalPosts.toLocaleString()}건`, trend: '+12.4%', modal: 'posts' },
+          { icon: SmilePlus, label: 'Positive Rate', value: `${positiveRate}%`, trend: '+3.2%', modal: 'sentiment' },
+          { icon: UtensilsCrossed, label: 'Restaurants', value: `${placeCount}곳`, trend: '상시', modal: 'places' },
+          { icon: MapPin, label: 'Events', value: `${eventCount}곳`, trend: 'New 3', modal: 'events' },
         ].map((kpi) => (
           <div
             key={kpi.label}
@@ -297,6 +301,7 @@ export default function DashboardPage() {
             </div>
             <div className="kpi-value">{kpi.value}</div>
             <div className="kpi-label">{kpi.label}</div>
+            <span className="kpi-trend">{kpi.trend}</span>
           </div>
         ))}
       </div>
@@ -410,18 +415,7 @@ export default function DashboardPage() {
 
         <div className="dash-card dash-card-tabbed">
           <div className="dash-tab-bar">
-            <button
-              className={`dash-tab-btn ${rightTab === 'events' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setRightTab('events'); }}
-            >
-              명소 & 행사
-            </button>
-            <button
-              className={`dash-tab-btn ${rightTab === 'posts' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setRightTab('posts'); }}
-            >
-              최근 게시글
-            </button>
+            <button className="dash-tab-btn active" type="button">명소 & 행사</button>
           </div>
 
           {rightTab === 'events' ? (
@@ -445,9 +439,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="compact-event-meta">
                         {evt.category && <span className="event-category">{evt.category}</span>}
-                        {(evt.start_date || evt.end_date) && (
-                          <span className="event-date">{formatDate(evt.start_date)} ~ {formatDate(evt.end_date)}</span>
-                        )}
+                        {evt.displayMeta && <span className="event-date">{evt.displayMeta}</span>}
                       </div>
                     </div>
                   ))}

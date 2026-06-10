@@ -30,21 +30,25 @@ const NOTIFICATION_ITEMS = [
 const WIDGET_ITEMS = [
   { label: '6월 18일 수요일', value: '28°C', desc: '맑음 · 강남구', Icon: CloudSun },
   { label: '미세먼지 보통', value: '소아과', desc: '행복소아과의원 · 도보 8분 · 운영 ~23:00', Icon: Pill },
-  { label: '오늘 가족 행사', value: '어린이 꽃 축제', desc: '오후 3:00 · 시민체육관', Icon: CalendarDays },
+  { label: '오늘 가족 행사', value: '어린이 꽃 축제', desc: '예정 · 오후 3:00 · 시민체육관', Icon: CalendarDays },
 ];
 
 const FAVORITE_RESTAURANTS = [
-  ['우래옥', '0.8km', '4.8', '한식 · 중구 창경궁로', '영업 중 · 21:00 마감'],
-  ['핏제리아 오', '1.4km', '4.7', '양식 · 용산구 이태원로', '영업 중 · 22:00 마감'],
-  ['앤트러사이트', '2.0km', '4.6', '카페 · 마포구 토정로', '곧 마감 · 18:00 마감'],
-  ['스시조', '3.2km', '4.9', '일식 · 중구 소공로', '영업 중 · 22:30 마감'],
+  ['우래옥', '0.8km', '4.8', '(3,214)', '한식 · 중구 창경궁로', '영업 중 · 21:00 마감'],
+  ['핏제리아 오', '1.4km', '4.7', '(2,108)', '양식 · 용산구 이태원로', '영업 중 · 22:00 마감'],
+  ['앤트러사이트', '2.0km', '4.6', '(4,572)', '카페 · 마포구 토정로', '곧 마감 · 18:00 마감'],
+  ['스시조', '3.2km', '4.9', '(1,843)', '일식 · 중구 소공로', '영업 중 · 22:30 마감'],
+  ['광장시장 마약김밥', '1.7km', '4.5', '(6,981)', '한식 · 종로구 창경궁로', '영업 중 · 19:00 마감'],
+  ['트라토리아 보나세라', '2.6km', '4.6', '(1,205)', '양식 · 강남구 압구정로', '영업 종료 · 17:00 오픈'],
 ];
 
 const FAVORITE_TOURISM = [
-  ['경복궁', '1.2km', '4.8', '고궁 · 종로구 사직로', '관람 가능 · 18:00 종료'],
-  ['N서울타워', '3.4km', '4.7', '전망대 · 용산구 남산공원길', '운영 중 · 23:00 마감'],
-  ['북촌한옥마을', '2.1km', '4.6', '전통마을 · 종로구 계동길', '곧 마감 · 17:00 마감'],
-  ['반포한강공원', '5.8km', '4.5', '공원 · 서초구 신반포로', '24시간 개방'],
+  ['경복궁', '1.2km', '4.8', '(8,432)', '고궁 · 종로구 사직로', '관람 가능 · 18:00 종료'],
+  ['N서울타워', '3.4km', '4.7', '(12,108)', '전망대 · 용산구 남산공원길', '운영 중 · 23:00 마감'],
+  ['북촌한옥마을', '2.1km', '4.6', '(5,672)', '전통마을 · 종로구 계동길', '곧 마감 · 17:00 마감'],
+  ['반포한강공원', '5.8km', '4.5', '(9,841)', '공원 · 서초구 신반포로', '24시간 개방'],
+  ['성산일출봉', '452km', '4.9', '(15,203)', '자연유산 · 제주 서귀포시', '개방 중 · 20:00 마감'],
+  ['해운대 해수욕장', '325km', '4.7', '(21,455)', '해변 · 부산 해운대구', '시즌 종료 · 6월 재개장'],
 ];
 
 const UI_TEXT = {
@@ -375,6 +379,9 @@ function FavoritesDropdown({ openModal }) {
       <button type="button" className="favorite-mini" onClick={() => openModal('favoriteRestaurants')}>
         <span>찜 맛집</span><strong>자주 방문</strong><small>총 12곳 저장됨 · 마지막 업데이트 오늘 12:08</small>
       </button>
+      <button type="button" className="favorite-mini" onClick={() => openModal('favorites', { title: '청년', primaryPath: '/youth', primaryLabel: '청년 바로가기' })}>
+        <span>청년</span><strong>오늘 방문</strong><small>청년 지원 공간과 정책을 확인하세요</small>
+      </button>
       <button type="button" className="favorite-mini" onClick={() => openModal('favoriteTourism')}>
         <span>관광지 찜 리스트</span><strong>2일 전</strong><small>총 18곳 저장됨 · 마지막 업데이트 오늘 14:32</small>
       </button>
@@ -403,15 +410,15 @@ function FavoriteModal({ title, items, actionLabel, onNavigate }) {
   return (
     <div className="favorite-modal-content">
       <div className="favorite-modal-tabs">
-        {['전체 12', '한식 4', '양식 3', '카페 2', '일식 2'].map((tab, index) => (
-          <span key={tab} className={index === 0 ? 'active' : ''}>{title.includes('관광') && index > 0 ? ['고궁·역사 5', '자연·공원 4', '전망대 3', '박물관 3'][index - 1] : tab}</span>
+        {(title.includes('관광') ? ['전체 18', '고궁·역사 5', '자연·공원 4', '전망대 3', '박물관 3', '테마파크 2', '해변 1'] : ['전체 12', '한식 4', '양식 3', '카페 2', '일식 2', '중식 1']).map((tab, index) => (
+          <span key={tab} className={index === 0 ? 'active' : ''}>{tab}</span>
         ))}
       </div>
       <div className="favorite-modal-grid">
-        {items.map(([name, distance, rating, category, status]) => (
+        {items.map(([name, distance, rating, reviews, category, status]) => (
           <article key={name}>
             <div className="favorite-card-top"><h3>{name}</h3><span>{distance}</span></div>
-            <p className="favorite-rating">★ {rating}</p>
+            <p className="favorite-rating">★ {rating} <span>{reviews}</span></p>
             <p>{category}</p>
             <strong>{status}</strong>
           </article>

@@ -4,7 +4,6 @@ import {
   Accessibility,
   BellRing,
   CalendarDays,
-  ExternalLink,
   Globe2,
   Home,
   MapPin,
@@ -109,7 +108,7 @@ const FIGMA_PAGES = {
         address: '충남 천안시 동남구 신부동 456-3',
         hours: '평일 14:00-22:00',
         phone: '041-555-4004',
-        description: '과목별 심화반',
+        description: '국어, 영어, 수학',
       },
     ],
   },
@@ -244,8 +243,8 @@ export default function InfoPage() {
 
   const loading = loadedSection !== content.section && !error;
   const currentData = loadedSection === content.section ? data : null;
-  const stats = useMemo(() => currentData?.stats ?? [], [currentData]);
-  const sourceLinks = useMemo(() => currentData?.source_links ?? [], [currentData]);
+  void currentData;
+  void useMemo;
 
   if (content.section === 'single-household') {
     return <SingleHouseholdPortal content={content} />;
@@ -269,7 +268,7 @@ export default function InfoPage() {
       <section className="info-figma-hero">
         <div className="info-hero-icon"><Icon size={30} /></div>
         <div>
-          <h2>천안시 {content.title.endsWith('정보') ? content.title : `${content.title} 정보`} 안내</h2>
+          <h2>{heroTitle(content)}</h2>
           <p>{content.description}</p>
           {content.special && (
             <div className="info-special-pill">
@@ -282,16 +281,6 @@ export default function InfoPage() {
 
       {error && <p className="status-msg error" role="alert">{error}</p>}
 
-      {stats.length > 0 && (
-        <div className="info-stat-grid compact" aria-label="연동 데이터 현황">
-          {stats.map((stat) => (
-            <article key={stat.label} className="info-stat-card">
-              <span>{stat.label}</span>
-              <strong>{Number(stat.value).toLocaleString()}</strong>
-            </article>
-          ))}
-        </div>
-      )}
 
       <nav className="info-chip-row" aria-label="카테고리">
         {content.chips.map((chip, index) => (
@@ -323,19 +312,19 @@ export default function InfoPage() {
         </div>
       </section>
 
-      {sourceLinks.length > 0 && (
-        <section className="info-panel" aria-label="공식 확인 링크">
-          {sourceLinks.map(({ label, url }) => (
-            <a key={url} className="info-panel-row link" href={url} target="_blank" rel="noreferrer">
-              <ExternalLink size={18} />
-              <span>{label}</span>
-              <strong>{url.replace(/^https?:\/\//, '')}</strong>
-            </a>
-          ))}
-        </section>
+      {content.section === 'accessibility' && (
+        <div className="pagination figma-pagination"><button type="button">← 이전</button><span>1</span><span>2</span><span>3</span><button type="button">다음 →</button></div>
       )}
     </div>
   );
+}
+
+
+function heroTitle(content) {
+  if (content.section === 'foreign-life') return '천안시 외국인 생활 지원 안내';
+  if (content.section === 'accessibility') return '천안시 무장애 정보 안내';
+  if (content.section === 'high-school') return '천안시 고등학생 학습 정보 안내';
+  return `천안시 ${content.title} 정보 안내`;
 }
 
 function SingleHouseholdPortal({ content }) {
@@ -348,10 +337,10 @@ function SingleHouseholdPortal({ content }) {
     ['취미', '1인 가구 소모임: 취미 및 관심사 공유', '새로운 인연을 찾는 청년/중장년', '지역별 소모임 공간', '모임별 상이', '모임 확인'],
   ];
   const cards = [
-    ['주거', '128건', '원룸/오피스텔 월세', '천안 시내 전 지역 최신 매물', '평균 월세 38만원', '평균 보증금 500만원'],
-    ['식사', '86곳', '혼밥 맛집 탐방', '1인 좌석 · 1인 메뉴 보장', '하카타 라멘 천안점 4.8', '착한 비빔밥 4.6'],
-    ['24H', 'LIVE', '우리동네 24H 시설', '새벽에도 안심하고 이용 가능', '세탁 12 · 스카 8', '편의점 34 · 헬스 6'],
-    ['소모임', '42개 모임', '취미 소모임 목록', '함께라서 더 즐거운 1인의 일상', '천안 독서 클럽 +24', '새벽 러닝 크루 +18'],
+    ['주거', '128건', '원룸/오피스텔 월세', '천안 시내 전 지역 최신 매물', '평균 월세', '38만원', '평균 보증금', '500만원', '신규 매물', '+12 오늘', '오피스텔 64', '원룸 64', '매물 보기'],
+    ['식사', '86곳', '혼밥 맛집 탐방', '1인 좌석 · 1인 메뉴 보장', '하카타 라멘 천안점', '4.8', '320m', '일식 · 1인 좌석 8석', '착한 비빔밥', '4.6', '510m', '한식 · 포장 가능', '전체 보기'],
+    ['24H', 'LIVE', '우리동네 24H 시설', '새벽에도 안심하고 이용 가능', '세탁', '12', '스카', '8', '편의점', '34', '헬스', '6', '반경 1km · 총 60개 시설 운영중', '지도 보기'],
+    ['소모임', '42개 모임', '취미 소모임 목록', '함께라서 더 즐거운 1인의 일상', '천안 독서 클럽', '+24', '매주 토 · 두정동', '새벽 러닝 크루', '+18', '화·목 6AM · 천안천', '모임 둘러보기'],
   ];
   return (
     <div className="info-page single-portal-page" style={{ '--info-accent': content.accent }}>
@@ -369,12 +358,12 @@ function SingleHouseholdPortal({ content }) {
       </nav>
       {view === 'cards' ? (
         <div className="single-card-grid">
-          {cards.map(([tag, count, title, desc, stat1, stat2]) => (
+          {cards.map(([tag, count, title, desc, ...details]) => (
             <article key={title}>
               <div className="single-card-kicker"><span>{tag}</span><strong>{count}</strong></div>
               <h2>{title}</h2>
               <p>{desc}</p>
-              <div><b>{stat1}</b><b>{stat2}</b></div>
+              <div>{details.map((detail) => <b key={detail}>{detail}</b>)}</div>
             </article>
           ))}
         </div>
@@ -396,10 +385,14 @@ function SingleHouseholdPortal({ content }) {
           <section className="single-settings" onClick={(e) => e.stopPropagation()}>
             <h2>맞춤 설정</h2>
             <p>1인가구 포털을 나에게 맞게 조정하세요. 변경사항은 즉시 반영됩니다.</p>
+            <h3>활동 지역 & 검색 반경</h3>
             <label>기본 지역<input readOnly value="천안시 서북구 불당동" /></label>
-            <div className="range-row"><span>검색 반경</span>{['500m', '1km', '2km', '5km'].map((v) => <button type="button" key={v}>{v}</button>)}</div>
-            <div className="setting-list">{['신규 매물 알림', '오늘의 혼밥 추천', '소모임 모집 알림'].map((v) => <label key={v}><input type="checkbox" defaultChecked /> {v}</label>)}</div>
-            <div className="setting-actions"><button type="button" onClick={() => setSettingsOpen(false)}>취소</button><button type="button" onClick={() => setSettingsOpen(false)}>설정 저장</button></div>
+            <div className="range-row"><span>검색 반경</span><strong>1.0 km</strong>{['500m', '1km', '2km', '5km'].map((v) => <button type="button" key={v}>{v}</button>)}</div>
+            <h3>알림 설정</h3>
+            <div className="setting-list"><label><input type="checkbox" defaultChecked /> 신규 매물 알림 <small>관심 지역의 새 원룸·오피스텔이 등록되면 알려드려요</small></label><label><input type="checkbox" defaultChecked /> 오늘의 혼밥 추천 <small>매일 오전 11시 · 점심 추천 푸시</small></label><label><input type="checkbox" defaultChecked /> 소모임 모집 알림 <small>관심 카테고리의 새 소모임이 열릴 때</small></label></div>
+            <h3>표시 방식</h3>
+            <div className="range-row"><button type="button">카드 그리드</button><strong>현재 보기</strong><button type="button">리스트</button><span>간결하게</span></div>
+            <div className="setting-actions"><button type="button">기본값으로 재설정</button><button type="button" onClick={() => setSettingsOpen(false)}>취소</button><button type="button" onClick={() => setSettingsOpen(false)}>설정 저장</button></div>
           </section>
         </div>
       )}
