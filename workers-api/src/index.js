@@ -17,7 +17,8 @@ const UNIVERSITY_CATEGORY_ALIASES = {
 	행사: ['행사', '특강', '사회봉사센터', '인성개발원', '실용음악트랙', '백석대학 합창단'],
 };
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
-const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길'];
+const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩'];
+const FOOD_REVIEW_TERMS = ['맛있', '맛집', '메뉴', '음식', '초밥', '김밥', '떡볶', '카페', '커피', '디저트', '고기', '매장'];
 
 const sanitizeImageUrl = (url) => {
 	if (!url) return null;
@@ -33,12 +34,14 @@ const reviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p', options = {}) =
 	const areaClauses = CHEONAN_AREAS.map((area) => `(${placeAlias}.address LIKE '%${area}%' AND instr(${compactReview}, '${area}') > 0)`).join(' OR ');
 	const noKnownArea = CHEONAN_AREAS.map((area) => `${placeAlias}.address NOT LIKE '%${area}%'`).join(' AND ');
 	const blockClauses = REVIEW_BLOCK_TERMS.map((term) => `${compactReview} NOT LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' AND ');
+	const foodClauses = FOOD_REVIEW_TERMS.map((term) => `${compactReview} LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' OR ');
 	const areaFilter = options.requireArea ? `AND ((${noKnownArea}) OR ${areaClauses})` : '';
 	return `
 		${reviewAlias}.place_id = ${placeAlias}.id
 		AND ${placeAlias}.name IS NOT NULL
 		AND ${reviewAlias}.review_text IS NOT NULL
 		AND instr(${compactReview}, ${compactName}) > 0
+		AND (${foodClauses})
 		${areaFilter}
 		AND ${blockClauses}
 	`;

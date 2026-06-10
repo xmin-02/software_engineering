@@ -107,6 +107,13 @@ function kakaoMapUrl(place) {
   return `https://map.kakao.com/link/search/${encodeURIComponent(query || '천안 맛집')}`;
 }
 
+function kakaoRouteUrl(place) {
+  if (place.latitude && place.longitude) {
+    return `https://map.kakao.com/link/to/${encodeURIComponent(place.name || '목적지')},${place.latitude},${place.longitude}`;
+  }
+  return kakaoMapUrl(place);
+}
+
 function displayHours(hours) {
   if (!hours) return '정보 없음';
   if (typeof hours === 'string') return hours;
@@ -169,7 +176,24 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
             </div>
           </div>
           <div className="modal-right">
-            <div className="modal-right-sticky"><a className="modal-map-placeholder modal-map-link" href={kakaoMapUrl(current)} target="_blank" rel="noreferrer"><strong>카카오맵에서 위치 보기</strong><span>{current.address || '천안시'}</span><small>새 창에서 길찾기와 실제 지도를 바로 확인합니다</small></a></div>
+            <div className="modal-right-sticky">
+              <div className="fallback-map compact modal-place-map-preview" aria-label={`${current.name} 위치 미리보기`}>
+                <div className="fallback-map-grid" />
+                <span className="fallback-map-label">CHEONAN MAP</span>
+                <div className="fallback-map-marker modal-place-marker" style={{ left: '48%', top: '48%' }}>
+                  <span className="fallback-map-dot" />
+                  <span className="fallback-map-name">{current.name}</span>
+                </div>
+                <div className="modal-map-card">
+                  <strong>{current.name}</strong>
+                  <span>{current.address || '천안시 위치 정보'}</span>
+                  <div className="modal-map-actions">
+                    <a href={kakaoMapUrl(current)} target="_blank" rel="noreferrer">지도 보기</a>
+                    <a href={kakaoRouteUrl(current)} target="_blank" rel="noreferrer">길찾기</a>
+                  </div>
+                </div>
+              </div>
+            </div>
             <button type="button" className="dropdown-primary" onClick={() => onToggleFavorite(current)}>{favorite ? '관심 장소 해제' : '관심 장소 저장'}</button>
           </div>
         </div>

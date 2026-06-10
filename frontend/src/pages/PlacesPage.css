@@ -1233,6 +1233,65 @@
   min-height: 0;
 }
 
+.figma-place-detail .modal-place-map-preview {
+  height: 100%;
+  min-height: 360px;
+  border-radius: 0;
+}
+
+.modal-place-marker {
+  left: 48%;
+  top: 42%;
+}
+
+.modal-map-card {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.modal-map-card strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.modal-map-card span {
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.modal-map-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.modal-map-actions a {
+  flex: 1;
+  min-width: 100px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #111827;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.modal-map-actions a:last-child {
+  background: #005bbf;
+}
+
 .figma-place-detail .modal-map-link {
   flex-direction: column;
   gap: 8px;
