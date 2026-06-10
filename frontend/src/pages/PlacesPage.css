@@ -1224,7 +1224,6 @@
   max-height: calc(100% - 84px);
   min-height: 0;
   overflow: hidden;
-  pointer-events: none;
   position: relative;
   z-index: 1;
 }
@@ -1232,7 +1231,30 @@
 .figma-place-detail .modal-map-placeholder {
   height: 100%;
   min-height: 0;
-  pointer-events: none;
+}
+
+.figma-place-detail .modal-map-link {
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  text-decoration: none;
+  color: #334155;
+  cursor: pointer;
+}
+
+.figma-place-detail .modal-map-link strong {
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.figma-place-detail .modal-map-link span {
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+.figma-place-detail .modal-map-link small {
+  color: #64748b;
 }
 
 .figma-place-detail .modal-right > .dropdown-primary {

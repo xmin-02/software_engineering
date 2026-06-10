@@ -102,6 +102,17 @@ function formatDate(date) {
   return date ? date.slice(0, 10).replaceAll('-', '.') : '';
 }
 
+function kakaoMapUrl(place) {
+  const query = [place.name, place.address].filter(Boolean).join(' ');
+  return `https://map.kakao.com/link/search/${encodeURIComponent(query || '천안 맛집')}`;
+}
+
+function displayHours(hours) {
+  if (!hours) return '정보 없음';
+  if (typeof hours === 'string') return hours;
+  return hours.today || hours.mon || hours.everyday || hours.daily || '정보 없음';
+}
+
 function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(Boolean(place?.id && !String(place.id).startsWith('figma')));
@@ -141,7 +152,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
             <h2 className="modal-place-name">{current.name}</h2>
             <p className="modal-address">{current.address ?? '천안시'}</p>
             <div className="modal-info-row">
-              <span className="modal-info-chip">영업시간 {typeof current.business_hours === 'string' ? current.business_hours : current.business_hours?.mon ?? '정보 없음'}</span>
+              <span className="modal-info-chip">영업시간 {displayHours(current.business_hours)}</span>
               <span className="modal-info-chip">전화번호 {current.phone || '정보 없음'}</span>
             </div>
             <h3 className="modal-reviews-title">최근 리뷰 데이터 <span>총 {current.review_count?.toLocaleString?.() ?? reviews.length}건</span></h3>
@@ -158,7 +169,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
             </div>
           </div>
           <div className="modal-right">
-            <div className="modal-right-sticky"><div className="modal-map-placeholder">Kakao Map Loading...</div></div>
+            <div className="modal-right-sticky"><a className="modal-map-placeholder modal-map-link" href={kakaoMapUrl(current)} target="_blank" rel="noreferrer"><strong>카카오맵에서 위치 보기</strong><span>{current.address || '천안시'}</span><small>새 창에서 길찾기와 실제 지도를 바로 확인합니다</small></a></div>
             <button type="button" className="dropdown-primary" onClick={() => onToggleFavorite(current)}>{favorite ? '관심 장소 해제' : '관심 장소 저장'}</button>
           </div>
         </div>

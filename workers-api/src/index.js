@@ -7,14 +7,17 @@ app.use('*', cors());
 const RECENT_DAYS = 30;
 const TOPIC_DAYS = 7;
 const PLACE_FETCH_LIMIT = 1000;
-const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net'];
+const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com'];
+const BAD_IMAGE_TERMS = ['instar--', 'profile_thumb', 'tripcdn', 'hotel', 'motel'];
+const FOOD_CATEGORY_ALIASES = ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식', '이탈리아음식'];
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
 const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길'];
 
 const sanitizeImageUrl = (url) => {
 	if (!url) return null;
 	const value = String(url);
-	return BAD_IMAGE_HOSTS.some((host) => value.includes(host)) ? null : value;
+	const lower = value.toLowerCase();
+	return BAD_IMAGE_HOSTS.some((host) => lower.includes(host)) || BAD_IMAGE_TERMS.some((term) => lower.includes(term)) ? null : value;
 };
 
 const compactSql = (expr) => `replace(replace(replace(lower(${expr}), ' ', ''), char(10), ''), char(13), '')`;
@@ -62,7 +65,7 @@ const categoryAliases = (category) => {
 		return ['카페', '카페,디저트', '간식'];
 	}
 	if (['맛집', '맛집/카페', '맛집 · 카페', '맛집·카페', '식당'].includes(normalized)) {
-		return ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식'];
+		return FOOD_CATEGORY_ALIASES;
 	}
 	if (['일식/중식', '일식 · 중식', '일식·중식'].includes(normalized)) {
 		return ['일식', '중식'];
@@ -413,7 +416,12 @@ app.get('/api/places', async (c) => {
 	const offset = (pageNum - 1) * limit;
 	const where = [];
 	const params = [];
-	addCategoryFilter(where, params, 'p.category', category);
+	if (category) addCategoryFilter(where, params, 'p.category', category);
+	else {
+		where.push(`p.category IN (${FOOD_CATEGORY_ALIASES.map(() => '?').join(',')})`);
+		params.push(...FOOD_CATEGORY_ALIASES);
+	}
+	where.push("length(trim(p.name)) > 1");
 	if (age_group === 'youth') where.push("p.category NOT IN ('술집','주점')");
 	if (age_group === 'family') where.push("p.id NOT IN (SELECT place_id FROM place_tags WHERE tag='노키즈존')");
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
