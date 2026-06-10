@@ -22,6 +22,23 @@ const FIGMA_PLACES = [
 const CATEGORY_TABS = ['전체', '한식', '일식/중식', '카페/디저트'];
 const SORTS = ['평점 높은 순', '가까운 거리 순', '리뷰 많은 순'];
 
+function favoriteId(place) {
+  return String(place.id ?? place.name);
+}
+
+function compactFavorite(place) {
+  return {
+    id: favoriteId(place),
+    name: place.name,
+    distance: place.distance ?? '',
+    rating: getDisplayRating(place),
+    category: place.sub_category || place.category || '맛집',
+    address: place.address || '천안시',
+    status: getStatus(place),
+    image_url: place.image_url || place.photo_url || '',
+  };
+}
+
 function normalizeImageUrl(url, fallback) {
   if (!url) return fallback;
   if (url.startsWith('https://')) return url;
@@ -167,7 +184,15 @@ export default function PlacesPage() {
     api.get('/api/places', { params: { page: 1, size: 24 } })
       .then((res) => {
         const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
-        const withImages = items.filter((item) => item.image_url || item.photo_url);
+        const seenImages = new Set();
+        const withImages = items.filter((item) => {
+          const url = item.image_url || item.photo_url;
+          if (!url) return false;
+          const key = url.replace(/^https?:\/\//, '').replace(/^images\.weserv\.nl\/\?url=/, '');
+          if (seenImages.has(key)) return false;
+          seenImages.add(key);
+          return true;
+        });
         if (!ignore && withImages.length) setPlaces(withImages);
       })
       .catch(() => {});
@@ -184,17 +209,35 @@ export default function PlacesPage() {
       const text = `${place.name ?? ''} ${place.category ?? ''} ${place.sub_category ?? ''} ${place.address ?? ''}`.toLowerCase();
       return matchesCategory(place, category) && (!normalizedQuery || text.includes(normalizedQuery));
     });
-    return [...filtered].sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
       if (sort === '리뷰 많은 순') return (b.review_count ?? 0) - (a.review_count ?? 0);
       if (sort === '가까운 거리 순') return String(a.address ?? '').localeCompare(String(b.address ?? ''), 'ko');
       return Number(getDisplayRating(b)) - Number(getDisplayRating(a));
-    }).slice(0, 12);
+    });
+    if (category !== '전체' || normalizedQuery) return sorted.slice(0, 12);
+    const buckets = new Map();
+    sorted.forEach((place) => {
+      const key = getBadge(place);
+      buckets.set(key, [...(buckets.get(key) ?? []), place]);
+    });
+    const mixed = [];
+    while (mixed.length < 12 && [...buckets.values()].some((bucket) => bucket.length)) {
+      [...buckets.keys()].forEach((key) => {
+        const next = buckets.get(key)?.shift();
+        if (next && mixed.length < 12) mixed.push(next);
+      });
+    }
+    return mixed;
   }, [category, places, query, sort]);
 
   const toggleFavorite = (place) => {
     setFavorites((current) => {
-      const id = String(place.id ?? place.name);
-      return current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      const id = favoriteId(place);
+      const exists = current.some((item) => item.id === id || item === id);
+      const next = exists ? current.filter((item) => (item.id ?? item) !== id) : [...current, compactFavorite(place)];
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('cheonan:favorites-updated'));
+      return next;
     });
   };
 
@@ -218,7 +261,7 @@ export default function PlacesPage() {
       <div className="card-grid figma-places-grid">
         {displayedPlaces.map((place, index) => {
           const id = String(place.id ?? place.name);
-          const favorite = favorites.includes(id);
+          const favorite = favorites.some((item) => (item.id ?? item) === id);
           return (
             <article key={id} className="place-card figma-place-card" role="button" tabIndex={0} onClick={() => setSelected(place)} onKeyDown={(event) => { if (event.key === 'Enter') setSelected(place); }}>
               <div className="place-card-image-wrap">
@@ -236,7 +279,7 @@ export default function PlacesPage() {
       </div>
       {displayedPlaces.length === 0 && <p className="status-msg">검색 결과가 없습니다</p>}
       <button type="button" className="figma-more-btn" onClick={() => setQuery('')}>더 많은 맛집 보기</button>
-      {selected && <ActualPlaceModal key={selected.id ?? selected.name} place={selected} favorite={favorites.includes(String(selected.id ?? selected.name))} onToggleFavorite={toggleFavorite} onClose={() => setSelected(null)} />}
+      {selected && <ActualPlaceModal key={selected.id ?? selected.name} place={selected} favorite={favorites.some((item) => (item.id ?? item) === favoriteId(selected))} onToggleFavorite={toggleFavorite} onClose={() => setSelected(null)} />}
     </div>
   );
 }

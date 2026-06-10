@@ -11,6 +11,8 @@ import sidebarLogo from '../assets/brand/cheonan-insight-sidebar.png';
 
 const FONT_SCALE_KEY = 'cheonan_font_scale';
 const LANGUAGE_KEY = 'cheonan_language';
+const PLACE_FAVORITES_KEY = 'cheonan_favorite_places';
+const TOURISM_FAVORITES_KEY = 'cheonan_favorite_tourism';
 
 const LANGUAGES = {
   en: { label: 'English', short: 'EN' },
@@ -131,6 +133,22 @@ export default function Layout() {
     if (typeof window === 'undefined') return 'normal';
     return localStorage.getItem(FONT_SCALE_KEY) || 'normal';
   });
+  const [favoritePlaces, setFavoritePlaces] = useState([]);
+  const [favoriteTourism, setFavoriteTourism] = useState([]);
+
+  useEffect(() => {
+    const loadFavorites = () => {
+      try { setFavoritePlaces(JSON.parse(localStorage.getItem(PLACE_FAVORITES_KEY) || '[]')); } catch { setFavoritePlaces([]); }
+      try { setFavoriteTourism(JSON.parse(localStorage.getItem(TOURISM_FAVORITES_KEY) || '[]')); } catch { setFavoriteTourism([]); }
+    };
+    loadFavorites();
+    window.addEventListener('storage', loadFavorites);
+    window.addEventListener('cheonan:favorites-updated', loadFavorites);
+    return () => {
+      window.removeEventListener('storage', loadFavorites);
+      window.removeEventListener('cheonan:favorites-updated', loadFavorites);
+    };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.fontScale = fontScale;
@@ -148,8 +166,13 @@ export default function Layout() {
 
   const pageTitle = pageTitles[location.pathname] ?? '천안 대시보드';
   const text = UI_TEXT[language] ?? UI_TEXT.ko;
-  const togglePanel = (panel) =>
+  const togglePanel = (panel) => {
+    if (panel === 'favorites') {
+      try { setFavoritePlaces(JSON.parse(localStorage.getItem(PLACE_FAVORITES_KEY) || '[]')); } catch { setFavoritePlaces([]); }
+      try { setFavoriteTourism(JSON.parse(localStorage.getItem(TOURISM_FAVORITES_KEY) || '[]')); } catch { setFavoriteTourism([]); }
+    }
     setOpenPanel((current) => (current === panel ? null : panel));
+  };
   const openModal = (type, payload = {}) => {
     setOpenPanel(null);
     setModal({ type, ...payload });
@@ -287,7 +310,7 @@ export default function Layout() {
             {openPanel && (
               <div className="top-dropdown" onClick={(e) => e.stopPropagation()}>
                 {openPanel === 'favorites' && (
-                  <FavoritesDropdown openModal={openModal} />
+                  <FavoritesDropdown openModal={openModal} favoritePlaces={favoritePlaces} favoriteTourism={favoriteTourism} />
                 )}
                 {openPanel === 'notifications' && (
                   <NotificationsDropdown openModal={openModal} />
@@ -340,6 +363,8 @@ export default function Layout() {
         <ActionModal
           modal={modal}
           language={language}
+          favoritePlaces={favoritePlaces}
+          favoriteTourism={favoriteTourism}
           onClose={() => setModal(null)}
           onNavigate={(path) => {
             setModal(null);
@@ -372,18 +397,20 @@ function NotificationsDropdown({ openModal }) {
   );
 }
 
-function FavoritesDropdown({ openModal }) {
+function FavoritesDropdown({ openModal, favoritePlaces, favoriteTourism }) {
+  const placeCount = favoritePlaces.length;
+  const tourismCount = favoriteTourism.length;
   return (
     <>
       <h3>즐겨찾기</h3>
       <button type="button" className="favorite-mini" onClick={() => openModal('favoriteRestaurants')}>
-        <span>찜 맛집</span><strong>자주 방문</strong><small>총 12곳 저장됨 · 마지막 업데이트 오늘 12:08</small>
+        <span>찜 맛집</span><strong>{placeCount ? `${placeCount}곳 저장` : '저장된 곳 없음'}</strong><small>{placeCount ? '내가 찜한 맛집만 보기' : '맛집 카드의 ☆ 버튼으로 저장하세요'}</small>
       </button>
       <button type="button" className="favorite-mini" onClick={() => openModal('favorites', { title: '청년', primaryPath: '/youth', primaryLabel: '청년 바로가기' })}>
         <span>청년</span><strong>오늘 방문</strong><small>청년 지원 공간과 정책을 확인하세요</small>
       </button>
       <button type="button" className="favorite-mini" onClick={() => openModal('favoriteTourism')}>
-        <span>관광지 찜 리스트</span><strong>2일 전</strong><small>총 18곳 저장됨 · 마지막 업데이트 오늘 14:32</small>
+        <span>관광지 찜 리스트</span><strong>{tourismCount ? `${tourismCount}곳 저장` : '저장된 곳 없음'}</strong><small>{tourismCount ? '내가 찜한 관광지만 보기' : '관광 카드의 하트 버튼으로 저장하세요'}</small>
       </button>
     </>
   );
@@ -415,21 +442,31 @@ function FavoriteModal({ title, items, actionLabel, onNavigate }) {
         ))}
       </div>
       <div className="favorite-modal-grid">
-        {items.map(([name, distance, rating, reviews, category, status]) => (
-          <article key={name}>
-            <div className="favorite-card-top"><h3>{name}</h3><span>{distance}</span></div>
-            <p className="favorite-rating">★ {rating} <span>{reviews}</span></p>
-            <p>{category}</p>
-            <strong>{status}</strong>
-          </article>
-        ))}
+        {items.length === 0 ? (
+          <p className="empty-text">아직 저장된 장소가 없습니다</p>
+        ) : items.map((item) => {
+          const name = typeof item === 'string' ? item : (item.name || item.title);
+          const distance = typeof item === 'string' ? '' : (item.distance || '');
+          const rating = typeof item === 'string' ? '4.8' : (item.rating || '4.8');
+          const reviews = typeof item === 'string' ? '' : (item.reviews || '');
+          const category = typeof item === 'string' ? '저장한 장소' : (item.category || item.address || '저장한 장소');
+          const status = typeof item === 'string' ? '' : (item.status || item.address || '');
+          return (
+            <article key={(typeof item === 'string' ? item : item.id) || name}>
+              <div className="favorite-card-top"><h3>{name}</h3><span>{distance}</span></div>
+              <p className="favorite-rating">★ {rating} <span>{reviews}</span></p>
+              <p>{category}</p>
+              <strong>{status}</strong>
+            </article>
+          );
+        })}
       </div>
       <button type="button" className="favorite-map-btn" onClick={onNavigate}><PinIcon size={15} /> {actionLabel}</button>
     </div>
   );
 }
 
-function ActionModal({ modal, language, onClose, onNavigate }) {
+function ActionModal({ modal, language, favoritePlaces, favoriteTourism, onClose, onNavigate }) {
   const languageLabel = LANGUAGES[language]?.label ?? LANGUAGES.ko.label;
   const title = getModalTitle(modal, languageLabel);
   return (
@@ -446,13 +483,13 @@ function ActionModal({ modal, language, onClose, onNavigate }) {
         </button>
         <p className="action-modal-eyebrow">Cheonan Dashboard</p>
         <h2 id="action-modal-title">{title}</h2>
-        <ModalBody modal={modal} languageLabel={languageLabel} onNavigate={onNavigate} />
+        <ModalBody modal={modal} languageLabel={languageLabel} favoritePlaces={favoritePlaces} favoriteTourism={favoriteTourism} onNavigate={onNavigate} />
       </section>
     </div>
   );
 }
 
-function ModalBody({ modal, languageLabel, onNavigate }) {
+function ModalBody({ modal, languageLabel, favoritePlaces, favoriteTourism, onNavigate }) {
   if (modal.type === 'favorites') {
     return (
       <>
@@ -485,10 +522,10 @@ function ModalBody({ modal, languageLabel, onNavigate }) {
     return <p>글자 크기 설정이 적용되었습니다. 상단바와 주요 콘텐츠가 선택한 크기에 맞춰 표시됩니다.</p>;
   }
   if (modal.type === 'favoriteRestaurants') {
-    return <FavoriteModal title="찜한 맛집" items={FAVORITE_RESTAURANTS} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/places')} />;
+    return <FavoriteModal title="찜한 맛집" items={favoritePlaces} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/places')} />;
   }
   if (modal.type === 'favoriteTourism') {
-    return <FavoriteModal title="찜한 관광지" items={FAVORITE_TOURISM} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/events')} />;
+    return <FavoriteModal title="찜한 관광지" items={favoriteTourism} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/events')} />;
   }
   if (modal.type === 'widget') {
     return (

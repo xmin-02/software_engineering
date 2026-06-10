@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, Heart, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import './EventsPage.css';
 import tourismEvent1 from '../assets/figma/tourism/tourism-event-1.jpg';
@@ -36,6 +36,8 @@ const EVENT_FALLBACKS = [
   },
 ];
 
+const TOURISM_FAVORITES_KEY = 'cheonan_favorite_tourism';
+
 const SPOT_FALLBACKS = [
   {
     title: '독립기념관',
@@ -43,6 +45,7 @@ const SPOT_FALLBACKS = [
     rating: '4.9',
     address: '동남구 목천읍 삼방로 95',
     image: tourismSpot1,
+    url: 'https://i815.or.kr/',
   },
   {
     title: '각원사',
@@ -50,6 +53,7 @@ const SPOT_FALLBACKS = [
     rating: '4.8',
     address: '동남구 각원사길 245',
     image: tourismSpot2,
+    url: 'https://www.cheonan.go.kr/',
   },
   {
     title: '아라리오 갤러리',
@@ -57,13 +61,33 @@ const SPOT_FALLBACKS = [
     rating: '4.7',
     address: '동남구 만남로 43',
     image: tourismSpot3,
+    url: 'https://www.arario.com/',
   },
 ];
 
 
 export default function EventsPage() {
-  const upcomingEvents = useMemo(() => EVENT_FALLBACKS, []);
-  const chosenSpots = useMemo(() => SPOT_FALLBACKS, []);
+  const [eventOffset, setEventOffset] = useState(0);
+  const [sortMode, setSortMode] = useState('가까운 순');
+  const [selectedSpot, setSelectedSpot] = useState(null);
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(TOURISM_FAVORITES_KEY) || '[]'); } catch { return []; }
+  });
+  const upcomingEvents = useMemo(() => EVENT_FALLBACKS.map((_, index, array) => array[(index + eventOffset) % array.length]), [eventOffset]);
+  const chosenSpots = useMemo(() => {
+    const spots = [...SPOT_FALLBACKS];
+    if (sortMode === '평점 순') return spots.sort((a, b) => Number(b.rating) - Number(a.rating));
+    return spots;
+  }, [sortMode]);
+  const toggleFavorite = (spot) => {
+    setFavorites((current) => {
+      const exists = current.some((item) => item.title === spot.title);
+      const next = exists ? current.filter((item) => item.title !== spot.title) : [...current, spot];
+      localStorage.setItem(TOURISM_FAVORITES_KEY, JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('cheonan:favorites-updated'));
+      return next;
+    });
+  };
 
   return (
     <div className="tourism-page">
@@ -79,8 +103,8 @@ export default function EventsPage() {
         <div className="tourism-section-head">
           <h2>UPCOMING EVENTS</h2>
           <div className="tourism-arrow-row" aria-hidden="true">
-            <button type="button"><ChevronLeft size={14} /></button>
-            <button type="button"><ChevronRight size={14} /></button>
+            <button type="button" onClick={() => setEventOffset((value) => (value + EVENT_FALLBACKS.length - 1) % EVENT_FALLBACKS.length)} aria-label="이전 행사"><ChevronLeft size={14} /></button>
+            <button type="button" onClick={() => setEventOffset((value) => (value + 1) % EVENT_FALLBACKS.length)} aria-label="다음 행사"><ChevronRight size={14} /></button>
           </div>
         </div>
         <div className="tourism-event-row">
@@ -93,11 +117,11 @@ export default function EventsPage() {
       <section className="tourism-section tourism-chosen" aria-label="추천 관광지">
         <div className="tourism-section-head">
           <h2>CHOSEN FOR YOU</h2>
-          <button type="button" className="tourism-sort-btn">가까운 순 <ChevronDown size={15} /></button>
+          <button type="button" className="tourism-sort-btn" onClick={() => setSortMode((value) => (value === '가까운 순' ? '평점 순' : '가까운 순'))}>{sortMode} <ChevronDown size={15} /></button>
         </div>
         <div className="tourism-spot-grid">
           {chosenSpots.map((spot) => (
-            <TourismSpotCard key={spot.title} spot={spot} />
+            <TourismSpotCard key={spot.title} spot={spot} favorite={favorites.some((item) => item.title === spot.title)} onToggleFavorite={toggleFavorite} onSelect={setSelectedSpot} />
           ))}
         </div>
       </section>
@@ -118,6 +142,7 @@ export default function EventsPage() {
           <img src={tourismMap} alt="천안 관광지 혼잡도 지도" />
         </div>
       </section>
+      {selectedSpot && <TourismSpotModal spot={selectedSpot} favorite={favorites.some((item) => item.title === selectedSpot.title)} onToggleFavorite={toggleFavorite} onClose={() => setSelectedSpot(null)} />}
     </div>
   );
 }
@@ -139,12 +164,12 @@ function TourismEventCard({ event }) {
   return event.url ? <a className="tourism-card-link" href={event.url} target="_blank" rel="noreferrer">{content}</a> : content;
 }
 
-function TourismSpotCard({ spot }) {
+function TourismSpotCard({ spot, favorite, onToggleFavorite, onSelect }) {
   const content = (
-    <article className="tourism-spot-card">
+    <article className="tourism-spot-card" onClick={() => onSelect(spot)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter') onSelect(spot); }}>
       <div className="tourism-spot-image">
         <img src={spot.image} alt="" loading="lazy" />
-        <button type="button" aria-label={`${spot.title} 찜하기`}><Heart size={20} /></button>
+        <button type="button" className={favorite ? 'active' : ''} aria-label={`${spot.title} 찜하기`} onClick={(event) => { event.stopPropagation(); onToggleFavorite(spot); }}><Heart size={20} fill={favorite ? 'currentColor' : 'none'} /></button>
       </div>
       <div className="tourism-spot-body">
         <div className="tourism-spot-meta">
@@ -153,11 +178,31 @@ function TourismSpotCard({ spot }) {
         </div>
         <h3>{spot.title}</h3>
         <p><MapPin size={13} />{spot.address}</p>
-        <a href={spot.url || '#'} onClick={(e) => { if (!spot.url) e.preventDefault(); }} target={spot.url ? '_blank' : undefined} rel="noreferrer" className="tourism-discover-btn">
+        <a href={spot.url || '#'} onClick={(e) => { e.stopPropagation(); if (!spot.url) e.preventDefault(); }} target={spot.url ? '_blank' : undefined} rel="noreferrer" className="tourism-discover-btn">
           Discover <ArrowRight size={14} />
         </a>
       </div>
     </article>
   );
   return content;
+}
+
+
+function TourismSpotModal({ spot, favorite, onToggleFavorite, onClose }) {
+  return (
+    <div className="tourism-modal-overlay" onClick={onClose}>
+      <section className="tourism-modal" role="dialog" aria-modal="true" aria-label={`${spot.title} 상세`} onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="tourism-modal-close" onClick={onClose}>닫기</button>
+        <img src={spot.image} alt="" />
+        <span>{spot.category}</span>
+        <h2>{spot.title}</h2>
+        <p><MapPin size={14} />{spot.address}</p>
+        <strong>★ {spot.rating}</strong>
+        <div className="tourism-modal-actions">
+          <button type="button" onClick={() => onToggleFavorite(spot)}>{favorite ? '찜 해제' : '찜하기'}</button>
+          <a href={spot.url} target="_blank" rel="noreferrer">관련 페이지 이동</a>
+        </div>
+      </section>
+    </div>
+  );
 }
