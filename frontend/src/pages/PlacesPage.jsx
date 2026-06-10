@@ -48,20 +48,26 @@ function getDisplayRating(place) {
 }
 
 function getArea(address = '') {
-  const match = address.match(/(불당동|신부동|쌍용동|백석동|두정동|청당동|성정동|봉명동|대흥동|신방동|안서동)/);
-  return match?.[1] ?? address.split(' ').slice(-1)[0] ?? '천안';
+  const match = address.match(/(불당동|신부동|쌍용동|백석동|두정동|청당동|성정동|봉명동|대흥동|신방동|안서동|원성동|다가동|유량동|삼룡동|성환읍|병천면|목천읍|직산읍|성거읍|입장면|풍세면|광덕면)/);
+  if (match) return match[1];
+  const district = address.match(/(동남구|서북구)/)?.[1];
+  return district || '천안';
 }
 
 function getBadge(place) {
-  const category = place.sub_category || place.category || 'RESTAURANT';
-  if (category.includes('카페') || category.includes('디저트')) return 'CAFE';
-  if (category.includes('한식')) return 'KOREAN';
-  if (category.includes('일식')) return 'JAPANESE';
-  if (category.includes('중식')) return 'CHINESE';
-  if (category.includes('분식')) return 'KOREAN';
-  if (category.includes('베이커리') || category.includes('빵')) return 'BAKERY';
-  if (category.includes('양식') || category.includes('이탈')) return 'ITALIAN';
+  const category = `${place.category ?? ''} ${place.sub_category ?? ''}`;
+  if (/카페|디저트|커피/.test(category)) return 'CAFE';
+  if (/한식|분식|김밥|도시락|치킨|퓨전/.test(category)) return 'KOREAN';
+  if (/일식|초밥|돈까스|라멘|스시/.test(category)) return 'JAPANESE';
+  if (/중식|짬뽕|짜장|훠궈|마라/.test(category)) return 'CHINESE';
+  if (/베이커리|빵|간식/.test(category)) return 'BAKERY';
+  if (/양식|이탈|파스타|스테이크|피자|패밀리레스토랑/.test(category)) return 'ITALIAN';
   return 'RESTAURANT';
+}
+
+function parseDistanceValue(distance) {
+  const value = Number(String(distance ?? '').replace(/[^0-9.]/g, ''));
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
 }
 
 function getStatus(place) {
@@ -73,6 +79,7 @@ function getStatus(place) {
 
 function sortParam(sort) {
   if (sort === '리뷰 많은 순') return 'review_count';
+  if (sort === '가까운 거리 순') return 'distance';
   if (sort === '평점 높은 순') return 'sentiment_score';
   return 'sentiment_score';
 }
@@ -250,10 +257,10 @@ export default function PlacesPage() {
     });
     const sorted = [...filtered].sort((a, b) => {
       if (sort === '리뷰 많은 순') return (b.review_count ?? 0) - (a.review_count ?? 0);
-      if (sort === '가까운 거리 순') return String(a.address ?? '').localeCompare(String(b.address ?? ''), 'ko');
+      if (sort === '가까운 거리 순') return parseDistanceValue(a.distance) - parseDistanceValue(b.distance);
       return Number(getDisplayRating(b) ?? 0) - Number(getDisplayRating(a) ?? 0);
     });
-    if (category !== '전체' || normalizedQuery) return sorted.slice(0, 12);
+    if (category !== '전체' || normalizedQuery || sort !== '평점 높은 순') return sorted.slice(0, 12);
     const buckets = new Map();
     sorted.forEach((place) => {
       const key = getBadge(place);

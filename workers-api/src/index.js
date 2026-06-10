@@ -7,9 +7,10 @@ app.use('*', cors());
 const RECENT_DAYS = 30;
 const TOPIC_DAYS = 7;
 const PLACE_FETCH_LIMIT = 1000;
-const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com'];
+const CHEONAN_CENTER = { latitude: 36.8151, longitude: 127.1139 };
+const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com', 'file.albamon.com'];
 const BAD_IMAGE_TERMS = ['instar--', 'profile_thumb', 'tripcdn', 'hotel', 'motel'];
-const FOOD_CATEGORY_ALIASES = ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식', '이탈리아음식'];
+const FOOD_CATEGORY_ALIASES = ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식', '이탈리아음식', '아시아음식', '패밀리레스토랑', '도시락', '치킨', '퓨전요리'];
 const UNIVERSITY_CATEGORY_ALIASES = {
 	학사: ['학사', '일반', '대플', '교수학습개발원', '교양대학', '입학관리처'],
 	취업: ['취업', '취업팀', '학생역량관리센터'],
@@ -17,8 +18,9 @@ const UNIVERSITY_CATEGORY_ALIASES = {
 	행사: ['행사', '특강', '사회봉사센터', '인성개발원', '실용음악트랙', '백석대학 합창단'],
 };
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
-const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩'];
+const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩', '광고', '협찬', '제공받', '원고료', '체험단'];
 const FOOD_REVIEW_TERMS = ['맛있', '맛집', '메뉴', '음식', '초밥', '김밥', '떡볶', '카페', '커피', '디저트', '고기', '매장'];
+const TOPIC_BLOCK_TERMS = ['견적', '이사', '이삿짐', '화환', '근조', '장례', '000원', '특가', '할인', '전국서비스', '당일배송', '삼정엔지니어링', '수행사례', '비상주', '상담', '선임비용', '전자담배', '미용실', '필라테스', '홈페이지', '가입하기', '수수료', '시공', '설치', '교체', '납품', '업체', '사다리차', '정책자금', '대출', '보험', '영업시간', '법률', '대리인', '토목설계', '부지조성', '오늘도여행'];
 
 const sanitizeImageUrl = (url) => {
 	if (!url) return null;
@@ -28,6 +30,10 @@ const sanitizeImageUrl = (url) => {
 };
 
 const compactSql = (expr) => `replace(replace(replace(lower(${expr}), ' ', ''), char(10), ''), char(13), '')`;
+const blockSql = (expr, terms) => {
+	const compactExpr = compactSql(expr);
+	return terms.map((term) => `${compactExpr} NOT LIKE '%${String(term).toLowerCase().replace(/\s+/g, '')}%'`).join(' AND ');
+};
 const reviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p', options = {}) => {
 	const compactReview = compactSql(`${reviewAlias}.review_text`);
 	const compactName = compactSql(`${placeAlias}.name`);
@@ -149,6 +155,41 @@ const parseKeywords = (row) => ({ ...row, keywords: parseJson(row.keywords, null
 
 app.get('/api/health', (c) => c.json({ ok: true, service: 'cheonan-api', data: 'd1' }));
 
+const distanceKm = (lat, lon, origin = CHEONAN_CENTER) => {
+	const latitude = Number(lat);
+	const longitude = Number(lon);
+	if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+	const toRad = (value) => (value * Math.PI) / 180;
+	const dLat = toRad(latitude - origin.latitude);
+	const dLon = toRad(longitude - origin.longitude);
+	const a =
+		Math.sin(dLat / 2) ** 2 +
+		Math.cos(toRad(origin.latitude)) * Math.cos(toRad(latitude)) * Math.sin(dLon / 2) ** 2;
+	return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const placeDistanceLabel = (row) => {
+	const km = distanceKm(row.latitude, row.longitude);
+	if (km == null) return null;
+	return `${km < 10 ? km.toFixed(1) : Math.round(km).toLocaleString()}km`;
+};
+
+const normalizePlaceKey = (row) => {
+	const name = String(row.name || '').replace(/\s+/g, '').replace(/천안점|천안|본점|점$/g, '').toLowerCase();
+	const area = String(row.address || '').match(/(불당동|신부동|쌍용동|백석동|두정동|청당동|성정동|봉명동|대흥동|신방동|안서동|성환읍|병천면|목천읍|직산읍|성거읍|입장면|풍세면|광덕면)/)?.[1] || '';
+	return `${name}:${area}`;
+};
+
+const dedupePlaces = (items) => {
+	const seen = new Set();
+	return items.filter((item) => {
+		const key = normalizePlaceKey(item);
+		if (seen.has(key)) return false;
+		seen.add(key);
+		return true;
+	});
+};
+
 const placeResponse = async (db, row) => {
 	const tags = await db.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(row.id).all();
 	const business_hours = normalizeBusinessHours(row.business_hours);
@@ -158,6 +199,7 @@ const placeResponse = async (db, row) => {
 		tags: tags.results.map((t) => t.tag),
 		business_hours,
 		rating: row.rating_naver ?? row.rating_kakao ?? null,
+		distance: placeDistanceLabel(row),
 	};
 };
 
@@ -335,12 +377,29 @@ app.get('/api/topics', async (c) => {
 		dateFilter = `AND date(p.published_at)>=date(?, '-${TOPIC_DAYS} days')`;
 		params.push(latest);
 	}
+	const sourceWeight = "CASE p.source WHEN 'cheonan_city' THEN 3 WHEN 'dcinside' THEN 2 WHEN 'naver_blog' THEN 0.5 ELSE 1 END";
 	const rows = await c.env.DB.prepare(
-		`SELECT a.topic AS name, COUNT(*) AS post_count FROM analysis a JOIN posts p ON a.post_id=p.id WHERE a.topic IS NOT NULL AND a.topic!='기타' AND a.topic NOT LIKE '%견적%' AND a.topic NOT LIKE '%000원%' AND a.topic NOT LIKE '%화환%' AND a.topic NOT LIKE '%시공%' AND a.topic NOT LIKE '%영업시간%' ${dateFilter} GROUP BY a.topic ORDER BY COUNT(*) DESC LIMIT 15`,
+		`SELECT
+			a.topic AS name,
+			COUNT(*) AS post_count,
+			ROUND(SUM(${sourceWeight}), 1) AS score,
+			GROUP_CONCAT(DISTINCT p.source) AS sources,
+			MAX(p.published_at) AS latest
+		FROM analysis a
+		JOIN posts p ON a.post_id=p.id
+		WHERE a.topic IS NOT NULL
+			AND a.topic!='기타'
+			AND ${blockSql('a.topic', TOPIC_BLOCK_TERMS)}
+			AND ${blockSql('p.title', TOPIC_BLOCK_TERMS)}
+			${dateFilter}
+		GROUP BY a.topic
+		HAVING post_count >= 2
+		ORDER BY score DESC, latest DESC
+		LIMIT 15`,
 	)
 		.bind(...params)
 		.all();
-	return c.json(rows.results.map((r, i) => ({ id: i + 1, ...r, keywords: [], sentiment: null, score: null })));
+	return c.json(rows.results.map((r, i) => ({ id: i + 1, ...r, keywords: [], sentiment: null, sources: r.sources ? String(r.sources).split(',') : [] })));
 });
 
 app.get('/api/topics/:id/posts', async (c) => {
@@ -349,7 +408,21 @@ app.get('/api/topics/:id/posts', async (c) => {
 	const params = latest ? [latest] : [];
 	const filter = latest ? `AND date(p.published_at)>=date(?, '-${TOPIC_DAYS} days')` : '';
 	const topics = await c.env.DB.prepare(
-		`SELECT a.topic AS name FROM analysis a JOIN posts p ON a.post_id=p.id WHERE a.topic IS NOT NULL AND a.topic!='기타' ${filter} GROUP BY a.topic ORDER BY COUNT(*) DESC LIMIT 15`,
+		`SELECT a.topic AS name,
+			COUNT(*) AS post_count,
+			ROUND(SUM(CASE p.source WHEN 'cheonan_city' THEN 3 WHEN 'dcinside' THEN 2 WHEN 'naver_blog' THEN 0.5 ELSE 1 END), 1) AS score,
+			MAX(p.published_at) AS latest
+		FROM analysis a
+		JOIN posts p ON a.post_id=p.id
+		WHERE a.topic IS NOT NULL
+			AND a.topic!='기타'
+			AND ${blockSql('a.topic', TOPIC_BLOCK_TERMS)}
+			AND ${blockSql('p.title', TOPIC_BLOCK_TERMS)}
+			${filter}
+		GROUP BY a.topic
+		HAVING post_count >= 2
+		ORDER BY score DESC, latest DESC
+		LIMIT 15`,
 	)
 		.bind(...params)
 		.all();
@@ -365,7 +438,18 @@ app.get('/api/topics/:id/posts', async (c) => {
 
 app.get('/api/keywords', async (c) => {
 	const { limit = '50' } = c.req.query();
-	const rows = await c.env.DB.prepare('SELECT keywords FROM analysis WHERE keywords IS NOT NULL LIMIT 2000').all();
+	const latest = await latestPostDate(c.env.DB);
+	const rows = await c.env.DB.prepare(
+		`SELECT a.keywords
+		FROM analysis a
+		JOIN posts p ON p.id=a.post_id
+		WHERE a.keywords IS NOT NULL
+			AND p.source IN ('dcinside', 'cheonan_city')
+			${latest ? `AND date(p.published_at)>=date(?, '-${RECENT_DAYS} days')` : ''}
+		LIMIT 2000`,
+	)
+		.bind(...(latest ? [latest] : []))
+		.all();
 	const freq = {};
 	const spam = [
 		'견적',
@@ -401,11 +485,38 @@ app.get('/api/keywords', async (c) => {
 		'대출',
 		'보험',
 		'영업시간',
+		'공장경매',
+		'경매',
+		'원룸',
+		'입주청소',
+		'방충망',
+		'피부과',
+		'변호사',
+		'출장',
+		'공인중개사',
+		'웨딩컨벤션',
+		'인기상품',
+		'당일3시간',
+		'전화번호',
+		'주소',
+		'연락처',
+		'nikon',
+		'open',
+		'안녕하세요',
+		'발생하더라도',
+		'확산되지',
+		'이용주의사항',
 	];
 	for (const row of rows.results) {
 		const kws = parseJson(row.keywords, []);
 		if (Array.isArray(kws)) {
-			for (const kw of kws) if (kw && !spam.some((s) => kw.includes(s))) freq[kw] = (freq[kw] || 0) + 1;
+			const blockTerms = [...spam, ...TOPIC_BLOCK_TERMS];
+			for (const kw of kws) {
+				const compactKw = String(kw || '').replace(/\s+/g, '');
+				if (compactKw && !blockTerms.some((s) => compactKw.includes(String(s).replace(/\s+/g, '')))) {
+					freq[kw] = (freq[kw] || 0) + 1;
+				}
+			}
 		}
 	}
 	const sorted = Object.entries(freq)
@@ -444,12 +555,15 @@ app.get('/api/places', async (c) => {
 	const relevantReviewWhere = reviewRelevanceSql('r', 'p');
 	const avgRelevantScore = `(SELECT AVG(r.sentiment_score) FROM place_reviews r WHERE ${relevantReviewWhere})`;
 	const relevantReviewCount = `(SELECT COUNT(*) FROM place_reviews r WHERE ${relevantReviewWhere})`;
+	const distanceOrder = `(CASE WHEN p.latitude IS NULL OR p.longitude IS NULL THEN 999999 ELSE ((p.latitude - ${CHEONAN_CENTER.latitude}) * (p.latitude - ${CHEONAN_CENTER.latitude}) + (p.longitude - ${CHEONAN_CENTER.longitude}) * (p.longitude - ${CHEONAN_CENTER.longitude})) END)`;
 	const orderBy =
 		sort_by === 'rating'
 			? 'COALESCE(p.rating_naver, p.rating_kakao, avg_sentiment_score, 0) DESC, p.id ASC'
 			: sort_by === 'review_count'
 				? 'review_count DESC, COALESCE(avg_sentiment_score, 0) DESC, p.id ASC'
-				: 'COALESCE(avg_sentiment_score, 0) DESC, review_count DESC, p.id ASC';
+				: sort_by === 'distance'
+					? `${distanceOrder} ASC, COALESCE(avg_sentiment_score, 0) DESC, p.id ASC`
+					: 'COALESCE(avg_sentiment_score, 0) DESC, review_count DESC, p.id ASC';
 	const baseSelect = `
 		SELECT
 			p.*,
@@ -469,19 +583,21 @@ app.get('/api/places', async (c) => {
 		business_hours: normalizeBusinessHours(row.business_hours),
 		is_open_now: isOpenNow(row.business_hours),
 		rating: row.rating_naver ?? row.rating_kakao ?? null,
+		distance: placeDistanceLabel(row),
 		tag_list: undefined,
 	});
 
 	if (open_now === 'true') {
 		const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ?`).bind(...params, Math.min(PLACE_FETCH_LIMIT, 500)).all();
-		const filtered = rows.results.map(toPlace).filter((row) => row.is_open_now);
+		const filtered = dedupePlaces(rows.results.map(toPlace)).filter((row) => row.is_open_now);
 		const pageItems = filtered.slice(offset, offset + limit);
 		return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
 	}
 
-	const total = await c.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM places p ${wc}`).bind(...params).first('cnt');
-	const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ? OFFSET ?`).bind(...params, limit, offset).all();
-	return c.json({ items: rows.results.map(toPlace), total: total || 0, page: pageNum, size: limit, has_next: offset + limit < (total || 0) });
+	const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ?`).bind(...params, PLACE_FETCH_LIMIT).all();
+	const filtered = dedupePlaces(rows.results.map(toPlace));
+	const pageItems = filtered.slice(offset, offset + limit);
+	return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
 });
 
 app.get('/api/places/ranking', async (c) => {
