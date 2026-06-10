@@ -181,7 +181,7 @@ export default function PlacesPage() {
 
   useEffect(() => {
     let ignore = false;
-    api.get('/api/places', { params: { page: 1, size: 24 } })
+    api.get('/api/places', { params: { page: 1, size: 200 } })
       .then((res) => {
         const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
         const seenImages = new Set();
