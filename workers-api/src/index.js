@@ -13,7 +13,7 @@ const toInt = (value, fallback = 0) => {
 	return Number.isFinite(n) ? n : fallback;
 };
 
-const clampPageSize = (value, fallback = 20) => Math.min(Math.max(toInt(value, fallback), 1), 100);
+const clampPageSize = (value, fallback = 20) => Math.min(Math.max(toInt(value, fallback), 1), 200);
 
 const parseJson = (value, fallback = null) => {
 	if (value == null || value === '') return fallback;
@@ -377,7 +377,7 @@ app.get('/api/summaries', async (c) => {
 // === Places ===
 
 app.get('/api/places', async (c) => {
-	const { category, age_group, open_now, page = '1', size = '20' } = c.req.query();
+	const { category, age_group, open_now, page = '1', size = '20', sort_by = 'sentiment_score' } = c.req.query();
 	const pageNum = Math.max(toInt(page, 1), 1);
 	const limit = clampPageSize(size);
 	const offset = (pageNum - 1) * limit;
@@ -389,6 +389,12 @@ app.get('/api/places', async (c) => {
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
 	if (age_group === 'family') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가족','키즈시설'))");
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
+	const orderBy =
+		sort_by === 'rating'
+			? 'COALESCE(p.rating_naver, p.rating_kakao, rs.avg_sentiment_score, 0) DESC, p.id ASC'
+			: sort_by === 'review_count'
+				? 'COALESCE(rs.review_count, 0) DESC, COALESCE(rs.avg_sentiment_score, 0) DESC, p.id ASC'
+				: 'COALESCE(rs.avg_sentiment_score, 0) DESC, COALESCE(rs.review_count, 0) DESC, p.id ASC';
 	const baseSelect = `
 		SELECT
 			p.*,
@@ -399,7 +405,7 @@ app.get('/api/places', async (c) => {
 		LEFT JOIN (
 			SELECT
 				place_id,
-				CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) AS avg_sentiment_score,
+				AVG(sentiment_score) AS avg_sentiment_score,
 				COUNT(*) AS review_count
 			FROM place_reviews
 			GROUP BY place_id
@@ -407,7 +413,7 @@ app.get('/api/places', async (c) => {
 		LEFT JOIN place_tags pt ON pt.place_id = p.id
 		${wc}
 		GROUP BY p.id
-		ORDER BY COALESCE(p.updated_at, p.collected_at) DESC, p.id DESC
+		ORDER BY ${orderBy}
 	`;
 	const toPlace = (row) => ({
 		...row,

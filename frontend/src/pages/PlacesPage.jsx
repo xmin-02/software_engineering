@@ -79,6 +79,12 @@ function getStatus(place) {
   return '영업 중';
 }
 
+function sortParam(sort) {
+  if (sort === '리뷰 많은 순') return 'review_count';
+  if (sort === '평점 높은 순') return 'sentiment_score';
+  return 'sentiment_score';
+}
+
 function matchesCategory(place, category) {
   if (category === '전체') return true;
   const text = `${place.category ?? ''} ${place.sub_category ?? ''}`;
@@ -181,7 +187,13 @@ export default function PlacesPage() {
 
   useEffect(() => {
     let ignore = false;
-    api.get('/api/places', { params: { page: 1, size: 200 } })
+    const params = {
+      page: 1,
+      size: category === '전체' ? 200 : 100,
+      sort_by: sortParam(sort),
+    };
+    if (category !== '전체') params.category = category;
+    api.get('/api/places', { params })
       .then((res) => {
         const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
         const seenImages = new Set();
@@ -193,11 +205,11 @@ export default function PlacesPage() {
           seenImages.add(key);
           return true;
         });
-        if (!ignore && withImages.length) setPlaces(withImages);
+        if (!ignore) setPlaces(withImages.length ? withImages : FIGMA_PLACES);
       })
-      .catch(() => {});
+      .catch(() => { if (!ignore) setPlaces(FIGMA_PLACES); });
     return () => { ignore = true; };
-  }, []);
+  }, [category, sort]);
 
   useEffect(() => {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));

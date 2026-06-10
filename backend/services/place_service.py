@@ -55,6 +55,26 @@ def _build_place_response(place: Place, stats: dict | None = None) -> dict:
     }
 
 
+
+CATEGORY_ALIASES = {
+    "카페/디저트": ["카페", "카페,디저트", "간식"],
+    "카페 · 디저트": ["카페", "카페,디저트", "간식"],
+    "카페·디저트": ["카페", "카페,디저트", "간식"],
+    "디저트": ["카페", "카페,디저트", "간식"],
+    "맛집": ["한식", "중식", "일식", "양식", "분식", "음식점", "패스트푸드", "카페", "카페,디저트", "간식"],
+    "맛집/카페": ["한식", "중식", "일식", "양식", "분식", "음식점", "패스트푸드", "카페", "카페,디저트", "간식"],
+    "맛집 · 카페": ["한식", "중식", "일식", "양식", "분식", "음식점", "패스트푸드", "카페", "카페,디저트", "간식"],
+    "식당": ["한식", "중식", "일식", "양식", "분식", "음식점", "패스트푸드", "카페", "카페,디저트", "간식"],
+    "일식/중식": ["일식", "중식"],
+    "일식 · 중식": ["일식", "중식"],
+    "일식·중식": ["일식", "중식"],
+}
+
+
+def category_aliases(category: str) -> list[str]:
+    normalized = category.strip()
+    return CATEGORY_ALIASES.get(normalized, [normalized])
+
 AGE_GROUP_FILTERS = {
     "youth": {"exclude_categories": ["술집", "주점"], "prefer_tags": ["가성비"]},
     "college": {"prefer_tags": ["가성비", "카공", "데이트", "단체석"]},
@@ -78,7 +98,7 @@ def get_places(
     query = db.query(Place).options(selectinload(Place.tags))
 
     if category:
-        query = query.filter(Place.category == category)
+        query = query.filter(Place.category.in_(category_aliases(category)))
     if tags:
         tag_list = [t.strip() for t in tags.split(",")]
         query = query.join(PlaceTag).filter(PlaceTag.tag.in_(tag_list))
@@ -260,7 +280,7 @@ def get_ranking(
     )
 
     if category:
-        query = query.filter(Place.category == category)
+        query = query.filter(Place.category.in_(category_aliases(category)))
 
     rows = query.limit(limit).all()
 
