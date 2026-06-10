@@ -69,7 +69,7 @@ const FIGMA_PAGES = {
     Icon: School,
     accent: '#7c3aed',
     chips: ['신부동 학원가', '두정동 학원가', '불당동 학원가', '스터디카페', '청소년수련관', '입시설명회'],
-    special: { label: '2027 수능까지', value: 'D-544' },
+    special: { label: '2027 수능까지', value: '계산 중' },
     countLabel: '총 4개의 정보',
     mapTitle: '신부동 학원가 지도',
     mapMeta: '총 4개 학원',
@@ -80,7 +80,6 @@ const FIGMA_PAGES = {
         status: '운영중',
         address: '충남 천안시 동남구 신부동 432-5',
         hours: '평일 14:00-22:00, 주말 09:00-22:00',
-        phone: '041-555-1001',
         description: '수학, 영어, 국어, 과학',
       },
       {
@@ -89,7 +88,6 @@ const FIGMA_PAGES = {
         status: '운영중',
         address: '충남 천안시 동남구 신부동 512-8',
         hours: '평일 13:00-22:00, 토 09:00-18:00',
-        phone: '041-555-2002',
         description: '종합반, 수학특강',
       },
       {
@@ -98,7 +96,6 @@ const FIGMA_PAGES = {
         status: '운영중',
         address: '충남 천안시 동남구 신부동 398-12',
         hours: '평일 15:00-23:00, 주말 10:00-20:00',
-        phone: '041-555-3003',
         description: '영어, 수학, 논술',
       },
       {
@@ -107,7 +104,6 @@ const FIGMA_PAGES = {
         status: '운영중',
         address: '충남 천안시 동남구 신부동 456-3',
         hours: '평일 14:00-22:00',
-        phone: '041-555-4004',
         description: '국어, 영어, 수학',
       },
     ],
@@ -218,49 +214,76 @@ const FIGMA_PAGES = {
 
 const STATUS_FALLBACK = '데이터 확인 중';
 
+function getDday(targetDate) {
+  const target = new Date(`${targetDate}T00:00:00+09:00`);
+  const now = new Date();
+  const diff = Math.ceil((target.getTime() - now.getTime()) / 86400000);
+  return diff >= 0 ? `D-${diff}` : '종료';
+}
+
+function normalizeInfoCard(item) {
+  return {
+    title: item.title,
+    subtitle: item.subtitle || item.category,
+    distance: item.distance,
+    status: item.status || item.meta,
+    address: item.address || item.description,
+    hours: item.hours,
+    phone: item.phone,
+    description: item.description && item.address ? item.description : '',
+  };
+}
+
 export default function InfoPage() {
   const location = useLocation();
   const content = FIGMA_PAGES[location.pathname] ?? FIGMA_PAGES['/accessibility'];
-  const Icon = content.Icon;
+  const resolvedContent = content.section === 'high-school'
+    ? { ...content, special: { ...content.special, value: getDday('2026-11-19') } }
+    : content;
+  const Icon = resolvedContent.Icon;
   const [data, setData] = useState(null);
   const [activeChip, setActiveChip] = useState('전체');
+  const [page, setPage] = useState(1);
   const [loadedSection, setLoadedSection] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let ignore = false;
-    api.get(`/api/life-info/${content.section}`)
+    api.get(`/api/life-info/${resolvedContent.section}`)
       .then((res) => {
         if (ignore) return;
         setData(res.data);
-        setLoadedSection(content.section);
+        setLoadedSection(resolvedContent.section);
         setError(null);
       })
       .catch(() => {
         if (!ignore) setError('생활 정보를 불러올 수 없습니다');
       });
     return () => { ignore = true; };
-  }, [content.section]);
+  }, [resolvedContent.section]);
 
   useEffect(() => {
-    setActiveChip(content.chips[0] ?? '전체');
-  }, [content.chips]);
+    setActiveChip(resolvedContent.chips[0] ?? '전체');
+    setPage(1);
+  }, [resolvedContent.chips]);
 
-  const loading = loadedSection !== content.section && !error;
-  const currentData = loadedSection === content.section ? data : null;
-  void currentData;
+  const loading = loadedSection !== resolvedContent.section && !error;
+  const currentData = loadedSection === resolvedContent.section ? data : null;
+  const apiCards = currentData?.sections?.flatMap((section) => section.items ?? []).map(normalizeInfoCard) ?? [];
+  const displayCards = apiCards.length ? apiCards : resolvedContent.cards;
+  const displayCountLabel = apiCards.length ? `총 ${apiCards.length}개의 정보` : resolvedContent.countLabel;
   void useMemo;
 
-  if (content.section === 'single-household') {
-    return <SingleHouseholdPortal content={content} />;
+  if (resolvedContent.section === 'single-household') {
+    return <SingleHouseholdPortal content={resolvedContent} apiData={currentData} />;
   }
 
   return (
-    <div className="info-page figma-info-page" style={{ '--info-accent': content.accent }}>
+    <div className="info-page figma-info-page" style={{ '--info-accent': resolvedContent.accent }}>
       <section className="info-figma-topline">
-        <h1>{content.title}</h1>
+        <h1>{resolvedContent.title}</h1>
         <span className="info-live-pill">
-          <BellRing size={14} /> {loading ? STATUS_FALLBACK : content.eyebrow}
+          <BellRing size={14} /> {loading ? STATUS_FALLBACK : resolvedContent.eyebrow}
         </span>
       </section>
 
@@ -273,12 +296,12 @@ export default function InfoPage() {
       <section className="info-figma-hero">
         <div className="info-hero-icon"><Icon size={30} /></div>
         <div>
-          <h2>{heroTitle(content)}</h2>
-          <p>{content.description}</p>
-          {content.special && (
+          <h2>{heroTitle(resolvedContent)}</h2>
+          <p>{resolvedContent.description}</p>
+          {resolvedContent.special && (
             <div className="info-special-pill">
-              <span>{content.special.label}</span>
-              <strong>{content.special.value}</strong>
+              <span>{resolvedContent.special.label}</span>
+              <strong>{resolvedContent.special.value}</strong>
             </div>
           )}
         </div>
@@ -288,16 +311,16 @@ export default function InfoPage() {
 
 
       <nav className="info-chip-row" aria-label="카테고리">
-        {content.chips.map((chip) => (
+        {resolvedContent.chips.map((chip) => (
           <button key={chip} type="button" className={activeChip === chip ? 'active' : ''} onClick={() => setActiveChip(chip)}>{chip}</button>
         ))}
       </nav>
 
-      {content.mapTitle && (
+      {resolvedContent.mapTitle && (
         <section className="info-map-panel">
           <div>
-            <h2>{content.mapTitle}</h2>
-            <p>{content.mapMeta}</p>
+            <h2>{resolvedContent.mapTitle}</h2>
+            <p>{resolvedContent.mapMeta}</p>
           </div>
           <div className="info-map-placeholder">
             <strong>N</strong>
@@ -308,17 +331,21 @@ export default function InfoPage() {
 
       <section className="info-facility-section">
         <div className="info-section-head figma">
-          <h2>{activeChip === (content.chips[0] ?? '전체') ? content.countLabel : `${activeChip} 정보`}</h2>
+          <h2>{activeChip === (resolvedContent.chips[0] ?? '전체') ? displayCountLabel : `${activeChip} 정보`}</h2>
         </div>
         <div className="info-facility-list">
-          {content.cards.map((item, index) => (
+          {displayCards.map((item, index) => (
             <FacilityCard key={`${item.title}-${index}`} item={item} />
           ))}
         </div>
       </section>
 
-      {content.section === 'accessibility' && (
-        <div className="pagination figma-pagination"><button type="button">← 이전</button><span>1</span><span>2</span><span>3</span><button type="button">다음 →</button></div>
+      {resolvedContent.section === 'accessibility' && (
+        <div className="pagination figma-pagination">
+          <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>← 이전</button>
+          {[1, 2, 3].map((value) => <span key={value} className={page === value ? 'active' : ''}>{value}</span>)}
+          <button type="button" onClick={() => setPage((value) => Math.min(3, value + 1))}>다음 →</button>
+        </div>
       )}
     </div>
   );
@@ -332,21 +359,37 @@ function heroTitle(content) {
   return `천안시 ${content.title} 정보 안내`;
 }
 
-function SingleHouseholdPortal({ content }) {
+function SingleHouseholdPortal({ content, apiData }) {
   const [view, setView] = useState('cards');
+  const [activeTab, setActiveTab] = useState('전체');
+  const [radius, setRadius] = useState('1km');
+  const [displayMode, setDisplayMode] = useState('카드 그리드');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const services = [
-    ['주거', '역세권 전월세 추천 매물', '서울시 거주 무주택 1인 가구', '관악구, 동작구', '상시 업데이트', '매물 보기'],
-    ['식사', '나홀로 미식: 혼밥 추천 맛집 리스트', '혼밥을 즐기는 모든 분', '강남역, 신촌 일대', '매일 갱신', '맛집 보기'],
-    ['편의', '우리 동네 24시간 운영 시설 안내', '심야 이용객 및 직장인', '전국 주요 거점', '연중무휴', '위치 찾기'],
-    ['취미', '1인 가구 소모임: 취미 및 관심사 공유', '새로운 인연을 찾는 청년/중장년', '지역별 소모임 공간', '모임별 상이', '모임 확인'],
+  const apiSections = apiData?.sections ?? [];
+  const visibleSections = apiSections.length ? apiSections : [
+    { title: '최근 1인 주거 후보', items: content.cards.filter((item) => item.subtitle === '주거') },
+    { title: '혼밥/카페 추천', items: content.cards.filter((item) => item.subtitle === '식사') },
+    { title: '안전/지원 체크리스트', items: content.cards.filter((item) => item.subtitle === '안전') },
   ];
-  const cards = [
-    ['주거', '128건', '원룸/오피스텔 월세', '천안 시내 전 지역 최신 매물', '평균 월세', '38만원', '평균 보증금', '500만원', '신규 매물', '+12 오늘', '오피스텔 64', '원룸 64', '매물 보기'],
-    ['식사', '86곳', '혼밥 맛집 탐방', '1인 좌석 · 1인 메뉴 보장', '하카타 라멘 천안점', '4.8', '320m', '일식 · 1인 좌석 8석', '착한 비빔밥', '4.6', '510m', '한식 · 포장 가능', '전체 보기'],
-    ['24H', 'LIVE', '우리동네 24H 시설', '새벽에도 안심하고 이용 가능', '세탁', '12', '스카', '8', '편의점', '34', '헬스', '6', '반경 1km · 총 60개 시설 운영중', '지도 보기'],
-    ['소모임', '42개 모임', '취미 소모임 목록', '함께라서 더 즐거운 1인의 일상', '천안 독서 클럽', '+24', '매주 토 · 두정동', '새벽 러닝 크루', '+18', '화·목 6AM · 천안천', '모임 둘러보기'],
-  ];
+  const cards = visibleSections.map((section) => {
+    const items = section.items ?? [];
+    return {
+      tag: section.title.includes('주거') ? '주거' : section.title.includes('혼밥') || section.title.includes('카페') ? '식사' : section.title.includes('안전') ? '안전' : '정보',
+      count: `${items.length}건`,
+      title: section.title,
+      desc: section.caption || items[0]?.description || '천안시 연동 데이터 기준으로 표시합니다.',
+      details: items.slice(0, 4).flatMap((item) => [item.title, item.meta || item.subtitle || item.address || item.description]).filter(Boolean),
+    };
+  });
+  const services = visibleSections.flatMap((section) => (section.items ?? []).map((item) => [
+    section.title.includes('주거') ? '주거' : section.title.includes('혼밥') || section.title.includes('카페') ? '식사' : '지원',
+    item.title,
+    item.subtitle || '천안 시민',
+    item.description || item.address || '천안시',
+    item.meta || '수시 갱신',
+    item.url ? '상세 보기' : '확인',
+  ])).slice(0, 10);
+  const stats = apiData?.stats ?? [];
   return (
     <div className="info-page single-portal-page" style={{ '--info-accent': content.accent }}>
       <section className="single-hero">
@@ -358,12 +401,14 @@ function SingleHouseholdPortal({ content }) {
         <button type="button" onClick={() => setSettingsOpen(true)}>맞춤 설정</button>
       </section>
       <nav className="single-tabs">
-        {['전체', '주거', '식사', '편의', '취미'].map((tab, i) => <button key={tab} className={i === 0 ? 'active' : ''}>{tab}</button>)}
+        {['전체', '주거', '식사', '편의', '취미'].map((tab) => (
+          <button key={tab} type="button" className={activeTab === tab ? 'active' : ''} onClick={() => setActiveTab(tab)}>{tab}</button>
+        ))}
         <button type="button" onClick={() => setView(view === 'cards' ? 'table' : 'cards')}>{view === 'cards' ? '표 리스트' : '카드 그리드'}</button>
       </nav>
       {view === 'cards' ? (
         <div className="single-card-grid">
-          {cards.map(([tag, count, title, desc, ...details]) => (
+          {cards.map(({ tag, count, title, desc, details }) => (
             <article key={title}>
               <div className="single-card-kicker"><span>{tag}</span><strong>{count}</strong></div>
               <h2>{title}</h2>
@@ -378,12 +423,12 @@ function SingleHouseholdPortal({ content }) {
             <thead><tr>{['유형', '서비스명', '지원 대상', '지역', '신청 기간', '상태'].map((h) => <th key={h}>{h}</th>)}</tr></thead>
             <tbody>{services.map((row) => <tr key={row[1]}>{row.map((cell, i) => <td key={cell}><span className={i === 0 ? 'single-type' : ''}>{cell}</span></td>)}</tr>)}</tbody>
           </table>
-          <p>총 2,450개 서비스 중 1-10 표시</p>
+          <p>총 {services.length.toLocaleString()}개 서비스 표시</p>
         </div>
       )}
       <section className="single-dashboard">
         <div><h2>우리 지역 서비스 이용 현황</h2><p>실시간 인기 서비스 · 오늘의 신규 등록 · 누적 신청 건수</p></div>
-        <strong>12건</strong><strong>1,450건</strong>
+        {stats.slice(0, 3).map((item) => <strong key={item.label}>{item.value?.toLocaleString?.() ?? item.value}{item.label}</strong>)}
       </section>
       {settingsOpen && (
         <div className="single-settings-overlay" onClick={() => setSettingsOpen(false)}>
@@ -392,12 +437,17 @@ function SingleHouseholdPortal({ content }) {
             <p>1인가구 포털을 나에게 맞게 조정하세요. 변경사항은 즉시 반영됩니다.</p>
             <h3>활동 지역 & 검색 반경</h3>
             <label>기본 지역<input readOnly value="천안시 서북구 불당동" /></label>
-            <div className="range-row"><span>검색 반경</span><strong>1.0 km</strong>{['500m', '1km', '2km', '5km'].map((v) => <button type="button" key={v}>{v}</button>)}</div>
+            <div className="range-row"><span>검색 반경</span><strong>{radius}</strong>{['500m', '1km', '2km', '5km'].map((v) => <button type="button" key={v} className={radius === v ? 'active' : ''} onClick={() => setRadius(v)}>{v}</button>)}</div>
             <h3>알림 설정</h3>
             <div className="setting-list"><label><input type="checkbox" defaultChecked /> 신규 매물 알림 <small>관심 지역의 새 원룸·오피스텔이 등록되면 알려드려요</small></label><label><input type="checkbox" defaultChecked /> 오늘의 혼밥 추천 <small>매일 오전 11시 · 점심 추천 푸시</small></label><label><input type="checkbox" defaultChecked /> 소모임 모집 알림 <small>관심 카테고리의 새 소모임이 열릴 때</small></label></div>
             <h3>표시 방식</h3>
-            <div className="range-row"><button type="button">카드 그리드</button><strong>현재 보기</strong><button type="button">리스트</button><span>간결하게</span></div>
-            <div className="setting-actions"><button type="button">기본값으로 재설정</button><button type="button" onClick={() => setSettingsOpen(false)}>취소</button><button type="button" onClick={() => setSettingsOpen(false)}>설정 저장</button></div>
+            <div className="range-row">
+              <button type="button" className={displayMode === '카드 그리드' ? 'active' : ''} onClick={() => { setDisplayMode('카드 그리드'); setView('cards'); }}>카드 그리드</button>
+              <strong>현재 보기</strong>
+              <button type="button" className={displayMode === '리스트' ? 'active' : ''} onClick={() => { setDisplayMode('리스트'); setView('table'); }}>리스트</button>
+              <span>간결하게</span>
+            </div>
+            <div className="setting-actions"><button type="button" onClick={() => { setActiveTab('전체'); setRadius('1km'); setDisplayMode('카드 그리드'); setView('cards'); }}>기본값으로 재설정</button><button type="button" onClick={() => setSettingsOpen(false)}>취소</button><button type="button" onClick={() => setSettingsOpen(false)}>설정 저장</button></div>
           </section>
         </div>
       )}

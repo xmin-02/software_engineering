@@ -20,36 +20,12 @@ const SENTIMENT_COLORS = {
 
 
 const FIGMA_DASHBOARD_FALLBACK = {
-  sentiment: { positive: 68, negative: 18, neutral: 14, total: 1247 },
-  trend: [
-    { date: 'MON', positive: 41, negative: 12, neutral: 21 },
-    { date: 'TUE', positive: 58, negative: 16, neutral: 25 },
-    { date: 'WED', positive: 55, negative: 18, neutral: 24 },
-    { date: 'THU', positive: 74, negative: 11, neutral: 19 },
-    { date: 'FRI', positive: 68, negative: 13, neutral: 22 },
-    { date: 'SAT', positive: 52, negative: 20, neutral: 28 },
-    { date: 'SUN', positive: 62, negative: 17, neutral: 23 },
-  ],
-  keywords: ['#축제', '#천안삼거리', '#호두과자', '#단풍명소', '#교통중심', '#빵지순례', '#아라리오', '#청년창업', '#야경맛집', '#K-컬처'].map((keyword, i) => ({ keyword, count: 120 - i * 8 })),
-  topics: [
-    { id: 1, name: '천안 테크놀로지', post_count: 452, keywords: ['채용', '청년', 'IT'] },
-    { id: 2, name: '독립기념관 단풍길', post_count: 321, keywords: ['단풍', '명소'] },
-    { id: 3, name: '신부동 맛집 거리', post_count: 288, keywords: ['맛집', '카페'] },
-    { id: 4, name: '불당동 카페 투어', post_count: 194, keywords: ['카페', '데이트'] },
-    { id: 5, name: '성성호수공원 야경', post_count: 156, keywords: ['야경', '산책'] },
-  ],
-  events: [
-    { id: 'e1', title: '천안 흥타령 춤축제 2024 일정 안내', category: '행사', displayMeta: 'D-5 · 종합운동장' },
-    { id: 'e2', title: '독립기념관 가을 단풍 축제 개막', category: '명소', displayMeta: '진행중 · 목천읍' },
-    { id: 'e3', title: '성성호수공원 야간 킹스 레이크 쇼', category: '행사', displayMeta: '매일 20:00 · 성성동' },
-    { id: 'e4', title: '아라리오 갤러리 특별 기획 전시', category: '명소', displayMeta: '~12.15 · 신부동' },
-    { id: 'e5', title: '유량동 맛집 탐방 & 숲 체험', category: '명소', displayMeta: '상시운영 · 유량동' },
-  ],
-  posts: { items: [
-    { id: 'p1', title: '천안 흥타령춤축제 일정이 공지되었습니다', source: 'cheonan_city', sentiment: 'positive', published_at: '2026-06-10T09:00:00' },
-    { id: 'p2', title: '신부동 맛집 거리 신규 리뷰가 증가했습니다', source: 'naver_blog', sentiment: 'positive', published_at: '2026-06-10T08:20:00' },
-    { id: 'p3', title: '천안IC 인근 교통 지체가 발생했습니다', source: 'community', sentiment: 'neutral', published_at: '2026-06-10T07:40:00' },
-  ] },
+  sentiment: { positive: 0, negative: 0, neutral: 0, total: 0 },
+  trend: [],
+  keywords: [],
+  topics: [],
+  events: [],
+  posts: { items: [], total: 0 },
 };
 
 const SENTIMENT_LABELS = {
@@ -78,6 +54,19 @@ function formatDate(dateStr) {
 function getPlaceItems(places) {
   if (Array.isArray(places)) return places;
   return places?.items ?? [];
+}
+
+function getApiItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  return payload?.items ?? [];
+}
+
+function normalizeEvent(event) {
+  const date = event.displayMeta || event.start_date || event.end_date || event.location || '';
+  return {
+    ...event,
+    displayMeta: date,
+  };
 }
 
 // 모달 컴포넌트
@@ -203,13 +192,17 @@ export default function DashboardPage() {
   }, []);
 
   // 감성 분포 데이터
-  const dashboardSentiment = FIGMA_DASHBOARD_FALLBACK.sentiment;
-  const dashboardTrend = FIGMA_DASHBOARD_FALLBACK.trend;
-  const dashboardKeywords = FIGMA_DASHBOARD_FALLBACK.keywords;
-  const dashboardTopics = FIGMA_DASHBOARD_FALLBACK.topics;
-  const dashboardEvents = FIGMA_DASHBOARD_FALLBACK.events;
-  const dashboardPosts = FIGMA_DASHBOARD_FALLBACK.posts;
-  void sentiment; void trend; void keywords; void topics; void events; void posts;
+  const apiKeywords = getApiItems(keywords);
+  const apiTopics = getApiItems(topics);
+  const apiEvents = getApiItems(events).map(normalizeEvent);
+  const apiPosts = posts?.items ? posts : { items: getApiItems(posts), total: getApiItems(posts).length };
+  const apiPlaces = getPlaceItems(places);
+  const dashboardSentiment = sentiment?.total ? sentiment : FIGMA_DASHBOARD_FALLBACK.sentiment;
+  const dashboardTrend = Array.isArray(trend) && trend.length ? trend : FIGMA_DASHBOARD_FALLBACK.trend;
+  const dashboardKeywords = apiKeywords.length ? apiKeywords : FIGMA_DASHBOARD_FALLBACK.keywords;
+  const dashboardTopics = apiTopics.length ? apiTopics : FIGMA_DASHBOARD_FALLBACK.topics;
+  const dashboardEvents = apiEvents.length ? apiEvents : FIGMA_DASHBOARD_FALLBACK.events;
+  const dashboardPosts = apiPosts.items?.length ? apiPosts : FIGMA_DASHBOARD_FALLBACK.posts;
 
   const pieData = dashboardSentiment
     ? Object.entries(dashboardSentiment)
@@ -268,9 +261,8 @@ export default function DashboardPage() {
   const positiveRate = dashboardSentiment?.total
     ? Math.round((dashboardSentiment.positive / dashboardSentiment.total) * 100)
     : 0;
-  const placeCount = 342;
-  const eventCount = 28;
-  void places;
+  const placeCount = places?.total ?? apiPlaces.length;
+  const eventCount = events?.total ?? apiEvents.length;
 
   if (loading) {
     return (
@@ -286,10 +278,10 @@ export default function DashboardPage() {
 
       <div className="kpi-grid">
         {[
-          { icon: FileText, label: 'Total Posts', value: `${totalPosts.toLocaleString()}건`, trend: '+12.4%', modal: 'posts' },
-          { icon: SmilePlus, label: 'Positive Rate', value: `${positiveRate}%`, trend: '+3.2%', modal: 'sentiment' },
-          { icon: UtensilsCrossed, label: 'Restaurants', value: `${placeCount}곳`, trend: '상시', modal: 'places' },
-          { icon: MapPin, label: 'Events', value: `${eventCount}곳`, trend: 'New 3', modal: 'events' },
+          { icon: FileText, label: 'Total Posts', value: `${totalPosts.toLocaleString()}건`, trend: 'API', modal: 'posts' },
+          { icon: SmilePlus, label: 'Positive Rate', value: `${positiveRate}%`, trend: '실시간', modal: 'sentiment' },
+          { icon: UtensilsCrossed, label: 'Restaurants', value: `${placeCount.toLocaleString()}곳`, trend: 'DB', modal: 'places' },
+          { icon: MapPin, label: 'Events', value: `${eventCount.toLocaleString()}곳`, trend: 'DB', modal: 'events' },
         ].map((kpi) => (
           <div
             key={kpi.label}
@@ -415,7 +407,7 @@ export default function DashboardPage() {
 
         <div className="dash-card dash-card-tabbed">
           <div className="dash-tab-bar">
-            <button className="dash-tab-btn active" type="button">명소 & 행사</button>
+            <button className="dash-tab-btn active" type="button" onClick={() => setActiveModal('events')}>명소 & 행사</button>
           </div>
 
           {rightTab === 'events' ? (

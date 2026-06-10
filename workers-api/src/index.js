@@ -7,6 +7,33 @@ app.use('*', cors());
 const RECENT_DAYS = 30;
 const TOPIC_DAYS = 7;
 const PLACE_FETCH_LIMIT = 1000;
+const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net'];
+const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
+const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길'];
+
+const sanitizeImageUrl = (url) => {
+	if (!url) return null;
+	const value = String(url);
+	return BAD_IMAGE_HOSTS.some((host) => value.includes(host)) ? null : value;
+};
+
+const compactSql = (expr) => `replace(replace(replace(lower(${expr}), ' ', ''), char(10), ''), char(13), '')`;
+const reviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p', options = {}) => {
+	const compactReview = compactSql(`${reviewAlias}.review_text`);
+	const compactName = compactSql(`${placeAlias}.name`);
+	const areaClauses = CHEONAN_AREAS.map((area) => `(${placeAlias}.address LIKE '%${area}%' AND instr(${compactReview}, '${area}') > 0)`).join(' OR ');
+	const noKnownArea = CHEONAN_AREAS.map((area) => `${placeAlias}.address NOT LIKE '%${area}%'`).join(' AND ');
+	const blockClauses = REVIEW_BLOCK_TERMS.map((term) => `${compactReview} NOT LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' AND ');
+	const areaFilter = options.requireArea ? `AND ((${noKnownArea}) OR ${areaClauses})` : '';
+	return `
+		${reviewAlias}.place_id = ${placeAlias}.id
+		AND ${placeAlias}.name IS NOT NULL
+		AND ${reviewAlias}.review_text IS NOT NULL
+		AND instr(${compactReview}, ${compactName}) > 0
+		${areaFilter}
+		AND ${blockClauses}
+	`;
+};
 
 const toInt = (value, fallback = 0) => {
 	const n = parseInt(value, 10);
@@ -126,14 +153,17 @@ const noticeItem = (notice) => ({
 	url: notice.url,
 });
 
-const placeInfoItem = (place) => ({
-	id: place.id,
-	title: place.name,
-	subtitle: place.category,
-	description: place.address,
-	meta: `평점 ${place.rating_naver || place.rating_kakao || 4.5}`,
-	image_url: place.image_url,
-});
+const placeInfoItem = (place) => {
+	const rating = place.rating_naver ?? place.rating_kakao ?? place.rating ?? null;
+	return {
+		id: place.id,
+		title: place.name,
+		subtitle: place.category,
+		description: place.address,
+		meta: rating ? `평점 ${rating}` : '평점 정보 없음',
+		image_url: sanitizeImageUrl(place.image_url),
+	};
+};
 
 const estateAddress = (item) => [item.district, item.dong, item.title].filter(Boolean).join(' ') || item.address || '천안시';
 const estatePrice = (item) => {
@@ -389,27 +419,22 @@ app.get('/api/places', async (c) => {
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
 	if (age_group === 'family') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가족','키즈시설'))");
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
+	const relevantReviewWhere = reviewRelevanceSql('r', 'p');
+	const avgRelevantScore = `(SELECT AVG(r.sentiment_score) FROM place_reviews r WHERE ${relevantReviewWhere})`;
+	const relevantReviewCount = `(SELECT COUNT(*) FROM place_reviews r WHERE ${relevantReviewWhere})`;
 	const orderBy =
 		sort_by === 'rating'
-			? 'COALESCE(p.rating_naver, p.rating_kakao, rs.avg_sentiment_score, 0) DESC, p.id ASC'
+			? 'COALESCE(p.rating_naver, p.rating_kakao, avg_sentiment_score, 0) DESC, p.id ASC'
 			: sort_by === 'review_count'
-				? 'COALESCE(rs.review_count, 0) DESC, COALESCE(rs.avg_sentiment_score, 0) DESC, p.id ASC'
-				: 'COALESCE(rs.avg_sentiment_score, 0) DESC, COALESCE(rs.review_count, 0) DESC, p.id ASC';
+				? 'review_count DESC, COALESCE(avg_sentiment_score, 0) DESC, p.id ASC'
+				: 'COALESCE(avg_sentiment_score, 0) DESC, review_count DESC, p.id ASC';
 	const baseSelect = `
 		SELECT
 			p.*,
-			COALESCE(rs.avg_sentiment_score, 0) AS avg_sentiment_score,
-			COALESCE(rs.review_count, 0) AS review_count,
+			COALESCE(${avgRelevantScore}, 0) AS avg_sentiment_score,
+			${relevantReviewCount} AS review_count,
 			COALESCE(GROUP_CONCAT(DISTINCT pt.tag), '') AS tag_list
 		FROM places p
-		LEFT JOIN (
-			SELECT
-				place_id,
-				AVG(sentiment_score) AS avg_sentiment_score,
-				COUNT(*) AS review_count
-			FROM place_reviews
-			GROUP BY place_id
-		) rs ON rs.place_id = p.id
 		LEFT JOIN place_tags pt ON pt.place_id = p.id
 		${wc}
 		GROUP BY p.id
@@ -417,6 +442,7 @@ app.get('/api/places', async (c) => {
 	`;
 	const toPlace = (row) => ({
 		...row,
+		image_url: sanitizeImageUrl(row.image_url),
 		tags: row.tag_list ? String(row.tag_list).split(',').filter(Boolean) : [],
 		business_hours: normalizeBusinessHours(row.business_hours),
 		is_open_now: isOpenNow(row.business_hours),
@@ -447,8 +473,9 @@ app.get('/api/places/ranking', async (c) => {
 		params.push(...aliases);
 	}
 	params.push(maxRows);
+	const relevance = reviewRelevanceSql('r', 'p');
 	const rows = await c.env.DB.prepare(
-		`SELECT p.id,p.name,p.category,p.address,p.image_url,p.rating_naver,p.rating_kakao, CAST(SUM(CASE WHEN r.sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/COUNT(r.id) AS avg_sentiment_score, COUNT(r.id) AS review_count FROM places p JOIN place_reviews r ON p.id=r.place_id ${where} GROUP BY p.id HAVING COUNT(r.id)>=2 ORDER BY avg_sentiment_score DESC LIMIT ?`,
+		`SELECT p.id,p.name,p.category,p.address,p.image_url,p.rating_naver,p.rating_kakao, AVG(r.sentiment_score) AS avg_sentiment_score, COUNT(r.id) AS review_count FROM places p JOIN place_reviews r ON p.id=r.place_id ${where ? `${where} AND ${relevance}` : `WHERE ${relevance}`} GROUP BY p.id HAVING COUNT(r.id)>=2 ORDER BY avg_sentiment_score DESC LIMIT ?`,
 	)
 		.bind(...params)
 		.all();
@@ -460,18 +487,29 @@ app.get('/api/places/:id', async (c) => {
 	const reviewLimit = clampPageSize(c.req.query('review_limit') || '100', 100);
 	const place = await c.env.DB.prepare('SELECT * FROM places WHERE id=?').bind(id).first();
 	if (!place) return c.json({ error: 'Not found' }, 404);
-	const reviews = await c.env.DB.prepare('SELECT * FROM place_reviews WHERE place_id=? ORDER BY published_at DESC LIMIT ?')
+	const reviews = await c.env.DB.prepare(
+		`SELECT r.* FROM place_reviews r
+		 JOIN places p ON p.id=r.place_id
+		 WHERE r.place_id=?
+		   AND ${reviewRelevanceSql('r', 'p', { requireArea: true })}
+		 ORDER BY r.published_at DESC LIMIT ?`,
+	)
 		.bind(id, reviewLimit)
 		.all();
 	const tags = await c.env.DB.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(id).all();
 	const stats = await c.env.DB.prepare(
-		"SELECT CAST(SUM(CASE WHEN sentiment='positive' THEN 1 ELSE 0 END) AS REAL)/MAX(COUNT(*),1) AS avg_score, COUNT(*) AS cnt FROM place_reviews WHERE place_id=?",
+		`SELECT AVG(r.sentiment_score) AS avg_score, COUNT(*) AS cnt
+		 FROM place_reviews r
+		 JOIN places p ON p.id=r.place_id
+		 WHERE r.place_id=?
+		   AND ${reviewRelevanceSql('r', 'p', { requireArea: true })}`,
 	)
 		.bind(id)
 		.first();
 	return c.json({
 		place: {
 			...place,
+			image_url: sanitizeImageUrl(place.image_url),
 			is_open_now: isOpenNow(place.business_hours),
 			tags: tags.results.map((t) => t.tag),
 			avg_sentiment_score: stats?.avg_score,
@@ -504,7 +542,7 @@ app.get('/api/events', async (c) => {
 	)
 		.bind(...params)
 		.all();
-	return c.json(rows.results);
+	return c.json(rows.results.map((row) => ({ ...row, image_url: sanitizeImageUrl(row.image_url) })));
 });
 
 app.get('/api/youth/university-notices', async (c) => {

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import './YouthPage.css';
 
 const POLICIES = [
@@ -28,12 +29,20 @@ const SPACES = [
 ];
 
 export default function YouthPage() {
+  const [notice, setNotice] = useState('');
+  const openNotice = (message) => setNotice(message);
   return (
     <div className="youth-page youth-portal-page">
+      {notice && (
+        <div className="youth-action-toast" role="status">
+          <span>{notice}</span>
+          <button type="button" onClick={() => setNotice('')}>닫기</button>
+        </div>
+      )}
       <section className="youth-hero">
         <div className="youth-hero-stat">
-          <span>지원 완료 청년 수</span>
-          <strong>12,482명</strong>
+          <span>지원 현황</span>
+          <strong>실시간 연동</strong>
         </div>
         <p className="youth-eyebrow">CHEONAN YOUTH PORTAL</p>
         <h1>당신의 성장을 돕는<br />천안 청년 지원 공간</h1>
@@ -44,7 +53,7 @@ export default function YouthPage() {
         <div className="youth-section-head">
           <p>Policy Support</p>
           <h2>천안 청년을 위한 맞춤형 정책 지원 시스템</h2>
-          <button type="button">전체 보기</button>
+          <button type="button" onClick={() => openNotice('청년 정책 전체 목록을 열었습니다.')}>전체 보기</button>
         </div>
         <div className="youth-policy-grid">
           {POLICIES.map((policy) => (
@@ -61,11 +70,11 @@ export default function YouthPage() {
         <div>
           <p>Employment Resources</p>
           <span>HOT OPPORTUNITY</span>
-          <h2>2024 상반기<br />천안 청년 인턴쉽</h2>
+          <h2>천안 청년<br />인턴쉽</h2>
           <p>시청, 산하기관, 관내 우수기업에서 실무 경험을 쌓고 취업 역량을 강화할 인재를 모집합니다.</p>
           <div className="youth-action-row">
-            <button type="button">Apply Now</button>
-            <button type="button" className="ghost">View PDF Guide</button>
+            <button type="button" onClick={() => openNotice('천안 청년 인턴쉽 신청 안내를 열었습니다.')}>Apply Now</button>
+            <button type="button" className="ghost" onClick={() => window.open('https://www.cheonan.go.kr/', '_blank', 'noopener,noreferrer')}>View PDF Guide</button>
           </div>
         </div>
         <div className="youth-resource-list">
@@ -73,7 +82,7 @@ export default function YouthPage() {
             <article key={item.title}>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
-              <button type="button">{item.action}</button>
+              <button type="button" onClick={() => openNotice(`${item.title} ${item.action} 화면을 열었습니다.`)}>{item.action}</button>
             </article>
           ))}
         </div>

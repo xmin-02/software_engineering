@@ -763,6 +763,12 @@
   background: #f1f5f9;
 }
 
+.range-row button.active,
+.figma-pagination span.active {
+  background: #005bbf;
+  color: #fff;
+}
+
 .setting-list label {
   min-width: 220px;
   border-radius: 16px;

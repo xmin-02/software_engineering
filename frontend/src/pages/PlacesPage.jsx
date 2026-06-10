@@ -10,15 +10,6 @@ import placeImage5 from '../assets/figma/place-6.jpg';
 const PLACE_IMAGES = [placeImage1, placeImage2, placeImage3, placeImage4, placeImage5, placeImage1];
 const FAVORITES_KEY = 'cheonan_favorite_places';
 
-const FIGMA_PLACES = [
-  { id: 'figma-1', category: '카페', sub_category: '카페/디저트', address: '신부동', name: '모던 아카이브', description: '직접 로스팅한 원두와 미니멀한 인테리어가 돋보이는 감성 카페', distance: '1.2km', is_open_now: true, rating: 4.8, review_count: 1248, image_url: placeImage1 },
-  { id: 'figma-2', category: '양식', address: '불당동', name: '테이블 오브 더 시티', description: '지역 특산물을 활용한 창의적인 파인 다이닝을 경험해보세요', distance: '3.5km', status: '브레이크 타임', rating: 4.9, review_count: 2108, image_url: placeImage2 },
-  { id: 'figma-3', category: '한식', address: '쌍용동', name: '정성 담은 한 그릇', description: '어머니의 손맛을 그대로 담은 천안식 전통 비빔밥 전문점', distance: '800m', is_open_now: true, rating: 4.6, review_count: 981, image_url: placeImage3 },
-  { id: 'figma-4', category: '카페', sub_category: '베이커리', address: '백석동', name: '밀가루 공방', description: '매일 아침 갓 구운 천연 발효종 빵과 고소한 버터 향이 가득합니다', distance: '2.1km', status: '마감 임박', rating: 4.7, review_count: 843, image_url: placeImage4 },
-  { id: 'figma-5', category: '일식', address: '두정동', name: '스시 하루', description: '신선한 제철 생선만을 고집하는 정통 일식 초밥 전문점입니다', distance: '4.2km', is_open_now: true, rating: 4.5, review_count: 702, image_url: placeImage5 },
-  { id: 'figma-6', category: '양식', address: '청당동', name: '화덕의 미학', description: '참나무 장작으로 구워낸 쫄깃한 도우의 정통 나폴리 피자', distance: '5.5km', is_open_now: true, rating: 4.7, review_count: 612, image_url: placeImage1 },
-];
-
 const CATEGORY_TABS = ['전체', '한식', '일식/중식', '카페/디저트'];
 const SORTS = ['평점 높은 순', '가까운 거리 순', '리뷰 많은 순'];
 
@@ -27,11 +18,12 @@ function favoriteId(place) {
 }
 
 function compactFavorite(place) {
+  const rating = getDisplayRating(place);
   return {
     id: favoriteId(place),
     name: place.name,
     distance: place.distance ?? '',
-    rating: getDisplayRating(place),
+    rating: rating ?? '',
     category: place.sub_category || place.category || '맛집',
     address: place.address || '천안시',
     status: getStatus(place),
@@ -52,7 +44,7 @@ function getDisplayRating(place) {
   const rating = place.rating ?? place.rating_naver ?? place.rating_kakao;
   if (rating) return Number(rating).toFixed(1).replace('.0', '.0');
   if (place.avg_sentiment_score != null) return Math.max(4.1, Math.min(4.9, 4 + Number(place.avg_sentiment_score))).toFixed(1);
-  return '4.8';
+  return null;
 }
 
 function getArea(address = '') {
@@ -149,8 +141,8 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
             <h2 className="modal-place-name">{current.name}</h2>
             <p className="modal-address">{current.address ?? '천안시'}</p>
             <div className="modal-info-row">
-              <span className="modal-info-chip">영업시간 {typeof current.business_hours === 'string' ? current.business_hours : current.business_hours?.mon ?? '10:00 - 22:00'}</span>
-              <span className="modal-info-chip">전화번호 {current.phone || '041-123-4567'}</span>
+              <span className="modal-info-chip">영업시간 {typeof current.business_hours === 'string' ? current.business_hours : current.business_hours?.mon ?? '정보 없음'}</span>
+              <span className="modal-info-chip">전화번호 {current.phone || '정보 없음'}</span>
             </div>
             <h3 className="modal-reviews-title">최근 리뷰 데이터 <span>총 {current.review_count?.toLocaleString?.() ?? reviews.length}건</span></h3>
             {loading && <p className="modal-status">실제 리뷰를 불러오는 중...</p>}
@@ -176,7 +168,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
 }
 
 export default function PlacesPage() {
-  const [places, setPlaces] = useState(FIGMA_PLACES);
+  const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [category, setCategory] = useState('전체');
   const [sort, setSort] = useState('평점 높은 순');
@@ -189,7 +181,7 @@ export default function PlacesPage() {
     let ignore = false;
     const params = {
       page: 1,
-      size: category === '전체' ? 200 : 100,
+      size: 100,
       sort_by: sortParam(sort),
     };
     if (category !== '전체') params.category = category;
@@ -205,9 +197,9 @@ export default function PlacesPage() {
           seenImages.add(key);
           return true;
         });
-        if (!ignore) setPlaces(withImages.length ? withImages : FIGMA_PLACES);
+        if (!ignore) setPlaces(withImages.length ? withImages : items);
       })
-      .catch(() => { if (!ignore) setPlaces(FIGMA_PLACES); });
+      .catch(() => { if (!ignore) setPlaces([]); });
     return () => { ignore = true; };
   }, [category, sort]);
 
@@ -224,7 +216,7 @@ export default function PlacesPage() {
     const sorted = [...filtered].sort((a, b) => {
       if (sort === '리뷰 많은 순') return (b.review_count ?? 0) - (a.review_count ?? 0);
       if (sort === '가까운 거리 순') return String(a.address ?? '').localeCompare(String(b.address ?? ''), 'ko');
-      return Number(getDisplayRating(b)) - Number(getDisplayRating(a));
+      return Number(getDisplayRating(b) ?? 0) - Number(getDisplayRating(a) ?? 0);
     });
     if (category !== '전체' || normalizedQuery) return sorted.slice(0, 12);
     const buckets = new Map();
@@ -278,13 +270,13 @@ export default function PlacesPage() {
             <article key={id} className="place-card figma-place-card" role="button" tabIndex={0} onClick={() => setSelected(place)} onKeyDown={(event) => { if (event.key === 'Enter') setSelected(place); }}>
               <div className="place-card-image-wrap">
                 <img src={normalizeImageUrl(place.image_url || place.photo_url, PLACE_IMAGES[index % PLACE_IMAGES.length])} alt="" className="place-card-image" loading="lazy" onError={(event) => { event.currentTarget.src = PLACE_IMAGES[index % PLACE_IMAGES.length]; }} />
-                <span className="place-rating-pill">★ {getDisplayRating(place)}</span>
+                <span className="place-rating-pill">★ {getDisplayRating(place) ?? '신규'}</span>
                 <button type="button" className={`place-favorite-btn${favorite ? ' active' : ''}`} aria-label={`${place.name} 즐겨찾기`} onClick={(event) => { event.stopPropagation(); toggleFavorite(place); }}>{favorite ? '★' : '☆'}</button>
               </div>
               <div className="figma-place-meta"><span>{getBadge(place)}</span><strong>{getArea(place.address)}</strong></div>
               <h3 className="place-name">{place.name}</h3>
               <p className="place-address">{place.description || place.address || '천안 시민들이 추천하는 로컬 플레이스'}</p>
-              <div className="figma-place-bottom"><span>{place.distance ?? `${index + 1}.${index}km`}</span><strong>{getStatus(place)}</strong></div>
+              <div className="figma-place-bottom"><span>{place.distance ?? '거리 정보 없음'}</span><strong>{getStatus(place)}</strong></div>
             </article>
           );
         })}

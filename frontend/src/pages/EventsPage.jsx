@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, Heart, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import './EventsPage.css';
+import api from '../api/client';
 import tourismEvent1 from '../assets/figma/tourism/tourism-event-1.jpg';
 import tourismEvent2 from '../assets/figma/tourism/tourism-event-2.jpg';
 import tourismEvent3 from '../assets/figma/tourism/tourism-event-3.jpg';
@@ -13,7 +14,7 @@ const EVENT_FALLBACKS = [
   {
     title: '천안 흥타령 춤축제',
     category: '축제',
-    date: '2024.10.02 - 10.06',
+    date: '일정 확인 중',
     dday: 'D-5',
     image: tourismEvent1,
     tone: 'orange',
@@ -21,7 +22,7 @@ const EVENT_FALLBACKS = [
   {
     title: '시립미술관 기획전',
     category: '전시',
-    date: '2024.10.15 - 11.20',
+    date: '일정 확인 중',
     dday: 'D-12',
     image: tourismEvent2,
     tone: 'indigo',
@@ -29,7 +30,7 @@ const EVENT_FALLBACKS = [
   {
     title: '가을 밤의 클래식 산책',
     category: '공연',
-    date: '2024.10.21',
+    date: '일정 확인 중',
     dday: 'D-18',
     image: tourismEvent3,
     tone: 'rose',
@@ -42,7 +43,7 @@ const SPOT_FALLBACKS = [
   {
     title: '독립기념관',
     category: '역사 명소',
-    rating: '4.9',
+    rating: null,
     address: '동남구 목천읍 삼방로 95',
     image: tourismSpot1,
     url: 'https://i815.or.kr/',
@@ -50,7 +51,7 @@ const SPOT_FALLBACKS = [
   {
     title: '각원사',
     category: '자연/힐링',
-    rating: '4.8',
+    rating: null,
     address: '동남구 각원사길 245',
     image: tourismSpot2,
     url: 'https://www.cheonan.go.kr/',
@@ -58,7 +59,7 @@ const SPOT_FALLBACKS = [
   {
     title: '아라리오 갤러리',
     category: '예술/문화',
-    rating: '4.7',
+    rating: null,
     address: '동남구 만남로 43',
     image: tourismSpot3,
     url: 'https://www.arario.com/',
@@ -68,15 +69,38 @@ const SPOT_FALLBACKS = [
 
 export default function EventsPage() {
   const [eventOffset, setEventOffset] = useState(0);
+  const [events, setEvents] = useState([]);
   const [sortMode, setSortMode] = useState('가까운 순');
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try { return JSON.parse(localStorage.getItem(TOURISM_FAVORITES_KEY) || '[]'); } catch { return []; }
   });
-  const upcomingEvents = useMemo(() => EVENT_FALLBACKS.map((_, index, array) => array[(index + eventOffset) % array.length]), [eventOffset]);
+  useEffect(() => {
+    let ignore = false;
+    api.get('/api/events')
+      .then((res) => {
+        if (ignore) return;
+        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+        setEvents(items.slice(0, 9));
+      })
+      .catch(() => { if (!ignore) setEvents([]); });
+    return () => { ignore = true; };
+  }, []);
+  const eventSource = events.length
+    ? events.map((event, index) => ({
+      title: event.title,
+      category: event.category || '명소',
+      date: event.start_date || event.end_date || event.location || '일정 확인 필요',
+      dday: event.start_date ? '예정' : '상시',
+      image: event.image_url || EVENT_FALLBACKS[index % EVENT_FALLBACKS.length].image,
+      tone: EVENT_FALLBACKS[index % EVENT_FALLBACKS.length].tone,
+      url: event.url,
+    }))
+    : EVENT_FALLBACKS;
+  const upcomingEvents = useMemo(() => eventSource.map((_, index, array) => array[(index + eventOffset) % array.length]).slice(0, 3), [eventOffset, eventSource]);
   const chosenSpots = useMemo(() => {
     const spots = [...SPOT_FALLBACKS];
-    if (sortMode === '평점 순') return spots.sort((a, b) => Number(b.rating) - Number(a.rating));
+    if (sortMode === '평점 순') return spots.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     return spots;
   }, [sortMode]);
   const toggleFavorite = (spot) => {
@@ -103,8 +127,8 @@ export default function EventsPage() {
         <div className="tourism-section-head">
           <h2>UPCOMING EVENTS</h2>
           <div className="tourism-arrow-row" aria-hidden="true">
-            <button type="button" onClick={() => setEventOffset((value) => (value + EVENT_FALLBACKS.length - 1) % EVENT_FALLBACKS.length)} aria-label="이전 행사"><ChevronLeft size={14} /></button>
-            <button type="button" onClick={() => setEventOffset((value) => (value + 1) % EVENT_FALLBACKS.length)} aria-label="다음 행사"><ChevronRight size={14} /></button>
+            <button type="button" onClick={() => setEventOffset((value) => (value + eventSource.length - 1) % eventSource.length)} aria-label="이전 행사"><ChevronLeft size={14} /></button>
+            <button type="button" onClick={() => setEventOffset((value) => (value + 1) % eventSource.length)} aria-label="다음 행사"><ChevronRight size={14} /></button>
           </div>
         </div>
         <div className="tourism-event-row">
@@ -174,7 +198,7 @@ function TourismSpotCard({ spot, favorite, onToggleFavorite, onSelect }) {
       <div className="tourism-spot-body">
         <div className="tourism-spot-meta">
           <span>{spot.category}</span>
-          <em>★ {spot.rating}</em>
+          <em>{spot.rating ? `★ ${spot.rating}` : '추천'}</em>
         </div>
         <h3>{spot.title}</h3>
         <p><MapPin size={13} />{spot.address}</p>
@@ -197,7 +221,7 @@ function TourismSpotModal({ spot, favorite, onToggleFavorite, onClose }) {
         <span>{spot.category}</span>
         <h2>{spot.title}</h2>
         <p><MapPin size={14} />{spot.address}</p>
-        <strong>★ {spot.rating}</strong>
+        <strong>{spot.rating ? `★ ${spot.rating}` : '추천 명소'}</strong>
         <div className="tourism-modal-actions">
           <button type="button" onClick={() => onToggleFavorite(spot)}>{favorite ? '찜 해제' : '찜하기'}</button>
           <a href={spot.url} target="_blank" rel="noreferrer">관련 페이지 이동</a>

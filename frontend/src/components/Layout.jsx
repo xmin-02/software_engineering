@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   BarChart3, UtensilsCrossed, MapPin, GraduationCap,
@@ -29,29 +29,14 @@ const NOTIFICATION_ITEMS = [
   { tag: '행사', text: '천안시 문화재단 천안흥타령춤축제 일정이 공지되었습니다', time: '5시간 전' },
 ];
 
-const WIDGET_ITEMS = [
-  { label: '6월 18일 수요일', value: '28°C', desc: '맑음 · 강남구', Icon: CloudSun },
-  { label: '미세먼지 보통', value: '소아과', desc: '행복소아과의원 · 도보 8분 · 운영 ~23:00', Icon: Pill },
-  { label: '오늘 가족 행사', value: '어린이 꽃 축제', desc: '예정 · 오후 3:00 · 시민체육관', Icon: CalendarDays },
-];
-
-const FAVORITE_RESTAURANTS = [
-  ['우래옥', '0.8km', '4.8', '(3,214)', '한식 · 중구 창경궁로', '영업 중 · 21:00 마감'],
-  ['핏제리아 오', '1.4km', '4.7', '(2,108)', '양식 · 용산구 이태원로', '영업 중 · 22:00 마감'],
-  ['앤트러사이트', '2.0km', '4.6', '(4,572)', '카페 · 마포구 토정로', '곧 마감 · 18:00 마감'],
-  ['스시조', '3.2km', '4.9', '(1,843)', '일식 · 중구 소공로', '영업 중 · 22:30 마감'],
-  ['광장시장 마약김밥', '1.7km', '4.5', '(6,981)', '한식 · 종로구 창경궁로', '영업 중 · 19:00 마감'],
-  ['트라토리아 보나세라', '2.6km', '4.6', '(1,205)', '양식 · 강남구 압구정로', '영업 종료 · 17:00 오픈'],
-];
-
-const FAVORITE_TOURISM = [
-  ['경복궁', '1.2km', '4.8', '(8,432)', '고궁 · 종로구 사직로', '관람 가능 · 18:00 종료'],
-  ['N서울타워', '3.4km', '4.7', '(12,108)', '전망대 · 용산구 남산공원길', '운영 중 · 23:00 마감'],
-  ['북촌한옥마을', '2.1km', '4.6', '(5,672)', '전통마을 · 종로구 계동길', '곧 마감 · 17:00 마감'],
-  ['반포한강공원', '5.8km', '4.5', '(9,841)', '공원 · 서초구 신반포로', '24시간 개방'],
-  ['성산일출봉', '452km', '4.9', '(15,203)', '자연유산 · 제주 서귀포시', '개방 중 · 20:00 마감'],
-  ['해운대 해수욕장', '325km', '4.7', '(21,455)', '해변 · 부산 해운대구', '시즌 종료 · 6월 재개장'],
-];
+const makeWidgetItems = (date = new Date()) => {
+  const koreanDate = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' }).format(date);
+  return [
+    { label: koreanDate, value: '오늘 날씨', desc: '대시보드에서 최신 생활 정보를 확인하세요', Icon: CloudSun },
+    { label: '미세먼지', value: '환경 정보', desc: '실시간 대기 정보는 공식 API 연동 기준으로 표시됩니다', Icon: Pill },
+    { label: '오늘 일정', value: '행사 보기', desc: '관광/행사 탭에서 최신 행사 데이터를 확인하세요', Icon: CalendarDays },
+  ];
+};
 
 const UI_TEXT = {
   ko: {
@@ -135,6 +120,7 @@ export default function Layout() {
   });
   const [favoritePlaces, setFavoritePlaces] = useState([]);
   const [favoriteTourism, setFavoriteTourism] = useState([]);
+  const widgetItems = useMemo(() => makeWidgetItems(), []);
 
   useEffect(() => {
     const loadFavorites = () => {
@@ -348,7 +334,7 @@ export default function Layout() {
                   </>
                 )}
                 {openPanel === 'widgets' && (
-                  <WidgetsDropdown openModal={openModal} />
+                  <WidgetsDropdown openModal={openModal} widgetItems={widgetItems} />
                 )}
               </div>
             )}
@@ -416,12 +402,12 @@ function FavoritesDropdown({ openModal, favoritePlaces, favoriteTourism }) {
   );
 }
 
-function WidgetsDropdown({ openModal }) {
+function WidgetsDropdown({ openModal, widgetItems }) {
   return (
     <>
       <h3>오늘의 위젯</h3>
       <div className="widget-stack">
-        {WIDGET_ITEMS.map(({ label, value, desc }) => (
+        {widgetItems.map(({ label, value, desc }) => (
           <button key={label} type="button" className="widget-row" onClick={() => openModal('widget', { title: value })}>
             <span className="widget-dot" />
             <span><b>{label}</b><strong>{value}</strong><small>{desc}</small></span>
@@ -433,11 +419,22 @@ function WidgetsDropdown({ openModal }) {
   );
 }
 
+function buildFavoriteTabs(title, items) {
+  const categoryCounts = items.reduce((acc, item) => {
+    const raw = typeof item === 'string' ? '저장한 장소' : (item.category || item.subtitle || '저장한 장소');
+    const key = String(raw).split('·')[0].trim() || '저장한 장소';
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+  const prefix = title.includes('관광') ? '전체 관광지' : '전체 맛집';
+  return [`${prefix} ${items.length}`, ...Object.entries(categoryCounts).map(([name, count]) => `${name} ${count}`)];
+}
+
 function FavoriteModal({ title, items, actionLabel, onNavigate }) {
   return (
     <div className="favorite-modal-content">
       <div className="favorite-modal-tabs">
-        {(title.includes('관광') ? ['전체 18', '고궁·역사 5', '자연·공원 4', '전망대 3', '박물관 3', '테마파크 2', '해변 1'] : ['전체 12', '한식 4', '양식 3', '카페 2', '일식 2', '중식 1']).map((tab, index) => (
+        {buildFavoriteTabs(title, items).map((tab, index) => (
           <span key={tab} className={index === 0 ? 'active' : ''}>{tab}</span>
         ))}
       </div>
@@ -447,14 +444,14 @@ function FavoriteModal({ title, items, actionLabel, onNavigate }) {
         ) : items.map((item) => {
           const name = typeof item === 'string' ? item : (item.name || item.title);
           const distance = typeof item === 'string' ? '' : (item.distance || '');
-          const rating = typeof item === 'string' ? '4.8' : (item.rating || '4.8');
+          const rating = typeof item === 'string' ? '' : (item.rating || '');
           const reviews = typeof item === 'string' ? '' : (item.reviews || '');
           const category = typeof item === 'string' ? '저장한 장소' : (item.category || item.address || '저장한 장소');
           const status = typeof item === 'string' ? '' : (item.status || item.address || '');
           return (
             <article key={(typeof item === 'string' ? item : item.id) || name}>
               <div className="favorite-card-top"><h3>{name}</h3><span>{distance}</span></div>
-              <p className="favorite-rating">★ {rating} <span>{reviews}</span></p>
+              <p className="favorite-rating">{rating ? `★ ${rating}` : '평점 정보 없음'} <span>{reviews}</span></p>
               <p>{category}</p>
               <strong>{status}</strong>
             </article>
