@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import './JobsPage.css';
 
 const FIGMA_JOBS = [
@@ -8,18 +9,26 @@ const FIGMA_JOBS = [
 ];
 
 export default function JobsPage() {
+  const [experience, setExperience] = useState('전체 경력');
+  const [jobType, setJobType] = useState('전체 직종');
+  const [applied, setApplied] = useState(false);
+  const visibleJobs = useMemo(() => FIGMA_JOBS.filter((job) => {
+    if (!applied) return true;
+    return (experience === '전체 경력' || job.experience === experience) && (jobType === '전체 직종' || job.job_type === jobType);
+  }), [applied, experience, jobType]);
+
   return (
     <div className="jobs-page">
       <h1 className="jobs-page-title">채용</h1>
       <p className="jobs-subtitle">천안시의 최신 채용 정보와 일자리를 한눈에 확인하세요.</p>
       <div className="filter-bar">
-        <button type="button" className="filter-select">전체 경력</button>
-        <button type="button" className="filter-select">전체 직종</button>
-        <button type="button" className="jobs-filter-btn">필터 적용</button>
+        <button type="button" className="filter-select" onClick={() => { setApplied(false); setExperience((value) => (value === '전체 경력' ? '신입' : value === '신입' ? '주니어' : value === '주니어' ? '미드' : value === '미드' ? '시니어' : '전체 경력')); }}>{experience}</button>
+        <button type="button" className="filter-select" onClick={() => { setApplied(false); setJobType((value) => (value === '전체 직종' ? 'IT/개발' : value === 'IT/개발' ? '제조/생산' : value === '제조/생산' ? '영업' : value === '영업' ? '디자인' : '전체 직종')); }}>{jobType}</button>
+        <button type="button" className="jobs-filter-btn" onClick={() => setApplied(true)}>필터 적용</button>
       </div>
 
       <div className="job-list">
-        {FIGMA_JOBS.map((job) => (
+        {visibleJobs.map((job) => (
           <article key={job.title} className="job-card">
             <div className="job-main">
               <div className="job-info">
@@ -33,6 +42,7 @@ export default function JobsPage() {
           </article>
         ))}
       </div>
+      {visibleJobs.length === 0 && <p className="status-msg">선택한 조건의 채용 공고가 없습니다</p>}
 
       <div className="pagination figma-pagination"><button type="button">이전</button><span>1</span><span>/ 5</span><button type="button">다음</button></div>
     </div>

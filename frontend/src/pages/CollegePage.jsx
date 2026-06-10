@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react';
+import api from '../api/client';
 import './CollegePage.css';
 import collegePlaceImage1 from '../assets/figma/college-place-1.jpg';
 import collegePlaceImage2 from '../assets/figma/college-place-2.jpg';
@@ -18,6 +20,26 @@ const PLACES = [
 ];
 
 export default function CollegePage() {
+  const [realImages, setRealImages] = useState([]);
+  const [university, setUniversity] = useState('전체 대학');
+  const [category, setCategory] = useState('학사');
+
+  useEffect(() => {
+    let ignore = false;
+    api.get('/api/places', { params: { age_group: 'college', size: 6 } })
+      .then((res) => {
+        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+        const images = items.map((item) => item.image_url || item.photo_url).filter((url) => typeof url === 'string' && url.startsWith('https://'));
+        if (!ignore && images.length) setRealImages(images);
+      })
+      .catch(() => {});
+    return () => { ignore = true; };
+  }, []);
+
+  const visibleNotices = useMemo(() => NOTICES.filter(([u, , c]) =>
+    (university === '전체 대학' || u === university) && (!category || c === category)
+  ), [category, university]);
+
   return (
     <div className="college-page college-figma-page">
       <div className="college-page-head">
@@ -26,8 +48,8 @@ export default function CollegePage() {
       </div>
 
       <div className="filter-bar college-filter-bar">
-        <button type="button" className="filter-select">전체 대학</button>
-        <button type="button" className="filter-select">학사</button>
+        <button type="button" className="filter-select" onClick={() => setUniversity((value) => (value === '전체 대학' ? '단국대' : value === '단국대' ? '호서대' : value === '호서대' ? '백석대' : value === '백석대' ? '상명대' : '전체 대학'))}>{university}</button>
+        <button type="button" className="filter-select" onClick={() => setCategory((value) => (value === '학사' ? '취업' : value === '취업' ? '장학' : value === '장학' ? '행사' : '학사'))}>{category}</button>
         <span className="college-sort-pill">최신순</span>
       </div>
 
@@ -36,7 +58,7 @@ export default function CollegePage() {
           <caption className="sr-only">대학교 공지 목록</caption>
           <thead><tr><th>대학교</th><th>공지 제목</th><th>카테고리</th><th>등록일</th></tr></thead>
           <tbody>
-            {NOTICES.map(([university, title, category, date]) => (
+            {visibleNotices.map(([university, title, category, date]) => (
               <tr key={title}>
                 <td data-label="대학교"><span className="univ-badge">{university}</span></td>
                 <td data-label="공지 제목">{title}</td>
@@ -46,6 +68,7 @@ export default function CollegePage() {
             ))}
           </tbody>
         </table>
+        {visibleNotices.length === 0 && <p className="status-msg">선택한 조건의 공지가 없습니다</p>}
       </div>
       <button type="button" className="college-more-btn">더 보기</button>
 
@@ -57,7 +80,7 @@ export default function CollegePage() {
         <div className="places-grid">
           {PLACES.map(([name, category, description, rating, image]) => (
             <article key={name} className="place-card college-place-card">
-              <img className="college-place-image" src={image} alt="" loading="lazy" />
+              <img className="college-place-image" src={realImages[PLACES.findIndex((p) => p[0] === name)] ?? image} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = image; }} />
               <div className="college-place-rating">{rating}</div>
               <span className="place-category">{category}</span>
               <h3 className="place-name">{name}</h3>

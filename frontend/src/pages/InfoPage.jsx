@@ -223,6 +223,7 @@ export default function InfoPage() {
   const content = FIGMA_PAGES[location.pathname] ?? FIGMA_PAGES['/accessibility'];
   const Icon = content.Icon;
   const [data, setData] = useState(null);
+  const [activeChip, setActiveChip] = useState('전체');
   const [loadedSection, setLoadedSection] = useState(null);
   const [error, setError] = useState(null);
 
@@ -240,6 +241,10 @@ export default function InfoPage() {
       });
     return () => { ignore = true; };
   }, [content.section]);
+
+  useEffect(() => {
+    setActiveChip(content.chips[0] ?? '전체');
+  }, [content.chips]);
 
   const loading = loadedSection !== content.section && !error;
   const currentData = loadedSection === content.section ? data : null;
@@ -283,8 +288,8 @@ export default function InfoPage() {
 
 
       <nav className="info-chip-row" aria-label="카테고리">
-        {content.chips.map((chip, index) => (
-          <button key={chip} type="button" className={index === 0 ? 'active' : ''}>{chip}</button>
+        {content.chips.map((chip) => (
+          <button key={chip} type="button" className={activeChip === chip ? 'active' : ''} onClick={() => setActiveChip(chip)}>{chip}</button>
         ))}
       </nav>
 
@@ -303,7 +308,7 @@ export default function InfoPage() {
 
       <section className="info-facility-section">
         <div className="info-section-head figma">
-          <h2>{content.countLabel}</h2>
+          <h2>{activeChip === (content.chips[0] ?? '전체') ? content.countLabel : `${activeChip} 정보`}</h2>
         </div>
         <div className="info-facility-list">
           {content.cards.map((item, index) => (
@@ -422,7 +427,7 @@ function FacilityCard({ item }) {
         <p className="facility-row"><Phone size={16} /> {item.phone}</p>
       )}
       {item.description && <p className="facility-desc">{item.description}</p>}
-      <button type="button" className="facility-route-btn">길찾기</button>
+      <button type="button" className="facility-route-btn" onClick={() => window.open(`https://map.kakao.com/link/search/${encodeURIComponent(item.title)}`, '_blank', 'noopener,noreferrer')}>길찾기</button>
     </article>
   );
 }

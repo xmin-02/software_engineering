@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../api/client';
 import './FamilyPage.css';
 import homeImage1 from '../assets/figma/home-1.jpg';
 import homeImage2 from '../assets/figma/home-2.jpg';
@@ -40,6 +41,19 @@ function FilterModal({ onClose }) {
 
 export default function FamilyPage() {
   const [filterOpen, setFilterOpen] = useState(false);
+  const [realPlaceImages, setRealPlaceImages] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    api.get('/api/places', { params: { age_group: 'family', size: 8 } })
+      .then((res) => {
+        const items = Array.isArray(res.data) ? res.data : (res.data?.items ?? []);
+        const images = items.map((item) => item.image_url || item.photo_url).filter((url) => typeof url === 'string' && url.startsWith('https://'));
+        if (!ignore && images.length) setRealPlaceImages(images);
+      })
+      .catch(() => {});
+    return () => { ignore = true; };
+  }, []);
   return (
     <div className="family-page family-figma-page">
       <div className="family-page-head">
@@ -67,7 +81,7 @@ export default function FamilyPage() {
         <div className="family-section-title-row"><div><h2 className="places-title">가족 추천 맛집</h2><p className="places-desc">부동산 인근 아이와 함께 가기 좋은 식당</p></div><button type="button">전체보기</button></div>
         <div className="places-grid">
           {FIGMA_FAMILY_PLACES.map((place, index) => (
-            <article key={place.name} className="place-card family-place-card"><img className="family-place-image" src={FAMILY_PLACE_IMAGES[index]} alt="" loading="lazy" /><span className="family-place-rating">{place.rating}</span><h3 className="place-name">{place.name}</h3><span className="place-category">{place.category}</span></article>
+            <article key={place.name} className="place-card family-place-card"><img className="family-place-image" src={realPlaceImages[index] ?? FAMILY_PLACE_IMAGES[index]} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = FAMILY_PLACE_IMAGES[index]; }} /><span className="family-place-rating">{place.rating}</span><h3 className="place-name">{place.name}</h3><span className="place-category">{place.category}</span></article>
           ))}
         </div>
       </section>
