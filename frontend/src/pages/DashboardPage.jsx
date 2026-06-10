@@ -598,10 +598,10 @@ export default function DashboardPage() {
             <h3>주간 요약</h3>
             <div className="summary-fallback">
               <p className="summary-text">
-                현재까지 총 <strong>{sentiment.total?.toLocaleString()}건</strong>의 게시글이 분석되었습니다.
-                긍정 <strong>{sentiment.positive?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.positive / sentiment.total * 100) : 0}%),
-                부정 <strong>{sentiment.negative?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.negative / sentiment.total * 100) : 0}%),
-                중립 <strong>{sentiment.neutral?.toLocaleString()}건</strong>({sentiment.total ? Math.round(sentiment.neutral / sentiment.total * 100) : 0}%)입니다.
+                현재까지 총 <strong>{dashboardSentiment.total?.toLocaleString()}건</strong>의 게시글이 분석되었습니다.
+                긍정 <strong>{dashboardSentiment.positive?.toLocaleString()}건</strong>({dashboardSentiment.total ? Math.round(dashboardSentiment.positive / dashboardSentiment.total * 100) : 0}%),
+                부정 <strong>{dashboardSentiment.negative?.toLocaleString()}건</strong>({dashboardSentiment.total ? Math.round(dashboardSentiment.negative / dashboardSentiment.total * 100) : 0}%),
+                중립 <strong>{dashboardSentiment.neutral?.toLocaleString()}건</strong>({dashboardSentiment.total ? Math.round(dashboardSentiment.neutral / dashboardSentiment.total * 100) : 0}%)입니다.
               </p>
               {sources?.length > 0 && (
                 <p className="summary-text">
@@ -644,7 +644,7 @@ export default function DashboardPage() {
           <p className="empty-text">등록된 명소가 없습니다</p>
         ) : (
           <div className="event-list">
-            {events.map((evt) => (
+            {dashboardEvents.map((evt) => (
               <div key={evt.id} className="event-item">
                 <div className="event-title">
                   {evt.url ? (
