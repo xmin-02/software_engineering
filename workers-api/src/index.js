@@ -20,7 +20,10 @@ const UNIVERSITY_CATEGORY_ALIASES = {
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
 const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩', '광고', '협찬', '제공받', '원고료', '체험단'];
 const FOOD_REVIEW_TERMS = ['맛있', '맛집', '메뉴', '음식', '초밥', '김밥', '떡볶', '카페', '커피', '디저트', '고기', '매장'];
-const TOPIC_BLOCK_TERMS = ['견적', '이사', '이삿짐', '화환', '근조', '장례', '000원', '특가', '할인', '전국서비스', '당일배송', '삼정엔지니어링', '수행사례', '비상주', '상담', '선임비용', '전자담배', '미용실', '필라테스', '홈페이지', '가입하기', '수수료', '시공', '설치', '교체', '납품', '업체', '사다리차', '정책자금', '대출', '보험', '영업시간', '법률', '대리인', '토목설계', '부지조성', '오늘도여행'];
+const TOPIC_BLOCK_TERMS = ['견적', '이사', '이삿짐', '화환', '근조', '장례', '000원', '특가', '할인', '전국서비스', '당일배송', '삼정엔지니어링', '수행사례', '비상주', '상담', '선임비용', '전자담배', '미용실', '필라테스', '홈페이지', '가입하기', '수수료', '시공', '설치', '교체', '납품', '업체', '사다리차', '정책자금', '대출', '보험', '영업시간', '법률', '대리인', '토목설계', '부지조성', '오늘도여행', '쉐어하우스', '원룸', '졸작', '고유가지원금', '가전', '중고폰'];
+const TOPIC_ALLOW_TERMS = ['맛집', '카페', '축제', '행사', '공원', '교통', '주차', '전세', '병원', '약국', '학교', '천안시청', '동물복지', '환경', '터미널', '독립기념관', '수신메론', '성정', '두정', '불당', '백석', '신부'];
+const TOPIC_MIN_ITEMS = 5;
+const TOPIC_LIMIT = 15;
 
 const sanitizeImageUrl = (url) => {
 	if (!url) return null;
@@ -101,6 +104,72 @@ const addCategoryFilter = (where, params, column, category) => {
 const latestPostDate = async (db) => {
 	const row = await db.prepare('SELECT date(MAX(published_at)) AS latest FROM posts WHERE published_at IS NOT NULL').first();
 	return row?.latest || null;
+};
+
+const topicDateFilter = (latest, period = 'weekly', days = TOPIC_DAYS) => {
+	if (!latest) return { sql: '', params: [] };
+	if (period === 'today') return { sql: 'AND date(p.published_at)=date(?)', params: [latest] };
+	return { sql: `AND date(p.published_at)>=date(?, '-${days} days')`, params: [latest] };
+};
+
+const topicAllowSql = () => {
+	const allowed = TOPIC_ALLOW_TERMS.map((term) => `a.topic LIKE '%${term}%' OR p.title LIKE '%${term}%'`).join(' OR ');
+	return `(${allowed})`;
+};
+
+const fetchTopicRows = async (db, { latest, period = 'weekly', minCount = 2, days = TOPIC_DAYS, limit = TOPIC_LIMIT } = {}) => {
+	const filter = topicDateFilter(latest, period, days);
+	const sourceWeight = "CASE p.source WHEN 'cheonan_city' THEN 3 WHEN 'dcinside' THEN 2 WHEN 'naver_blog' THEN 0.5 ELSE 1 END";
+	const rows = await db.prepare(
+		`SELECT
+			a.topic AS name,
+			COUNT(*) AS post_count,
+			ROUND(SUM(${sourceWeight}), 1) AS score,
+			GROUP_CONCAT(DISTINCT p.source) AS sources,
+			MAX(p.published_at) AS latest
+		FROM analysis a
+		JOIN posts p ON a.post_id=p.id
+		WHERE a.topic IS NOT NULL
+			AND a.topic!='기타'
+			AND ${blockSql('a.topic', TOPIC_BLOCK_TERMS)}
+			AND ${blockSql('p.title', TOPIC_BLOCK_TERMS)}
+			AND ${topicAllowSql()}
+			${filter.sql}
+		GROUP BY a.topic
+		HAVING post_count >= ${Math.max(toInt(minCount, 1), 1)}
+		ORDER BY score DESC, latest DESC
+		LIMIT ${Math.max(toInt(limit, TOPIC_LIMIT), TOPIC_MIN_ITEMS)}`,
+	)
+		.bind(...filter.params)
+		.all();
+	return rows.results;
+};
+
+const displayTopicName = (name) => {
+	const text = String(name || '');
+	if (/동물복지|축산과/.test(text)) return '천안시 동물복지팀 칭찬';
+	if (/환경위생|청소팀|서북구청/.test(text)) return '서북구청 환경위생과 민원';
+	if (/주무관|천안시청|시청/.test(text)) return '천안시 시민 칭찬 민원';
+	if (/구급차|소방차|터미널/.test(text)) return '터미널 인근 긴급차량 출동';
+	if (/전세|출퇴근/.test(text)) return '천안 전세·출퇴근 지역 문의';
+	if (/주차/.test(text)) return '성정동 주차 불편';
+	if (/인구수|대전보다|실거주|천안은/.test(text)) return '천안 생활권·정주 여론';
+	return text;
+};
+
+const mergeTopicRows = (...groups) => {
+	const seen = new Set();
+	const merged = [];
+	for (const group of groups) {
+		for (const row of group) {
+			const displayName = displayTopicName(row.name);
+			const key = displayName.replace(/\s+/g, '').toLowerCase();
+			if (seen.has(key)) continue;
+			seen.add(key);
+			merged.push({ ...row, raw_name: row.name, name: displayName });
+		}
+	}
+	return merged.slice(0, TOPIC_LIMIT);
 };
 
 const latestDataDate = async (db, table, column) => {
@@ -366,72 +435,28 @@ app.get('/api/stats/sources', async (c) => {
 });
 
 app.get('/api/topics', async (c) => {
-	const { period = 'today' } = c.req.query();
+	const { period = 'weekly' } = c.req.query();
 	const latest = await latestPostDate(c.env.DB);
-	const params = [];
-	let dateFilter = '';
-	if (latest && period === 'today') {
-		dateFilter = 'AND date(p.published_at)=date(?)';
-		params.push(latest);
-	} else if (latest && period === 'weekly') {
-		dateFilter = `AND date(p.published_at)>=date(?, '-${TOPIC_DAYS} days')`;
-		params.push(latest);
-	}
-	const sourceWeight = "CASE p.source WHEN 'cheonan_city' THEN 3 WHEN 'dcinside' THEN 2 WHEN 'naver_blog' THEN 0.5 ELSE 1 END";
-	const rows = await c.env.DB.prepare(
-		`SELECT
-			a.topic AS name,
-			COUNT(*) AS post_count,
-			ROUND(SUM(${sourceWeight}), 1) AS score,
-			GROUP_CONCAT(DISTINCT p.source) AS sources,
-			MAX(p.published_at) AS latest
-		FROM analysis a
-		JOIN posts p ON a.post_id=p.id
-		WHERE a.topic IS NOT NULL
-			AND a.topic!='기타'
-			AND ${blockSql('a.topic', TOPIC_BLOCK_TERMS)}
-			AND ${blockSql('p.title', TOPIC_BLOCK_TERMS)}
-			${dateFilter}
-		GROUP BY a.topic
-		HAVING post_count >= 2
-		ORDER BY score DESC, latest DESC
-		LIMIT 15`,
-	)
-		.bind(...params)
-		.all();
-	return c.json(rows.results.map((r, i) => ({ id: i + 1, ...r, keywords: [], sentiment: null, sources: r.sources ? String(r.sources).split(',') : [] })));
+	const primary = await fetchTopicRows(c.env.DB, { latest, period, minCount: 2, limit: TOPIC_LIMIT });
+	const fallbackWeekly = primary.length < TOPIC_MIN_ITEMS ? await fetchTopicRows(c.env.DB, { latest, period: 'weekly', minCount: 1, limit: TOPIC_LIMIT }) : [];
+	const fallbackRecent = primary.length + fallbackWeekly.length < TOPIC_MIN_ITEMS ? await fetchTopicRows(c.env.DB, { latest, period: 'weekly', minCount: 1, days: RECENT_DAYS, limit: TOPIC_LIMIT }) : [];
+	const rows = mergeTopicRows(primary, fallbackWeekly, fallbackRecent);
+	return c.json(rows.map((r, i) => ({ id: i + 1, ...r, keywords: [], sentiment: null, sources: r.sources ? String(r.sources).split(',') : [] })));
 });
 
 app.get('/api/topics/:id/posts', async (c) => {
 	const tid = toInt(c.req.param('id'), 0);
 	const latest = await latestPostDate(c.env.DB);
-	const params = latest ? [latest] : [];
-	const filter = latest ? `AND date(p.published_at)>=date(?, '-${TOPIC_DAYS} days')` : '';
-	const topics = await c.env.DB.prepare(
-		`SELECT a.topic AS name,
-			COUNT(*) AS post_count,
-			ROUND(SUM(CASE p.source WHEN 'cheonan_city' THEN 3 WHEN 'dcinside' THEN 2 WHEN 'naver_blog' THEN 0.5 ELSE 1 END), 1) AS score,
-			MAX(p.published_at) AS latest
-		FROM analysis a
-		JOIN posts p ON a.post_id=p.id
-		WHERE a.topic IS NOT NULL
-			AND a.topic!='기타'
-			AND ${blockSql('a.topic', TOPIC_BLOCK_TERMS)}
-			AND ${blockSql('p.title', TOPIC_BLOCK_TERMS)}
-			${filter}
-		GROUP BY a.topic
-		HAVING post_count >= 2
-		ORDER BY score DESC, latest DESC
-		LIMIT 15`,
-	)
-		.bind(...params)
-		.all();
-	const topic = topics.results[tid - 1];
+	const primary = await fetchTopicRows(c.env.DB, { latest, period: 'weekly', minCount: 2, limit: TOPIC_LIMIT });
+	const fallbackWeekly = primary.length < TOPIC_MIN_ITEMS ? await fetchTopicRows(c.env.DB, { latest, period: 'weekly', minCount: 1, limit: TOPIC_LIMIT }) : [];
+	const fallbackRecent = primary.length + fallbackWeekly.length < TOPIC_MIN_ITEMS ? await fetchTopicRows(c.env.DB, { latest, period: 'weekly', minCount: 1, days: RECENT_DAYS, limit: TOPIC_LIMIT }) : [];
+	const topics = mergeTopicRows(primary, fallbackWeekly, fallbackRecent);
+	const topic = topics[tid - 1];
 	if (!topic) return c.json([]);
 	const rows = await c.env.DB.prepare(
 		'SELECT p.id,p.source,p.title,p.content,p.author,p.url,p.published_at,a.sentiment,a.sentiment_score,a.topic,a.keywords FROM analysis a JOIN posts p ON a.post_id=p.id WHERE a.topic=? ORDER BY p.published_at DESC, p.id DESC LIMIT 50',
 	)
-		.bind(topic.name)
+		.bind(topic.raw_name || topic.name)
 		.all();
 	return c.json(rows.results.map(parseKeywords));
 });
