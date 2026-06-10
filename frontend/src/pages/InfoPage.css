@@ -527,3 +527,268 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Figma single-household portal ===== */
+.single-portal-page {
+  max-width: 1180px;
+  padding: 34px 40px 72px;
+}
+
+.single-hero {
+  min-height: 220px;
+  border-radius: 34px;
+  padding: 34px 38px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  background: linear-gradient(135deg, #111827 0%, #1e3a8a 56%, #0f766e 100%);
+  color: #fff;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.16);
+}
+
+.single-hero span {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+  color: #bfdbfe;
+  font-weight: 900;
+}
+
+.single-hero b {
+  border-radius: 999px;
+  background: #22c55e;
+  color: #052e16;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.single-hero h1 {
+  max-width: 620px;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -1.8px;
+}
+
+.single-hero p {
+  margin-top: 12px;
+  color: #dbeafe;
+  font-size: 18px;
+}
+
+.single-hero button,
+.single-tabs button,
+.setting-actions button,
+.range-row button {
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  color: #111827;
+  padding: 12px 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.single-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 28px 0;
+}
+
+.single-tabs button {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #475569;
+}
+
+.single-tabs button.active,
+.single-tabs button:last-child {
+  background: #005bbf;
+  color: #fff;
+  border-color: #005bbf;
+}
+
+.single-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.single-card-grid article,
+.single-dashboard,
+.single-table-wrap {
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.07);
+  padding: 26px;
+}
+
+.single-card-kicker,
+.single-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.single-card-kicker span {
+  color: #005bbf;
+  font-weight: 900;
+}
+
+.single-card-kicker strong,
+.single-dashboard > strong {
+  color: #16a34a;
+  font-size: 22px;
+}
+
+.single-card-grid h2 {
+  margin: 18px 0 8px;
+  color: #111827;
+  font-size: 24px;
+}
+
+.single-card-grid p {
+  color: #64748b;
+}
+
+.single-card-grid article div:last-child {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.single-card-grid article div:last-child b {
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.single-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.single-table-wrap th,
+.single-table-wrap td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 12px;
+  text-align: left;
+  color: #475569;
+}
+
+.single-table-wrap th {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.single-type {
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #005bbf;
+  padding: 6px 9px;
+  font-weight: 900;
+}
+
+.single-dashboard {
+  margin-top: 28px;
+}
+
+.single-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.44);
+  backdrop-filter: blur(8px);
+}
+
+.single-settings {
+  width: min(820px, 100%);
+  border-radius: 30px;
+  background: #fff;
+  padding: 32px;
+  box-shadow: 0 34px 90px rgba(15, 23, 42, 0.24);
+}
+
+.single-settings h2 {
+  font-size: 30px;
+  color: #111827;
+}
+
+.single-settings p,
+.single-settings label {
+  color: #64748b;
+}
+
+.single-settings label {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+  font-weight: 800;
+}
+
+.single-settings input[type='text'],
+.single-settings input:not([type]) {
+  min-height: 46px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+
+.range-row,
+.setting-list,
+.setting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.range-row span {
+  width: 100%;
+  color: #111827;
+  font-weight: 900;
+}
+
+.range-row button {
+  background: #f1f5f9;
+}
+
+.setting-list label {
+  min-width: 220px;
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.setting-actions {
+  justify-content: flex-end;
+}
+
+.setting-actions button:last-child {
+  background: #005bbf;
+  color: #fff;
+}
+
+@media (max-width: 820px) {
+  .single-card-grid,
+  .single-dashboard {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .single-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

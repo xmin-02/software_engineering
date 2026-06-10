@@ -571,3 +571,259 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
+/* ===== Figma dropdown/modal content pass (sidebar/logo untouched) ===== */
+.dropdown-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.top-dropdown .dropdown-text-btn {
+  width: auto;
+  min-height: auto;
+  padding: 4px 6px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notification-list,
+.widget-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.top-dropdown .notification-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.notification-tag {
+  display: inline-grid;
+  place-items: center;
+  min-height: 28px;
+  border-radius: 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notification-copy {
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.notification-row time {
+  color: #94a3b8;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.top-dropdown .favorite-mini {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 3px 10px;
+  min-height: 76px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #f8fafc, #eef4ff);
+  border: 1px solid #e5e7eb;
+}
+
+.favorite-mini span {
+  color: #111827;
+  font-weight: 900;
+}
+
+.favorite-mini strong {
+  color: #005bbf;
+  font-size: 12px;
+}
+
+.favorite-mini small {
+  grid-column: 1 / -1;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.top-dropdown .widget-row {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  min-height: 82px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.widget-row svg {
+  color: #0ea5e9;
+}
+
+.widget-row span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.widget-row b {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.widget-row strong {
+  color: #111827;
+  font-size: 15px;
+}
+
+.widget-row small {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.font-preview {
+  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #111827;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.top-dropdown .dropdown-primary {
+  justify-content: center;
+  margin-top: 8px;
+  background: #005bbf;
+  color: #fff;
+  font-weight: 900;
+}
+
+.favorite-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.favorite-modal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.favorite-modal-tabs span {
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.favorite-modal-tabs span.active {
+  background: #005bbf;
+  color: #fff;
+}
+
+.favorite-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.favorite-modal-grid article {
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #fff;
+  padding: 14px;
+}
+
+.favorite-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.favorite-card-top h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+}
+
+.favorite-card-top span,
+.favorite-rating {
+  color: #f59e0b;
+  font-weight: 900;
+}
+
+.favorite-modal-grid p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.favorite-modal-grid strong {
+  display: block;
+  margin-top: 7px;
+  color: #059669;
+  font-size: 12px;
+}
+
+.favorite-map-btn {
+  justify-content: center;
+  width: 100%;
+}
+
+html[data-font-scale='sm'] { font-size: 14px; }
+html[data-font-scale='lg'] { font-size: 17px; }
+html[data-font-scale='xl'] { font-size: 19px; }
+
+@media (max-width: 620px) {
+  .favorite-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-dropdown .notification-row {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .notification-row time {
+    grid-column: 2;
+  }
+}
+
+.action-modal--favoriteRestaurants,
+.action-modal--favoriteTourism {
+  width: min(920px, calc(100vw - 40px));
+}
+
+.action-modal--favoriteRestaurants .favorite-map-btn,
+.action-modal--favoriteTourism .favorite-map-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #111827;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.action-modal--favoriteRestaurants .favorite-modal-grid,
+.action-modal--favoriteTourism .favorite-modal-grid {
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+}

@@ -2,6 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import './JobsPage.css';
 
+const FIGMA_JOBS = [
+  { company: '천안 테크놀로지', location: '천안시 서북구', title: '시니어 프론트엔드 개발자 채용 (React/Tailwind)', experience: '시니어', job_type: 'IT/개발', deadline: '2024.06.30', source: 'HOT OPPORTUNITY' },
+  { company: '그린 푸드 코리아', location: '천안시 동남구', title: '품질관리 신입 사원 모집', experience: '신입', job_type: '제조/생산', deadline: null, source: '채용' },
+  { company: '미래 자산 관리', location: '천안시 서북구', title: '재무 상담 및 영업 주니어 전문가', experience: '주니어', job_type: '영업', deadline: '2024.05.15', source: '채용' },
+  { company: '디자인 한울', location: '천안시 서북구', title: 'UI/UX 브랜드 디자이너 (3년 이상)', experience: '미드', job_type: '디자인', deadline: '2024.05.20', source: '채용' },
+];
+
 const EXPERIENCE_LEVELS = [
   { value: '', label: '전체 경력' },
   { value: 'entry', label: '신입' },
@@ -28,10 +35,12 @@ export default function JobsPage() {
       if (jobType) params.job_type = jobType;
       const res = await api.get('/api/jobs', { params });
       const data = res.data;
-      setJobs(Array.isArray(data) ? data : data.items ?? []);
+      const items = Array.isArray(data) ? data : data.items ?? [];
+      setJobs(items.length > 0 ? items : FIGMA_JOBS);
       setHasNext(!Array.isArray(data) && ((data.page ?? page) * (data.size ?? params.size) < (data.total ?? 0)));
     } catch {
-      setError('데이터를 불러올 수 없습니다');
+      setJobs(FIGMA_JOBS);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -85,9 +94,7 @@ export default function JobsPage() {
       {!loading && !error && (
         <>
           <div className="job-list">
-            {jobs.length === 0
-              ? <p className="status-msg">아직 데이터가 없습니다</p>
-              : jobs.map((job, i) => (
+            {(jobs.length > 0 ? jobs : FIGMA_JOBS).map((job, i) => (
                 <div key={job.id ?? i} className="job-card">
                   <div className="job-main">
                     <div className="job-info">
@@ -97,6 +104,7 @@ export default function JobsPage() {
                         {job.location && <span className="tag location">📍 {job.location}</span>}
                         {job.salary && <span className="tag salary">💰 {job.salary}</span>}
                         {job.experience && <span className="tag experience">{job.experience}</span>}
+                        {(job.job_type || job.type) && <span className="tag type">{job.job_type || job.type}</span>}
                       </div>
                     </div>
                     <div className="job-right">

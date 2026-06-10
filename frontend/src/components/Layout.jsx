@@ -4,7 +4,7 @@ import {
   BarChart3, UtensilsCrossed, MapPin, GraduationCap,
   BookOpen, Briefcase, Users, Search, Star, Bell, Languages,
   Type, Grid3X3, Accessibility, School, Pill, Globe2, Home,
-  Check, ChevronDown, X, ExternalLink,
+  Check, ChevronDown, X, ExternalLink, MapPin as PinIcon, CalendarDays, CloudSun,
 } from 'lucide-react';
 import './Layout.css';
 import sidebarLogo from '../assets/brand/cheonan-insight-sidebar.png';
@@ -13,10 +13,39 @@ const FONT_SCALE_KEY = 'cheonan_font_scale';
 const LANGUAGE_KEY = 'cheonan_language';
 
 const LANGUAGES = {
-  ko: { label: '한국어', short: 'KO' },
   en: { label: 'English', short: 'EN' },
+  ko: { label: '한국어', short: 'KO' },
+  ja: { label: '日本語', short: 'JA' },
   zh: { label: '中文', short: 'ZH' },
+  es: { label: 'Español', short: 'ES' },
 };
+
+const NOTIFICATION_ITEMS = [
+  { tag: '천안', text: '천안시청 신규 주차 금지 구역이 지정되었습니다', time: '5분 전' },
+  { tag: '교통', text: '천안 교통정보 천안IC 인근 교통 지체가 발생했습니다', time: '1시간 전' },
+  { tag: '날씨', text: '기상청 천안시 미세먼지 주의보가 발령되었습니다', time: '3시간 전' },
+  { tag: '행사', text: '천안시 문화재단 천안흥타령춤축제 일정이 공지되었습니다', time: '5시간 전' },
+];
+
+const WIDGET_ITEMS = [
+  { label: '6월 18일 수요일', value: '28°C', desc: '맑음 · 강남구', Icon: CloudSun },
+  { label: '미세먼지 보통', value: '소아과', desc: '행복소아과의원 · 도보 8분 · 운영 ~23:00', Icon: Pill },
+  { label: '오늘 가족 행사', value: '어린이 꽃 축제', desc: '오후 3:00 · 시민체육관', Icon: CalendarDays },
+];
+
+const FAVORITE_RESTAURANTS = [
+  ['우래옥', '0.8km', '4.8', '한식 · 중구 창경궁로', '영업 중 · 21:00 마감'],
+  ['핏제리아 오', '1.4km', '4.7', '양식 · 용산구 이태원로', '영업 중 · 22:00 마감'],
+  ['앤트러사이트', '2.0km', '4.6', '카페 · 마포구 토정로', '곧 마감 · 18:00 마감'],
+  ['스시조', '3.2km', '4.9', '일식 · 중구 소공로', '영업 중 · 22:30 마감'],
+];
+
+const FAVORITE_TOURISM = [
+  ['경복궁', '1.2km', '4.8', '고궁 · 종로구 사직로', '관람 가능 · 18:00 종료'],
+  ['N서울타워', '3.4km', '4.7', '전망대 · 용산구 남산공원길', '운영 중 · 23:00 마감'],
+  ['북촌한옥마을', '2.1km', '4.6', '전통마을 · 종로구 계동길', '곧 마감 · 17:00 마감'],
+  ['반포한강공원', '5.8km', '4.5', '공원 · 서초구 신반포로', '24시간 개방'],
+];
 
 const UI_TEXT = {
   ko: {
@@ -111,7 +140,7 @@ export default function Layout() {
   }, [language]);
 
   const toggleFontScale = () =>
-    setFontScale((v) => (v === 'lg' ? 'normal' : 'lg'));
+    setFontScale((v) => (v === 'lg' || v === 'xl' ? 'normal' : 'lg'));
 
   const pageTitle = pageTitles[location.pathname] ?? '천안 대시보드';
   const text = UI_TEXT[language] ?? UI_TEXT.ko;
@@ -254,41 +283,10 @@ export default function Layout() {
             {openPanel && (
               <div className="top-dropdown" onClick={(e) => e.stopPropagation()}>
                 {openPanel === 'favorites' && (
-                  <>
-                    <h3>{text.favorite}</h3>
-                    <button
-                      type="button"
-                      onClick={() => openModal('favorites', {
-                        title: '찜한 맛집 보기',
-                        message: '저장해 둔 맛집 · 카페 목록을 모달에서 먼저 확인한 뒤 화면으로 이동할 수 있어요.',
-                        primaryPath: '/places',
-                        primaryLabel: '맛집 · 카페로 이동',
-                      })}
-                    >
-                      찜한 맛집 보기
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openModal('favorites', {
-                        title: '찜 관광지 보기',
-                        message: '저장해 둔 관광지와 행사를 모달에서 먼저 확인한 뒤 관광 화면으로 이동할 수 있어요.',
-                        primaryPath: '/events',
-                        primaryLabel: '관광으로 이동',
-                      })}
-                    >
-                      찜 관광지 보기
-                    </button>
-                    <button type="button" onClick={() => openModal('favorites')}>즐겨찾기 관리</button>
-                    <p>자주 보는 콘텐츠를 빠르게 열 수 있어요.</p>
-                  </>
+                  <FavoritesDropdown openModal={openModal} />
                 )}
                 {openPanel === 'notifications' && (
-                  <>
-                    <h3>{text.notifications}</h3>
-                    <button type="button" className="dropdown-item strong" onClick={() => openModal('notification', { title: '신규 맛집 리뷰 12건 수집' })}>신규 맛집 리뷰 12건 수집</button>
-                    <button type="button" className="dropdown-item" onClick={() => openModal('notification', { title: '이번 주 관광 행사 업데이트' })}>이번 주 관광 행사 업데이트</button>
-                    <button type="button" className="dropdown-item" onClick={() => openModal('notification', { title: '채용 공고 4건 추가' })}>채용 공고 4건 추가</button>
-                  </>
+                  <NotificationsDropdown openModal={openModal} />
                 )}
                 {openPanel === 'language' && (
                   <>
@@ -308,24 +306,22 @@ export default function Layout() {
                 {openPanel === 'font' && (
                   <>
                     <h3>{text.font}</h3>
-                    <button type="button" className={fontScale !== 'lg' ? 'selected' : ''} onClick={() => setFontScale('normal')}>
-                      {fontScale !== 'lg' && <Check size={14} />} 기본
-                    </button>
-                    <button type="button" className={fontScale === 'lg' ? 'selected' : ''} onClick={() => setFontScale('lg')}>
-                      {fontScale === 'lg' && <Check size={14} />} 크게
-                    </button>
+                    <div className="font-preview">가나다라마바사 12345</div>
+                    {[
+                      ['sm', '작게'],
+                      ['normal', '기본'],
+                      ['lg', '크게'],
+                      ['xl', '매우 크게'],
+                    ].map(([key, label]) => (
+                      <button key={key} type="button" className={fontScale === key ? 'selected' : ''} onClick={() => setFontScale(key)}>
+                        {fontScale === key && <Check size={14} />} {label}
+                      </button>
+                    ))}
+                    <button type="button" className="dropdown-primary" onClick={() => openModal('font')}>적용하기</button>
                   </>
                 )}
                 {openPanel === 'widgets' && (
-                  <>
-                    <h3>{text.widgets}</h3>
-                    <div className="widget-grid">
-                      <button type="button" onClick={() => openModal('widget', { title: '날씨' })}>날씨</button>
-                      <button type="button" onClick={() => openModal('widget', { title: '인기 키워드' })}>인기 키워드</button>
-                      <button type="button" onClick={() => openModal('widget', { title: '내 주변' })}>내 주변</button>
-                      <button type="button" onClick={() => openModal('widget', { title: '최근 알림' })}>최근 알림</button>
-                    </div>
-                  </>
+                  <WidgetsDropdown openModal={openModal} />
                 )}
               </div>
             )}
@@ -351,13 +347,88 @@ export default function Layout() {
   );
 }
 
+
+function NotificationsDropdown({ openModal }) {
+  return (
+    <>
+      <div className="dropdown-head-row">
+        <h3>알림</h3>
+        <button type="button" className="dropdown-text-btn" onClick={() => openModal('notification', { title: '모두 읽음으로 표시' })}>모두 읽음으로 표시</button>
+      </div>
+      <div className="notification-list">
+        {NOTIFICATION_ITEMS.map((item) => (
+          <button key={item.text} type="button" className="notification-row" onClick={() => openModal('notification', { title: item.text })}>
+            <span className="notification-tag">{item.tag}</span>
+            <span className="notification-copy">{item.text}</span>
+            <time>{item.time}</time>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function FavoritesDropdown({ openModal }) {
+  return (
+    <>
+      <h3>즐겨찾기</h3>
+      <button type="button" className="favorite-mini" onClick={() => openModal('favoriteRestaurants')}>
+        <span>찜 맛집</span><strong>자주 방문</strong><small>총 12곳 저장됨 · 마지막 업데이트 오늘 12:08</small>
+      </button>
+      <button type="button" className="favorite-mini" onClick={() => openModal('favoriteTourism')}>
+        <span>관광지 찜 리스트</span><strong>2일 전</strong><small>총 18곳 저장됨 · 마지막 업데이트 오늘 14:32</small>
+      </button>
+    </>
+  );
+}
+
+function WidgetsDropdown({ openModal }) {
+  return (
+    <>
+      <h3>오늘의 위젯</h3>
+      <div className="widget-stack">
+        {WIDGET_ITEMS.map(({ label, value, desc }) => (
+          <button key={label} type="button" className="widget-row" onClick={() => openModal('widget', { title: value })}>
+            <span className="widget-dot" />
+            <span><b>{label}</b><strong>{value}</strong><small>{desc}</small></span>
+          </button>
+        ))}
+      </div>
+      <button type="button" className="dropdown-primary" onClick={() => openModal('widget', { title: '전체 위젯' })}>전체 보기</button>
+    </>
+  );
+}
+
+function FavoriteModal({ title, items, actionLabel, onNavigate }) {
+  return (
+    <div className="favorite-modal-content">
+      <div className="favorite-modal-tabs">
+        {['전체 12', '한식 4', '양식 3', '카페 2', '일식 2'].map((tab, index) => (
+          <span key={tab} className={index === 0 ? 'active' : ''}>{title.includes('관광') && index > 0 ? ['고궁·역사 5', '자연·공원 4', '전망대 3', '박물관 3'][index - 1] : tab}</span>
+        ))}
+      </div>
+      <div className="favorite-modal-grid">
+        {items.map(([name, distance, rating, category, status]) => (
+          <article key={name}>
+            <div className="favorite-card-top"><h3>{name}</h3><span>{distance}</span></div>
+            <p className="favorite-rating">★ {rating}</p>
+            <p>{category}</p>
+            <strong>{status}</strong>
+          </article>
+        ))}
+      </div>
+      <button type="button" className="favorite-map-btn" onClick={onNavigate}><PinIcon size={15} /> {actionLabel}</button>
+    </div>
+  );
+}
+
 function ActionModal({ modal, language, onClose, onNavigate }) {
   const languageLabel = LANGUAGES[language]?.label ?? LANGUAGES.ko.label;
   const title = getModalTitle(modal, languageLabel);
   return (
     <div className="action-modal-overlay" role="presentation" onClick={onClose}>
       <section
-        className="action-modal"
+        className={`action-modal action-modal--${modal.type}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="action-modal-title"
@@ -403,6 +474,15 @@ function ModalBody({ modal, languageLabel, onNavigate }) {
   if (modal.type === 'notification') {
     return <p>{modal.title} 알림 상세입니다. 관련 데이터는 최신 API 응답 기준으로 대시보드에 반영되어 있습니다.</p>;
   }
+  if (modal.type === 'font') {
+    return <p>글자 크기 설정이 적용되었습니다. 상단바와 주요 콘텐츠가 선택한 크기에 맞춰 표시됩니다.</p>;
+  }
+  if (modal.type === 'favoriteRestaurants') {
+    return <FavoriteModal title="찜한 맛집" items={FAVORITE_RESTAURANTS} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/places')} />;
+  }
+  if (modal.type === 'favoriteTourism') {
+    return <FavoriteModal title="찜한 관광지" items={FAVORITE_TOURISM} actionLabel="지도에서 모두 보기" onNavigate={() => onNavigate('/events')} />;
+  }
   if (modal.type === 'widget') {
     return (
       <>
@@ -420,6 +500,9 @@ function getModalTitle(modal, languageLabel) {
   if (modal.type === 'favorites') return modal.title || '즐겨찾기 관리';
   if (modal.type === 'language') return `${languageLabel} 적용 완료`;
   if (modal.type === 'notification') return modal.title || '알림 상세';
+  if (modal.type === 'font') return '글자 크기 설정';
+  if (modal.type === 'favoriteRestaurants') return '찜한 맛집';
+  if (modal.type === 'favoriteTourism') return '찜한 관광지';
   if (modal.type === 'widget') return `${modal.title} 위젯`;
   return '상세 보기';
 }

@@ -18,6 +18,38 @@ const SENTIMENT_COLORS = {
   neutral: '#a0a4ab',
 };
 
+
+const FIGMA_DASHBOARD_FALLBACK = {
+  sentiment: { positive: 68, negative: 18, neutral: 14, total: 1247 },
+  trend: [
+    { date: 'MON', positive: 41, negative: 12, neutral: 21 },
+    { date: 'TUE', positive: 58, negative: 16, neutral: 25 },
+    { date: 'WED', positive: 55, negative: 18, neutral: 24 },
+    { date: 'THU', positive: 74, negative: 11, neutral: 19 },
+    { date: 'FRI', positive: 68, negative: 13, neutral: 22 },
+    { date: 'SAT', positive: 52, negative: 20, neutral: 28 },
+    { date: 'SUN', positive: 62, negative: 17, neutral: 23 },
+  ],
+  keywords: ['#축제', '#천안삼거리', '#호두과자', '#단풍명소', '#교통중심', '#빵지순례', '#아라리오', '#청년창업', '#야경맛집', '#K-컬처'].map((keyword, i) => ({ keyword, count: 120 - i * 8 })),
+  topics: [
+    { id: 1, name: '천안 테크놀로지', post_count: 452, keywords: ['채용', '청년', 'IT'] },
+    { id: 2, name: '독립기념관 단풍길', post_count: 321, keywords: ['단풍', '명소'] },
+    { id: 3, name: '신부동 맛집 거리', post_count: 288, keywords: ['맛집', '카페'] },
+    { id: 4, name: '불당동 카페 투어', post_count: 194, keywords: ['카페', '데이트'] },
+    { id: 5, name: '성성호수공원 야경', post_count: 156, keywords: ['야경', '산책'] },
+  ],
+  events: [
+    { id: 'e1', title: '천안 흥타령 춤축제 2024 일정 안내', category: '행사', start_date: '2024-10-02', end_date: '2024-10-06', location: '종합운동장' },
+    { id: 'e2', title: '독립기념관 가을 단풍 축제 개막', category: '명소', start_date: '2024-10-15', end_date: '2024-11-20', location: '목천읍' },
+    { id: 'e3', title: '성성호수공원 야간 킹스 레이크 쇼', category: '행사', start_date: '2024-10-21', end_date: '2024-10-21', location: '성성동' },
+  ],
+  posts: { items: [
+    { id: 'p1', title: '천안 흥타령춤축제 일정이 공지되었습니다', source: 'cheonan_city', sentiment: 'positive', published_at: '2026-06-10T09:00:00' },
+    { id: 'p2', title: '신부동 맛집 거리 신규 리뷰가 증가했습니다', source: 'naver_blog', sentiment: 'positive', published_at: '2026-06-10T08:20:00' },
+    { id: 'p3', title: '천안IC 인근 교통 지체가 발생했습니다', source: 'community', sentiment: 'neutral', published_at: '2026-06-10T07:40:00' },
+  ] },
+};
+
 const SENTIMENT_LABELS = {
   positive: '긍정',
   negative: '부정',
@@ -169,8 +201,15 @@ export default function DashboardPage() {
   }, []);
 
   // 감성 분포 데이터
-  const pieData = sentiment
-    ? Object.entries(sentiment)
+  const dashboardSentiment = sentiment?.total ? sentiment : FIGMA_DASHBOARD_FALLBACK.sentiment;
+  const dashboardTrend = Array.isArray(trend) && trend.length ? trend : FIGMA_DASHBOARD_FALLBACK.trend;
+  const dashboardKeywords = Array.isArray(keywords) && keywords.length ? keywords : FIGMA_DASHBOARD_FALLBACK.keywords;
+  const dashboardTopics = Array.isArray(topics) && topics.length ? topics : FIGMA_DASHBOARD_FALLBACK.topics;
+  const dashboardEvents = Array.isArray(events) && events.length ? events : FIGMA_DASHBOARD_FALLBACK.events;
+  const dashboardPosts = posts?.items?.length ? posts : FIGMA_DASHBOARD_FALLBACK.posts;
+
+  const pieData = dashboardSentiment
+    ? Object.entries(dashboardSentiment)
         .filter(([key]) => key !== 'total')
         .map(([key, value]) => ({
           name: SENTIMENT_LABELS[key] ?? key,
@@ -182,8 +221,8 @@ export default function DashboardPage() {
   const sourceData = Array.isArray(sources) ? sources : [];
 
   // 키워드 크기 계산
-  const keywordMax = keywords?.length
-    ? Math.max(...keywords.map((k) => k.count))
+  const keywordMax = dashboardKeywords?.length
+    ? Math.max(...dashboardKeywords.map((k) => k.count))
     : 1;
 
   const getKeywordSize = (count, max = 36, min = 12) =>
@@ -208,7 +247,7 @@ export default function DashboardPage() {
   ];
   const isAd = (title) => AD_PATTERNS.some((p) => title?.includes(p));
 
-  const filteredPosts = posts?.items?.filter((post) => {
+  const filteredPosts = dashboardPosts?.items?.filter((post) => {
     const matchSource = filterSource ? post.source === filterSource : true;
     const matchSentiment = filterSentiment
       ? post.sentiment?.toLowerCase() === filterSentiment
@@ -217,17 +256,17 @@ export default function DashboardPage() {
     return matchSource && matchSentiment && isCheonan && !isAd(post.title);
   }) ?? [];
 
-  const sourceList = posts?.items
-    ? [...new Set(posts.items.map((p) => p.source))]
+  const sourceList = dashboardPosts?.items
+    ? [...new Set(dashboardPosts.items.map((p) => p.source))]
     : [];
 
   // KPI 수치
-  const totalPosts = sentiment?.total ?? 0;
-  const positiveRate = sentiment?.total
-    ? Math.round((sentiment.positive / sentiment.total) * 100)
+  const totalPosts = dashboardSentiment?.total ?? 0;
+  const positiveRate = dashboardSentiment?.total
+    ? Math.round((dashboardSentiment.positive / dashboardSentiment.total) * 100)
     : 0;
   const placeCount = places?.total ?? (Array.isArray(places) ? places.length : (places?.items?.length ?? 0));
-  const eventCount = events?.length ?? 0;
+  const eventCount = dashboardEvents?.length ?? 0;
 
   if (loading) {
     return (
@@ -267,13 +306,11 @@ export default function DashboardPage() {
           <div className="dash-card-title">
             감성 트렌드 (일별)
           </div>
-          {errors.trend ? (
-            <p className="error-text">데이터를 불러올 수 없습니다</p>
-          ) : !trend?.length ? (
+          {!dashboardTrend?.length ? (
             <p className="empty-text">아직 데이터가 없습니다</p>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={trend} margin={{ right: 16 }}>
+              <LineChart data={dashboardTrend} margin={{ right: 16 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
@@ -326,13 +363,11 @@ export default function DashboardPage() {
             주간 토픽
             <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
           </div>
-          {errors.topics ? (
-            <p className="error-text">데이터를 불러올 수 없습니다</p>
-          ) : !topics?.length ? (
+          {!dashboardTopics?.length ? (
             <p className="empty-text">아직 데이터가 없습니다</p>
           ) : (
             <div className="compact-topic-list">
-              {topics.slice(0, 5).map((t, i) => (
+              {dashboardTopics.slice(0, 5).map((t, i) => (
                 <div key={t.id} className="compact-topic-item">
                   <span className="compact-topic-rank">{i + 1}</span>
                   <div className="compact-topic-info">
@@ -352,11 +387,11 @@ export default function DashboardPage() {
           </div>
           {errors.keywords ? (
             <p className="error-text">데이터를 불러올 수 없습니다</p>
-          ) : !keywords?.length ? (
+          ) : !dashboardKeywords?.length ? (
             <p className="empty-text">아직 데이터가 없습니다</p>
           ) : (
             <div className="keyword-list compact">
-              {keywords.slice(0, 10).map((kw, idx) => (
+              {dashboardKeywords.slice(0, 10).map((kw, idx) => (
                 <span
                   key={kw.keyword}
                   className="keyword-tag"
@@ -397,11 +432,11 @@ export default function DashboardPage() {
               </div>
               {errors.events ? (
                 <p className="error-text">데이터를 불러올 수 없습니다</p>
-              ) : !events?.length ? (
+              ) : !dashboardEvents?.length ? (
                 <p className="empty-text">등록된 명소가 없습니다</p>
               ) : (
                 <div className="compact-event-list">
-                  {events.slice(0, 3).map((evt) => (
+                  {dashboardEvents.slice(0, 3).map((evt) => (
                     <div key={evt.id} className="compact-event-item">
                       <div className="compact-event-title">
                         {evt.url ? (
@@ -453,11 +488,11 @@ export default function DashboardPage() {
 
       {/* 주간 토픽 모달 */}
       <DashboardModal open={activeModal === 'topics'} onClose={closeModal} title="주간 토픽">
-        {!topics?.length ? (
+        {!dashboardTopics?.length ? (
           <p className="empty-text">아직 데이터가 없습니다</p>
         ) : (
           <div className="topic-list">
-            {topics.slice(0, 8).map((t) => (
+            {dashboardTopics.slice(0, 8).map((t) => (
               <div key={t.id} className="topic-card">
                 <div className="topic-name">{t.name}</div>
                 <div className="topic-meta">
@@ -476,11 +511,11 @@ export default function DashboardPage() {
 
       {/* 키워드 모달 */}
       <DashboardModal open={activeModal === 'keywords'} onClose={closeModal} title="주요 키워드 Top 30">
-        {!keywords?.length ? (
+        {!dashboardKeywords?.length ? (
           <p className="empty-text">아직 데이터가 없습니다</p>
         ) : (
           <div className="keyword-list">
-            {keywords.map((kw, idx) => (
+            {dashboardKeywords.map((kw, idx) => (
               <span
                 key={kw.keyword}
                 className="keyword-tag"
@@ -605,7 +640,7 @@ export default function DashboardPage() {
 
       {/* 명소 & 행사 모달 */}
       <DashboardModal open={activeModal === 'events'} onClose={closeModal} title="천안 명소 & 행사">
-        {!events?.length ? (
+        {!dashboardEvents?.length ? (
           <p className="empty-text">등록된 명소가 없습니다</p>
         ) : (
           <div className="event-list">

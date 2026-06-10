@@ -247,6 +247,10 @@ export default function InfoPage() {
   const stats = useMemo(() => currentData?.stats ?? [], [currentData]);
   const sourceLinks = useMemo(() => currentData?.source_links ?? [], [currentData]);
 
+  if (content.section === 'single-household') {
+    return <SingleHouseholdPortal content={content} />;
+  }
+
   return (
     <div className="info-page figma-info-page" style={{ '--info-accent': content.accent }}>
       <section className="info-figma-topline">
@@ -329,6 +333,75 @@ export default function InfoPage() {
             </a>
           ))}
         </section>
+      )}
+    </div>
+  );
+}
+
+function SingleHouseholdPortal({ content }) {
+  const [view, setView] = useState('cards');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const services = [
+    ['주거', '역세권 전월세 추천 매물', '서울시 거주 무주택 1인 가구', '관악구, 동작구', '상시 업데이트', '매물 보기'],
+    ['식사', '나홀로 미식: 혼밥 추천 맛집 리스트', '혼밥을 즐기는 모든 분', '강남역, 신촌 일대', '매일 갱신', '맛집 보기'],
+    ['편의', '우리 동네 24시간 운영 시설 안내', '심야 이용객 및 직장인', '전국 주요 거점', '연중무휴', '위치 찾기'],
+    ['취미', '1인 가구 소모임: 취미 및 관심사 공유', '새로운 인연을 찾는 청년/중장년', '지역별 소모임 공간', '모임별 상이', '모임 확인'],
+  ];
+  const cards = [
+    ['주거', '128건', '원룸/오피스텔 월세', '천안 시내 전 지역 최신 매물', '평균 월세 38만원', '평균 보증금 500만원'],
+    ['식사', '86곳', '혼밥 맛집 탐방', '1인 좌석 · 1인 메뉴 보장', '하카타 라멘 천안점 4.8', '착한 비빔밥 4.6'],
+    ['24H', 'LIVE', '우리동네 24H 시설', '새벽에도 안심하고 이용 가능', '세탁 12 · 스카 8', '편의점 34 · 헬스 6'],
+    ['소모임', '42개 모임', '취미 소모임 목록', '함께라서 더 즐거운 1인의 일상', '천안 독서 클럽 +24', '새벽 러닝 크루 +18'],
+  ];
+  return (
+    <div className="info-page single-portal-page" style={{ '--info-accent': content.accent }}>
+      <section className="single-hero">
+        <div>
+          <span>1인가구 추천 <b>NEW</b></span>
+          <h1>천안에서 혼자 살아도 든든하게.</h1>
+          <p>주거·식사·생활·취미를 한 곳에서.</p>
+        </div>
+        <button type="button" onClick={() => setSettingsOpen(true)}>맞춤 설정</button>
+      </section>
+      <nav className="single-tabs">
+        {['전체', '주거', '식사', '편의', '취미'].map((tab, i) => <button key={tab} className={i === 0 ? 'active' : ''}>{tab}</button>)}
+        <button type="button" onClick={() => setView(view === 'cards' ? 'table' : 'cards')}>{view === 'cards' ? '표 리스트' : '카드 그리드'}</button>
+      </nav>
+      {view === 'cards' ? (
+        <div className="single-card-grid">
+          {cards.map(([tag, count, title, desc, stat1, stat2]) => (
+            <article key={title}>
+              <div className="single-card-kicker"><span>{tag}</span><strong>{count}</strong></div>
+              <h2>{title}</h2>
+              <p>{desc}</p>
+              <div><b>{stat1}</b><b>{stat2}</b></div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="single-table-wrap">
+          <table>
+            <thead><tr>{['유형', '서비스명', '지원 대상', '지역', '신청 기간', '상태'].map((h) => <th key={h}>{h}</th>)}</tr></thead>
+            <tbody>{services.map((row) => <tr key={row[1]}>{row.map((cell, i) => <td key={cell}><span className={i === 0 ? 'single-type' : ''}>{cell}</span></td>)}</tr>)}</tbody>
+          </table>
+          <p>총 2,450개 서비스 중 1-10 표시</p>
+        </div>
+      )}
+      <section className="single-dashboard">
+        <div><h2>우리 지역 서비스 이용 현황</h2><p>실시간 인기 서비스 · 오늘의 신규 등록 · 누적 신청 건수</p></div>
+        <strong>12건</strong><strong>1,450건</strong>
+      </section>
+      {settingsOpen && (
+        <div className="single-settings-overlay" onClick={() => setSettingsOpen(false)}>
+          <section className="single-settings" onClick={(e) => e.stopPropagation()}>
+            <h2>맞춤 설정</h2>
+            <p>1인가구 포털을 나에게 맞게 조정하세요. 변경사항은 즉시 반영됩니다.</p>
+            <label>기본 지역<input readOnly value="천안시 서북구 불당동" /></label>
+            <div className="range-row"><span>검색 반경</span>{['500m', '1km', '2km', '5km'].map((v) => <button type="button" key={v}>{v}</button>)}</div>
+            <div className="setting-list">{['신규 매물 알림', '오늘의 혼밥 추천', '소모임 모집 알림'].map((v) => <label key={v}><input type="checkbox" defaultChecked /> {v}</label>)}</div>
+            <div className="setting-actions"><button type="button" onClick={() => setSettingsOpen(false)}>취소</button><button type="button" onClick={() => setSettingsOpen(false)}>설정 저장</button></div>
+          </section>
+        </div>
       )}
     </div>
   );

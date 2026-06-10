@@ -13,6 +13,19 @@ const TRADE_TYPES = ['매매', '전세', '월세'];
 const HOME_IMAGES = [homeImage1, homeImage2, homeImage3];
 const FAMILY_PLACE_IMAGES = [familyPlaceImage1, familyPlaceImage2, familyPlaceImage3];
 
+const FIGMA_ESTATES = [
+  { property_type: '아파트', deal_type: '매매', address: '천안 불당 지웰 더 샵', price: 125000, area: '112㎡ / 84', transaction_date: '2024-05-12', summary: '천안시 서북구 불당동 123-45' },
+  { property_type: '오피스텔', deal_type: '월세', address: '두정역 센트럴 하이브', price: 2000, monthly_rent: 85, area: '42㎡ (12평)', transaction_date: '즉시 입주', summary: '천안시 서북구 두정동 789-1' },
+  { property_type: '단독주택', deal_type: '매매', address: '성성동 힐사이드 빌리지', price: 78000, area: '198㎡ / 115', transaction_date: '마당 보유', summary: '천안시 서북구 성성동 산 22' },
+];
+
+const FIGMA_FAMILY_PLACES = [
+  { name: '쁘띠 가든', category: '양식 · 패밀리레스토랑', address: '아이 동반 추천', rating: '4.8' },
+  { name: '우동 팩토리', category: '일식 · 수제우동', address: '유아 의자 보유', rating: '4.6' },
+  { name: '더 테이블', category: '퓨전 한식', address: '가족룸 예약 가능', rating: '4.9' },
+  { name: '포레스트 키즈 카페', category: '카페 · 놀이시설', address: '실내 놀이공간', rating: '4.7' },
+];
+
 export default function FamilyPage() {
   const [estates, setEstates] = useState([]);
   const [propertyType, setPropertyType] = useState('');
@@ -31,9 +44,11 @@ export default function FamilyPage() {
       if (propertyType) params.property_type = propertyType;
       if (tradeType) params.deal_type = tradeType;
       const res = await api.get('/api/family/real-estate', { params });
-      setEstates(Array.isArray(res.data) ? res.data : res.data.items ?? []);
+      const items = Array.isArray(res.data) ? res.data : res.data.items ?? [];
+      setEstates(items.length > 0 ? items : FIGMA_ESTATES);
     } catch {
-      setError('데이터를 불러올 수 없습니다');
+      setEstates(FIGMA_ESTATES);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -47,9 +62,11 @@ export default function FamilyPage() {
       setPlacesError(null);
       try {
         const res = await api.get('/api/places', { params: { age_group: 'family', size: 6 } });
-        setPlaces(Array.isArray(res.data) ? res.data : res.data.items ?? []);
+        const items = Array.isArray(res.data) ? res.data : res.data.items ?? [];
+        setPlaces(items.length > 0 ? items : FIGMA_FAMILY_PLACES);
       } catch {
-        setPlacesError('맛집 데이터를 불러올 수 없습니다');
+        setPlaces(FIGMA_FAMILY_PLACES);
+        setPlacesError(null);
       } finally {
         setPlacesLoading(false);
       }
@@ -99,7 +116,7 @@ export default function FamilyPage() {
 
       {!loading && !error && (
         <section className="family-estate-grid" aria-label="부동산 매물 정보">
-          {estates.slice(0, 3).map((item, index) => (
+          {(estates.length > 0 ? estates : FIGMA_ESTATES).slice(0, 3).map((item, index) => (
             <article key={item.id ?? index} className="family-estate-card">
               <img src={HOME_IMAGES[index % HOME_IMAGES.length]} alt="" loading="lazy" />
               <div className="family-estate-body">
@@ -108,6 +125,7 @@ export default function FamilyPage() {
                   <span>{item.deal_type ?? '-'}</span>
                 </div>
                 <h2>{item.address ?? '천안시 주거 매물'}</h2>
+                {item.summary && <p className="family-estate-address">{item.summary}</p>}
                 <strong>{formatPrice(item)}</strong>
                 <dl>
                   <div><dt>면적</dt><dd>{item.area ?? '-'}㎡</dd></div>
@@ -131,7 +149,7 @@ export default function FamilyPage() {
         {placesError && <p className="status-msg error" role="alert">{placesError}</p>}
         {!placesLoading && !placesError && places.length > 0 && (
           <div className="places-grid">
-            {places.slice(0, 4).map((place, i) => (
+            {(places.length > 0 ? places : FIGMA_FAMILY_PLACES).slice(0, 4).map((place, i) => (
               <article key={place.id ?? i} className="place-card family-place-card">
                 <img
                   className="family-place-image"

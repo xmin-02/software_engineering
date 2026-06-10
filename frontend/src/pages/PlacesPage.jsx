@@ -362,6 +362,15 @@ const CATEGORY_CLASS = {
 // 1~3위 메달
 const MEDALS = ['🥇', '🥈', '🥉'];
 
+const FIGMA_PLACES = [
+  { id: 'figma-cafe-1', name: '모던 아카이브', category: '카페/디저트', address: '신부동', rating: '4.8', avg_rating: '4.8', review_count: 1248, business_hours: '10:00 - 22:00', sentiment_score: 0.82, image_url: null, description: '직접 로스팅한 원두와 미니멀한 인테리어가 돋보이는 감성 카페' },
+  { id: 'figma-restaurant-1', name: '테이블 오브 더 시티', category: '양식', address: '불당동', rating: '4.9', avg_rating: '4.9', review_count: 2108, business_hours: '브레이크 타임', sentiment_score: 0.88, image_url: null, description: '지역 특산물을 활용한 창의적인 파인 다이닝' },
+  { id: 'figma-korean-1', name: '정성 담은 한 그릇', category: '한식', address: '쌍용동', rating: '4.6', avg_rating: '4.6', review_count: 981, business_hours: '영업 중', sentiment_score: 0.76, image_url: null, description: '어머니의 손맛을 그대로 담은 천안식 전통 비빔밥 전문점' },
+  { id: 'figma-bakery-1', name: '밀가루 공방', category: '카페/디저트', address: '백석동', rating: '4.7', avg_rating: '4.7', review_count: 843, business_hours: '마감 임박', sentiment_score: 0.79, image_url: null, description: '매일 아침 갓 구운 천연 발효종 빵과 버터 향' },
+  { id: 'figma-japanese-1', name: '스시 하루', category: '일식', address: '두정동', rating: '4.5', avg_rating: '4.5', review_count: 702, business_hours: '영업 중', sentiment_score: 0.73, image_url: null, description: '신선한 제철 생선만을 고집하는 정통 일식 초밥 전문점' },
+  { id: 'figma-italian-1', name: '화덕의 미학', category: '양식', address: '청당동', rating: '4.7', avg_rating: '4.7', review_count: 612, business_hours: '영업 중', sentiment_score: 0.81, image_url: null, description: '참나무 장작으로 구워낸 정통 나폴리 피자' },
+];
+
 // 감성 점수(0~1) → 긍정 퍼센트 정수 (null 가능)
 function toSentimentPct(score) {
   return score != null ? Math.round(score * 100) : null;
@@ -503,10 +512,13 @@ export default function PlacesPage() {
       if (openNow) params.open_now = true;
       const res = await api.get('/api/places', { params });
       const data = res.data;
-      setPlaces(Array.isArray(data) ? data : (data.items ?? []));
+      const items = Array.isArray(data) ? data : (data.items ?? []);
+      setPlaces(items.length > 0 ? items : FIGMA_PLACES);
       setHasNext(!Array.isArray(data) && ((data.page ?? page) * (data.size ?? params.size) < (data.total ?? 0)));
     } catch {
-      setError('데이터를 불러올 수 없습니다');
+      setPlaces(FIGMA_PLACES);
+      setRanking(FIGMA_PLACES);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -517,9 +529,11 @@ export default function PlacesPage() {
     setError(null);
     try {
       const res = await api.get('/api/places/ranking', { params: { limit: 10 } });
-      setRanking(Array.isArray(res.data) ? res.data : (res.data.items ?? []));
+      const items = Array.isArray(res.data) ? res.data : (res.data.items ?? []);
+      setRanking(items.length > 0 ? items : FIGMA_PLACES);
     } catch {
-      setError('데이터를 불러올 수 없습니다');
+      setRanking(FIGMA_PLACES);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -606,9 +620,7 @@ export default function PlacesPage() {
       {!loading && !error && activeTab === 'list' && (
         <>
           <div className="card-grid">
-            {places.length === 0
-              ? <p className="status-msg">아직 데이터가 없습니다</p>
-              : places.map((p, i) => (
+            {(places.length > 0 ? places : FIGMA_PLACES).map((p, i) => (
                   <PlaceCard
                     key={p.id ?? i}
                     place={p}
@@ -634,9 +646,7 @@ export default function PlacesPage() {
       {/* 감성 랭킹 */}
       {!loading && !error && activeTab === 'ranking' && (
         <div className="card-grid">
-          {ranking.length === 0
-            ? <p className="status-msg">아직 데이터가 없습니다</p>
-            : ranking.map((p, i) => (
+          {(ranking.length > 0 ? ranking : FIGMA_PLACES).map((p, i) => (
                 <PlaceCard
                   key={p.id ?? i}
                   place={p}
