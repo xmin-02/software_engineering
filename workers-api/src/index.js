@@ -10,6 +10,12 @@ const PLACE_FETCH_LIMIT = 1000;
 const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com'];
 const BAD_IMAGE_TERMS = ['instar--', 'profile_thumb', 'tripcdn', 'hotel', 'motel'];
 const FOOD_CATEGORY_ALIASES = ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식', '이탈리아음식'];
+const UNIVERSITY_CATEGORY_ALIASES = {
+	학사: ['학사', '일반', '대플', '교수학습개발원', '교양대학', '입학관리처'],
+	취업: ['취업', '취업팀', '학생역량관리센터'],
+	장학: ['장학', '학생장학팀', '국가장학', '교내장학', '학자금대출'],
+	행사: ['행사', '특강', '사회봉사센터', '인성개발원', '실용음악트랙', '백석대학 합창단'],
+};
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
 const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길'];
 
@@ -64,7 +70,10 @@ const categoryAliases = (category) => {
 	if (['카페/디저트', '카페,디저트', '디저트', '카페 · 디저트', '카페·디저트'].includes(normalized)) {
 		return ['카페', '카페,디저트', '간식'];
 	}
-	if (['맛집', '맛집/카페', '맛집 · 카페', '맛집·카페', '식당'].includes(normalized)) {
+	if (['cafe', 'coffee', 'dessert', 'bakery'].includes(normalized.toLowerCase())) {
+		return ['카페', '카페,디저트', '간식'];
+	}
+	if (['맛집', '맛집/카페', '맛집 · 카페', '맛집·카페', '식당'].includes(normalized) || ['restaurant', 'food', 'places'].includes(normalized.toLowerCase())) {
 		return FOOD_CATEGORY_ALIASES;
 	}
 	if (['일식/중식', '일식 · 중식', '일식·중식'].includes(normalized)) {
@@ -134,6 +143,8 @@ const isOpenNow = (businessHours, date = koreaNow()) => {
 };
 
 const parseKeywords = (row) => ({ ...row, keywords: parseJson(row.keywords, null) });
+
+app.get('/api/health', (c) => c.json({ ok: true, service: 'cheonan-api', data: 'd1' }));
 
 const placeResponse = async (db, row) => {
 	const tags = await db.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(row.id).all();
@@ -562,8 +573,9 @@ app.get('/api/youth/university-notices', async (c) => {
 		params.push(university);
 	}
 	if (category) {
-		where.push('category=?');
-		params.push(category);
+		const categoryGroup = UNIVERSITY_CATEGORY_ALIASES[category] || [category];
+		where.push(`category IN (${categoryGroup.map(() => '?').join(',')})`);
+		params.push(...categoryGroup);
 	}
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
 	const rows = await c.env.DB.prepare(`SELECT * FROM university_notices ${wc} ORDER BY published_at DESC, id DESC LIMIT 100`)
