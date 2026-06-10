@@ -58,6 +58,21 @@ const FIGMA_PAGES = {
         description: '1층 대합실 장애인 화장실, 전동휠체어 충전 가능',
         phone: '041-570-2114',
       },
+      {
+        title: '천안 장애인 콜택시',
+        subtitle: '이동지원',
+        status: '예약 권장',
+        address: '충청남도 광역이동지원센터 연계',
+        description: '휠체어 이용자와 교통약자를 위한 사전 예약 이동지원 서비스',
+        phone: '1644-5588',
+      },
+      {
+        title: '저상버스·주차 정보',
+        subtitle: '교통 접근',
+        status: '노선 확인',
+        address: '천안시 버스정보시스템 및 공영주차장',
+        description: '저상버스 운행 여부와 장애인 주차구역 위치를 출발 전 확인하세요.',
+      },
     ],
   },
   '/high-school': {
@@ -143,6 +158,24 @@ const FIGMA_PAGES = {
         hours: '24시간 응급실 운영',
         phone: '041-570-5119',
       },
+      {
+        title: '천안시 서북구보건소',
+        distance: '공식',
+        status: '검진 안내',
+        address: '충남 천안시 서북구 번영로 156',
+        hours: '평일 09:00-18:00',
+        phone: '041-521-2552',
+        description: '예방접종·건강검진·보건민원은 방문 전 공식 안내 확인 권장',
+      },
+      {
+        title: '천안시 동남구보건소',
+        distance: '공식',
+        status: '검진 안내',
+        address: '충남 천안시 동남구 버들로 34',
+        hours: '평일 09:00-18:00',
+        phone: '041-521-2652',
+        description: '보건소 검진과 지역 의료기관 안내를 제공합니다.',
+      },
     ],
   },
   '/foreign-life': {
@@ -173,6 +206,23 @@ const FIGMA_PAGES = {
         hours: '평일 09:00-18:00',
         phone: '041-521-2961',
         description: '영어, 중국어, 베트남어, 타갈로그어',
+      },
+      {
+        title: '외국인종합안내센터 1345',
+        distance: '전화 상담',
+        status: '긴급상담',
+        address: '국번 없이 1345',
+        hours: '평일 상담 · 긴급 안내',
+        phone: '1345',
+        description: '출입국, 체류, 생활민원 다국어 상담',
+      },
+      {
+        title: '다국어 의료·생활 안내',
+        distance: '생활 지원',
+        status: '확인 필요',
+        address: '천안시 외국인 생활권',
+        hours: '기관별 상이',
+        description: '다국어 의료 안내, 할랄·베트남 식료품, 모스크 정보를 함께 확인하세요.',
       },
     ],
   },
@@ -234,6 +284,56 @@ function normalizeInfoCard(item) {
   };
 }
 
+function keywordMatch(item, keywords) {
+  const haystack = [item.title, item.subtitle, item.status, item.address, item.hours, item.phone, item.description]
+    .filter(Boolean)
+    .join(' ');
+  return keywords.some((keyword) => haystack.includes(keyword));
+}
+
+function filterCuratedCards(content, activeChip) {
+  const cards = content.cards ?? [];
+  if (!activeChip || ['전체', content.chips?.[0]].includes(activeChip)) return cards;
+  const chipKeywords = {
+    '휠체어 접근': ['휠체어', '경사로', '엘리베이터', '접근'],
+    '장애인 화장실': ['화장실'],
+    저상버스: ['저상버스', '터미널', '버스', '교통'],
+    콜택시: ['콜택시', '이동지원'],
+    '신부동 학원가': ['신부동', '신부'],
+    '두정동 학원가': ['두정동', '두정'],
+    '불당동 학원가': ['불당동', '불당'],
+    스터디카페: ['스터디', '카페'],
+    청소년수련관: ['청소년', '수련관'],
+    입시설명회: ['입시', '설명회', '수능'],
+    '야간/응급진료': ['응급', '24시간', '야간'],
+    '분만가능 산부인과': ['산부인과', '분만'],
+    '보건소 검진': ['보건소', '검진'],
+    정형외과: ['정형외과'],
+    내과: ['내과'],
+    한의원: ['한의원'],
+    '출입국·외국인청': ['출입국', '외국인청'],
+    외국인노동자지원: ['노동자', '지원센터', '주민지원'],
+    '다국어 의료': ['다국어', '의료'],
+    '할랄/베트남 식료품': ['할랄', '베트남', '식료품'],
+    모스크: ['모스크'],
+    '1345 긴급상담': ['1345', '긴급상담'],
+  };
+  const filtered = cards.filter((item) => keywordMatch(item, chipKeywords[activeChip] ?? [activeChip]));
+  return filtered.length ? filtered : cards;
+}
+
+function isStructuredLifeInfo(section) {
+  return ['accessibility', 'high-school', 'medical', 'foreign-life'].includes(section);
+}
+
+function getDisplayCards(content, activeChip, currentData) {
+  if (isStructuredLifeInfo(content.section)) {
+    return filterCuratedCards(content, activeChip);
+  }
+  const apiCards = currentData?.sections?.flatMap((section) => section.items ?? []).map(normalizeInfoCard) ?? [];
+  return apiCards.length ? apiCards : filterCuratedCards(content, activeChip);
+}
+
 export default function InfoPage() {
   const location = useLocation();
   const content = FIGMA_PAGES[location.pathname] ?? FIGMA_PAGES['/accessibility'];
@@ -269,9 +369,10 @@ export default function InfoPage() {
 
   const loading = loadedSection !== resolvedContent.section && !error;
   const currentData = loadedSection === resolvedContent.section ? data : null;
-  const apiCards = currentData?.sections?.flatMap((section) => section.items ?? []).map(normalizeInfoCard) ?? [];
-  const displayCards = apiCards.length ? apiCards : resolvedContent.cards;
-  const displayCountLabel = apiCards.length ? `총 ${apiCards.length}개의 정보` : resolvedContent.countLabel;
+  const displayCards = getDisplayCards(resolvedContent, activeChip, currentData);
+  const displayCountLabel = activeChip === (resolvedContent.chips[0] ?? '전체')
+    ? (isStructuredLifeInfo(resolvedContent.section) ? resolvedContent.countLabel : `총 ${displayCards.length}개의 정보`)
+    : `${activeChip} 정보 ${displayCards.length}건`;
   void useMemo;
 
   if (resolvedContent.section === 'single-household') {
@@ -324,7 +425,14 @@ export default function InfoPage() {
           </div>
           <div className="info-map-placeholder">
             <strong>N</strong>
-            <span>학원 위치 | 마커에 마우스를 올려 학원명을 확인하세요</span>
+            <span>학원 위치 | 주요 학원가를 한눈에 확인하세요</span>
+            <div className="academy-map-pins">
+              {displayCards.slice(0, 4).map((item, index) => (
+                <button key={item.title} type="button" style={{ '--pin-x': `${18 + index * 20}%`, '--pin-y': `${35 + (index % 2) * 28}%` }}>
+                  {index + 1}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -366,27 +474,32 @@ function SingleHouseholdPortal({ content, apiData }) {
   const [displayMode, setDisplayMode] = useState('카드 그리드');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const apiSections = apiData?.sections ?? [];
-  const visibleSections = apiSections.length ? apiSections : [
+  const fallbackSections = [
     { title: '최근 1인 주거 후보', items: content.cards.filter((item) => item.subtitle === '주거') },
     { title: '혼밥/카페 추천', items: content.cards.filter((item) => item.subtitle === '식사') },
     { title: '안전/지원 체크리스트', items: content.cards.filter((item) => item.subtitle === '안전') },
   ];
-  const cards = visibleSections.map((section) => {
+  const visibleSections = (apiSections.length ? apiSections : fallbackSections).map((section) => {
     const items = section.items ?? [];
     return {
       tag: section.title.includes('주거') ? '주거' : section.title.includes('혼밥') || section.title.includes('카페') ? '식사' : section.title.includes('안전') ? '안전' : '정보',
       count: `${items.length}건`,
       title: section.title,
       desc: section.caption || items[0]?.description || '천안시 연동 데이터 기준으로 표시합니다.',
-      details: items.slice(0, 4).flatMap((item) => [item.title, item.meta || item.subtitle || item.address || item.description]).filter(Boolean),
+      details: items.slice(0, 4).flatMap((item) => {
+        const meta = item.meta || item.subtitle || item.address || item.description;
+        return [item.title, meta && !/평점 정보 없음|정보 없음/.test(meta) ? meta : null];
+      }).filter(Boolean),
+      rawItems: items,
     };
   });
-  const services = visibleSections.flatMap((section) => (section.items ?? []).map((item) => [
-    section.title.includes('주거') ? '주거' : section.title.includes('혼밥') || section.title.includes('카페') ? '식사' : '지원',
+  const cards = visibleSections.filter((card) => activeTab === '전체' || card.tag === activeTab || (activeTab === '편의' && card.tag === '정보'));
+  const services = cards.flatMap((section) => (section.rawItems ?? []).map((item) => [
+    section.tag === '정보' ? '지원' : section.tag,
     item.title,
     item.subtitle || '천안 시민',
     item.description || item.address || '천안시',
-    item.meta || '수시 갱신',
+    item.meta && !/평점 정보 없음|정보 없음/.test(item.meta) ? item.meta : '수시 갱신',
     item.url ? '상세 보기' : '확인',
   ])).slice(0, 10);
   const stats = apiData?.stats ?? [];
@@ -428,7 +541,7 @@ function SingleHouseholdPortal({ content, apiData }) {
       )}
       <section className="single-dashboard">
         <div><h2>우리 지역 서비스 이용 현황</h2><p>실시간 인기 서비스 · 오늘의 신규 등록 · 누적 신청 건수</p></div>
-        {stats.slice(0, 3).map((item) => <strong key={item.label}>{item.value?.toLocaleString?.() ?? item.value}{item.label}</strong>)}
+        {stats.slice(0, 3).map((item) => <strong key={item.label}>{item.value?.toLocaleString?.() ?? item.value} <span>{item.label}</span></strong>)}
       </section>
       {settingsOpen && (
         <div className="single-settings-overlay" onClick={() => setSettingsOpen(false)}>

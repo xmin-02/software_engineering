@@ -418,6 +418,8 @@
   text-align: center;
   color: #7c3aed;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
 .info-map-placeholder strong {
@@ -429,6 +431,32 @@
   background: #fff;
   box-shadow: 0 10px 28px rgba(124, 58, 237, 0.18);
   margin-bottom: 8px;
+}
+
+.academy-map-pins {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.academy-map-pins button {
+  position: absolute;
+  left: var(--pin-x);
+  top: var(--pin-y);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px 999px 999px 4px;
+  transform: rotate(-45deg);
+  background: #7c3aed;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.25);
+  font-weight: 900;
+  pointer-events: auto;
+}
+
+.academy-map-pins button::first-letter {
+  transform: rotate(45deg);
 }
 
 .info-facility-list {
@@ -698,6 +726,19 @@
 
 .single-dashboard {
   margin-top: 28px;
+}
+
+.single-dashboard > strong {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+
+.single-dashboard > strong span {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
 }
 
 .single-settings-overlay {

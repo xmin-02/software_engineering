@@ -28,6 +28,17 @@ function normalizeFamilyImage(url, fallback) {
   return fallback;
 }
 
+function formatPlaceRating(place) {
+  const directRating = place.rating ?? place.rating_naver ?? place.rating_kakao;
+  const numericRating = Number(directRating);
+  if (Number.isFinite(numericRating) && numericRating > 0) return numericRating.toFixed(1);
+  const sentimentScore = Number(place.avg_sentiment_score);
+  if (Number.isFinite(sentimentScore)) {
+    return Math.max(4.1, Math.min(4.9, 4 + sentimentScore)).toFixed(1);
+  }
+  return '신규';
+}
+
 function FilterModal({ onClose }) {
   const [homeType, setHomeType] = useState('아파트');
   const [dealType, setDealType] = useState('매매');
@@ -107,7 +118,7 @@ export default function FamilyPage() {
         <div className="family-section-title-row"><div><h2 className="places-title">가족 추천 맛집</h2><p className="places-desc">부동산 인근 아이와 함께 가기 좋은 식당</p></div><button type="button" onClick={() => navigate('/places')}>전체보기</button></div>
         <div className="places-grid">
           {familyPlaces.map((place, index) => (
-            <article key={place.id ?? place.name} className="place-card family-place-card"><img className="family-place-image" src={normalizeFamilyImage(place.image_url || place.photo_url, FAMILY_PLACE_IMAGES[index % FAMILY_PLACE_IMAGES.length])} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = FAMILY_PLACE_IMAGES[index % FAMILY_PLACE_IMAGES.length]; }} /><span className="family-place-rating">{place.rating ?? (place.avg_sentiment_score ? (4 + Number(place.avg_sentiment_score)).toFixed(1) : '신규')}</span><h3 className="place-name">{place.name}</h3><span className="place-category">{place.category}</span></article>
+            <article key={place.id ?? place.name} className="place-card family-place-card"><img className="family-place-image" src={normalizeFamilyImage(place.image_url || place.photo_url, FAMILY_PLACE_IMAGES[index % FAMILY_PLACE_IMAGES.length])} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = FAMILY_PLACE_IMAGES[index % FAMILY_PLACE_IMAGES.length]; }} /><span className="family-place-rating">{formatPlaceRating(place) === '신규' ? '신규' : `★ ${formatPlaceRating(place)}`}</span><h3 className="place-name">{place.name}</h3><span className="place-category">{place.category}</span></article>
           ))}
         </div>
       </section>
