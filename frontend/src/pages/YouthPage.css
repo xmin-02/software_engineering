@@ -363,3 +363,167 @@
   .youth-section-head,
   .youth-opportunity { grid-template-columns: 1fr; display: grid; align-items: start; }
 }
+
+.youth-link-button {
+  border: 0;
+  background: transparent;
+  color: #7c3aed;
+  font-weight: 900;
+  padding: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.youth-link-button:hover {
+  text-decoration: underline;
+}
+
+.youth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(10px);
+  padding: 24px;
+}
+
+.youth-modal {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(760px, 88vh);
+  overflow: auto;
+  border-radius: 28px;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+  padding: 34px;
+}
+
+.youth-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.youth-modal-kicker {
+  margin: 0 0 10px;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.youth-modal h2 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+.youth-modal-desc {
+  margin: 12px 0 22px;
+  color: #64748b;
+  line-height: 1.7;
+}
+
+.youth-modal-list {
+  display: grid;
+  gap: 12px;
+}
+
+.youth-modal-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 18px;
+  background: linear-gradient(135deg, #fff, #f8fafc);
+}
+
+.youth-modal-item h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.youth-modal-item p {
+  margin: 0 0 8px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.youth-modal-item small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.youth-modal-item span {
+  align-self: flex-start;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.youth-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.youth-modal-actions a,
+.youth-modal-actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 16px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.youth-modal-actions a {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.youth-modal-actions button {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+@media (max-width: 640px) {
+  .youth-modal {
+    padding: 26px 18px;
+    border-radius: 22px;
+  }
+
+  .youth-modal-item {
+    flex-direction: column;
+  }
+
+  .youth-modal-actions {
+    flex-direction: column;
+  }
+
+  .youth-modal-actions a,
+  .youth-modal-actions button {
+    text-align: center;
+  }
+}

@@ -12,6 +12,7 @@ const FAVORITES_KEY = 'cheonan_favorite_places';
 
 const CATEGORY_TABS = ['전체', '한식', '일식/중식', '카페/디저트'];
 const SORTS = ['평점 높은 순', '가까운 거리 순', '리뷰 많은 순'];
+const PLACE_PAGE_SIZE = 12;
 
 function favoriteId(place) {
   return String(place.id ?? place.name);
@@ -215,6 +216,7 @@ export default function PlacesPage() {
   const [category, setCategory] = useState('전체');
   const [sort, setSort] = useState('평점 높은 순');
   const [query, setQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PLACE_PAGE_SIZE);
   const [favorites, setFavorites] = useState(() => {
     try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
   });
@@ -249,7 +251,7 @@ export default function PlacesPage() {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
-  const displayedPlaces = useMemo(() => {
+  const orderedPlaces = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     const filtered = places.filter((place) => {
       const text = `${place.name ?? ''} ${place.category ?? ''} ${place.sub_category ?? ''} ${place.address ?? ''}`.toLowerCase();
@@ -260,21 +262,24 @@ export default function PlacesPage() {
       if (sort === '가까운 거리 순') return parseDistanceValue(a.distance) - parseDistanceValue(b.distance);
       return Number(getDisplayRating(b) ?? 0) - Number(getDisplayRating(a) ?? 0);
     });
-    if (category !== '전체' || normalizedQuery || sort !== '평점 높은 순') return sorted.slice(0, 12);
+    if (category !== '전체' || normalizedQuery || sort !== '평점 높은 순') return sorted;
     const buckets = new Map();
     sorted.forEach((place) => {
       const key = getBadge(place);
       buckets.set(key, [...(buckets.get(key) ?? []), place]);
     });
     const mixed = [];
-    while (mixed.length < 12 && [...buckets.values()].some((bucket) => bucket.length)) {
+    while ([...buckets.values()].some((bucket) => bucket.length)) {
       [...buckets.keys()].forEach((key) => {
         const next = buckets.get(key)?.shift();
-        if (next && mixed.length < 12) mixed.push(next);
+        if (next) mixed.push(next);
       });
     }
     return mixed;
   }, [category, places, query, sort]);
+
+  const displayedPlaces = useMemo(() => orderedPlaces.slice(0, visibleCount), [orderedPlaces, visibleCount]);
+  const hasMorePlaces = displayedPlaces.length < orderedPlaces.length;
 
   const toggleFavorite = (place) => {
     setFavorites((current) => {
@@ -296,11 +301,11 @@ export default function PlacesPage() {
 
       <div className="figma-place-controls">
         <nav className="figma-category-tabs" aria-label="맛집 카테고리">
-          {CATEGORY_TABS.map((label) => <button key={label} type="button" className={category === label ? 'active' : ''} onClick={() => setCategory(label)}>{label}</button>)}
+          {CATEGORY_TABS.map((label) => <button key={label} type="button" className={category === label ? 'active' : ''} onClick={() => { setCategory(label); setVisibleCount(PLACE_PAGE_SIZE); }}>{label}</button>)}
         </nav>
         <div className="figma-sort-row">
-          {SORTS.map((label) => <button key={label} type="button" className={sort === label ? 'active' : ''} onClick={() => setSort(label)}>{label}</button>)}
-          <label className="figma-place-search"><span className="sr-only">매장 검색</span><input value={query} placeholder="매장명 또는 메뉴 검색..." onChange={(event) => setQuery(event.target.value)} /></label>
+          {SORTS.map((label) => <button key={label} type="button" className={sort === label ? 'active' : ''} onClick={() => { setSort(label); setVisibleCount(PLACE_PAGE_SIZE); }}>{label}</button>)}
+          <label className="figma-place-search"><span className="sr-only">매장 검색</span><input value={query} placeholder="매장명 또는 메뉴 검색..." onChange={(event) => { setQuery(event.target.value); setVisibleCount(PLACE_PAGE_SIZE); }} /></label>
         </div>
       </div>
 
@@ -324,7 +329,11 @@ export default function PlacesPage() {
         })}
       </div>
       {displayedPlaces.length === 0 && <p className="status-msg">검색 결과가 없습니다</p>}
-      <button type="button" className="figma-more-btn" onClick={() => setQuery('')}>더 많은 맛집 보기</button>
+      {hasMorePlaces && (
+        <button type="button" className="figma-more-btn" onClick={() => setVisibleCount((count) => Math.min(count + PLACE_PAGE_SIZE, orderedPlaces.length))}>
+          더 많은 맛집 보기
+        </button>
+      )}
       {selected && <ActualPlaceModal key={selected.id ?? selected.name} place={selected} favorite={favorites.some((item) => (item.id ?? item) === favoriteId(selected))} onToggleFavorite={toggleFavorite} onClose={() => setSelected(null)} />}
     </div>
   );
