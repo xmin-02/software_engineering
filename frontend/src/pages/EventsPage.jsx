@@ -1,126 +1,163 @@
-import { useState, useEffect, useCallback } from 'react';
-import api from '../api/client';
+import { useMemo } from 'react';
+import { CalendarDays, ChevronLeft, ChevronRight, Heart, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import './EventsPage.css';
-import eventImage1 from '../assets/figma/home-1.jpg';
-import eventImage2 from '../assets/figma/home-2.jpg';
-import eventImage3 from '../assets/figma/home-3.jpg';
+import tourismEvent1 from '../assets/figma/tourism/tourism-event-1.jpg';
+import tourismEvent2 from '../assets/figma/tourism/tourism-event-2.jpg';
+import tourismEvent3 from '../assets/figma/tourism/tourism-event-3.jpg';
+import tourismSpot1 from '../assets/figma/tourism/tourism-spot-1.jpg';
+import tourismSpot2 from '../assets/figma/tourism/tourism-spot-2.jpg';
+import tourismSpot3 from '../assets/figma/tourism/tourism-spot-3.jpg';
+import tourismMap from '../assets/figma/tourism/tourism-map.jpg';
 
-const MAIN_CATEGORIES = ['축제', '전시관', '천안8경', '천안12경', '자연관광', '유적지', '산', '사찰', '명소', '관광농원', '박물관'];
-const EVENT_FALLBACK_IMAGES = [eventImage1, eventImage2, eventImage3];
+const EVENT_FALLBACKS = [
+  {
+    title: '천안 흥타령 춤축제',
+    category: '축제',
+    date: '2024.10.02 - 10.06',
+    dday: 'D-5',
+    image: tourismEvent1,
+    tone: 'orange',
+  },
+  {
+    title: '시립미술관 기획전',
+    category: '전시',
+    date: '2024.10.15 - 11.20',
+    dday: 'D-12',
+    image: tourismEvent2,
+    tone: 'indigo',
+  },
+  {
+    title: '가을 밤의 클래식 산책',
+    category: '공연',
+    date: '2024.10.21',
+    dday: 'D-18',
+    image: tourismEvent3,
+    tone: 'rose',
+  },
+];
 
-function normalizeCategory(category) {
-  return category === '자연광광' ? '자연관광' : category;
-}
+const SPOT_FALLBACKS = [
+  {
+    title: '독립기념관',
+    category: '역사 명소',
+    rating: '4.9',
+    address: '동남구 목천읍 삼방로 95',
+    image: tourismSpot1,
+  },
+  {
+    title: '각원사',
+    category: '자연/힐링',
+    rating: '4.8',
+    address: '동남구 각원사길 245',
+    image: tourismSpot2,
+  },
+  {
+    title: '아라리오 갤러리',
+    category: '예술/문화',
+    rating: '4.7',
+    address: '동남구 만남로 43',
+    image: tourismSpot3,
+  },
+];
+
 
 export default function EventsPage() {
-  const [events, setEvents] = useState([]);
-  const [category, setCategory] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = { upcoming: true };
-      if (category) params.category = category;
-      const res = await api.get('/api/events', { params });
-      setEvents(Array.isArray(res.data) ? res.data : res.data.items ?? []);
-    } catch {
-      setError('데이터를 불러올 수 없습니다');
-    } finally {
-      setLoading(false);
-    }
-  }, [category]);
-
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
-
-  const festivals = events.filter((e) => normalizeCategory(e.category) === '축제' || normalizeCategory(e.category) === '빵빵데이');
-  const spots = events.filter((e) => normalizeCategory(e.category) !== '축제' && normalizeCategory(e.category) !== '빵빵데이');
-
-  const categories = [...new Set(events.map((e) => normalizeCategory(e.category)).filter(Boolean))].sort();
+  const upcomingEvents = useMemo(() => EVENT_FALLBACKS, []);
+  const chosenSpots = useMemo(() => SPOT_FALLBACKS, []);
 
   return (
-    <div className="events-page">
-      <h1 className="events-page-title">천안 관광/명소</h1>
+    <div className="tourism-page">
+      <header className="tourism-hero">
+        <h1>천안을 발견하다</h1>
+        <p>
+          역사와 현대가 공존하는 천안의 아름다운 명소와 활기찬 축제를 경험해보세요.
+          엄선된 큐레이션을 통해 당신만의 특별한 여정을 시작하세요.
+        </p>
+      </header>
 
-      <div className="filter-bar">
-        <label className="sr-only" htmlFor="events-category-filter">카테고리 선택</label>
-        <select
-          id="events-category-filter"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">전체 ({events.length}건)</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
+      <section className="tourism-section tourism-events" aria-label="예정된 행사">
+        <div className="tourism-section-head">
+          <h2>UPCOMING EVENTS</h2>
+          <div className="tourism-arrow-row" aria-hidden="true">
+            <button type="button"><ChevronLeft size={14} /></button>
+            <button type="button"><ChevronRight size={14} /></button>
+          </div>
+        </div>
+        <div className="tourism-event-row">
+          {upcomingEvents.map((event) => (
+            <TourismEventCard key={`${event.category}-${event.title}`} event={event} />
           ))}
-        </select>
-      </div>
+        </div>
+      </section>
 
-      {loading && <p className="status-msg" aria-live="polite">데이터를 불러오는 중...</p>}
-      {error && <p className="status-msg error" role="alert">{error}</p>}
+      <section className="tourism-section tourism-chosen" aria-label="추천 관광지">
+        <div className="tourism-section-head">
+          <h2>CHOSEN FOR YOU</h2>
+          <button type="button" className="tourism-sort-btn">가까운 순 <ChevronDown size={15} /></button>
+        </div>
+        <div className="tourism-spot-grid">
+          {chosenSpots.map((spot) => (
+            <TourismSpotCard key={spot.title} spot={spot} />
+          ))}
+        </div>
+      </section>
 
-      {!loading && !error && (
-        <>
-          {!category && festivals.length > 0 && (
-            <section className="events-section" aria-label="연례 축제">
-              <h2 className="events-section-title">연례 축제</h2>
-              <div className="event-grid">
-                {festivals.map((ev, i) => (
-                  <EventCard key={ev.id ?? i} event={ev} festival index={i} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="events-section" aria-label="관광지 및 체험">
-            {!category && <h2 className="events-section-title">관광지 &amp; 체험</h2>}
-            <div className="event-grid">
-              {(category ? events : spots).length === 0
-                ? <p className="status-msg">등록된 명소가 없습니다</p>
-                : (category ? events : spots).map((ev, i) => (
-                  <EventCard key={ev.id ?? i} event={ev} index={i} />
-                ))
-              }
-            </div>
-          </section>
-        </>
-      )}
+      <section className="tourism-map-section" aria-label="지도에서 명소 찾기">
+        <div className="tourism-map-copy">
+          <h2>지도로 명소 찾기</h2>
+          <p>
+            내 주변의 가장 인기 있는 장소를 실시간 지도로 확인해보세요. 각 장소의 혼잡도와 현재 운영 여부를 즉시 파악할 수 있습니다.
+          </p>
+          <div className="tourism-map-legend">
+            <span><i className="good" />쾌적함</span>
+            <span><i className="normal" />보통</span>
+            <span><i className="busy" />혼잡</span>
+          </div>
+        </div>
+        <div className="tourism-map-art">
+          <img src={tourismMap} alt="천안 관광지 혼잡도 지도" />
+        </div>
+      </section>
     </div>
   );
 }
 
-function EventCard({ event, festival = false, index = 0 }) {
-  return (
-    <div className={`event-card${festival ? ' festival' : ''}`}>
-      <div className="event-image-wrap">
-        <img
-          src={event.image_url ?? EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]}
-          alt=""
-          className="event-image"
-          loading="lazy"
-          onError={(e) => { e.currentTarget.src = EVENT_FALLBACK_IMAGES[index % EVENT_FALLBACK_IMAGES.length]; }}
-        />
+function TourismEventCard({ event }) {
+  const content = (
+    <article className={`tourism-event-card tone-${event.tone}`}>
+      <div className="tourism-event-image">
+        <img src={event.image} alt="" loading="lazy" />
+        <span>{event.category}</span>
       </div>
-      <div className="event-card-body">
-        <div className="event-header">
-          <span className={`event-category${festival ? ' festival-tag' : ''}`}>
-            {normalizeCategory(event.category) ?? (festival ? '축제' : '기타')}
-          </span>
-        </div>
-        <h3 className="event-title">{event.title}</h3>
-        {event.location && <p className="event-location">📍 {event.location}</p>}
-        {event.description && event.description !== event.category && (
-          <p className="event-desc">{event.description}</p>
-        )}
-        {event.url && (
-          <a href={event.url} target="_blank" rel="noopener noreferrer" className="event-link-btn">
-            자세히 보기 →
-          </a>
-        )}
+      <div className="tourism-event-body">
+        <strong>{event.dday}</strong>
+        <h3>{event.title}</h3>
+        <p><CalendarDays size={12} />{event.date}</p>
       </div>
-    </div>
+    </article>
   );
+  return event.url ? <a className="tourism-card-link" href={event.url} target="_blank" rel="noreferrer">{content}</a> : content;
+}
+
+function TourismSpotCard({ spot }) {
+  const content = (
+    <article className="tourism-spot-card">
+      <div className="tourism-spot-image">
+        <img src={spot.image} alt="" loading="lazy" />
+        <button type="button" aria-label={`${spot.title} 찜하기`}><Heart size={20} /></button>
+      </div>
+      <div className="tourism-spot-body">
+        <div className="tourism-spot-meta">
+          <span>{spot.category}</span>
+          <em>★ {spot.rating}</em>
+        </div>
+        <h3>{spot.title}</h3>
+        <p><MapPin size={13} />{spot.address}</p>
+        <a href={spot.url || '#'} onClick={(e) => { if (!spot.url) e.preventDefault(); }} target={spot.url ? '_blank' : undefined} rel="noreferrer" className="tourism-discover-btn">
+          Discover <ArrowRight size={14} />
+        </a>
+      </div>
+    </article>
+  );
+  return content;
 }
