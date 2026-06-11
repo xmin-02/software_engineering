@@ -66,6 +66,9 @@ const FIGMA_PAGES = {
         address: '충청남도 광역이동지원센터 연계',
         description: '휠체어 이용자와 교통약자를 위한 사전 예약 이동지원 서비스',
         phone: '1644-5588',
+        map: false,
+        url: 'https://www.16445588.co.kr/',
+        urlLabel: '예약 안내',
       },
       {
         title: '저상버스·주차 정보',
@@ -73,6 +76,9 @@ const FIGMA_PAGES = {
         status: '노선 확인',
         address: '천안시 버스정보시스템 및 공영주차장',
         description: '저상버스 운행 여부와 장애인 주차구역 위치를 출발 전 확인하세요.',
+        map: false,
+        url: 'https://its.cheonan.go.kr/',
+        urlLabel: '노선 확인',
       },
     ],
   },
@@ -460,7 +466,6 @@ export default function InfoPage() {
   const Icon = resolvedContent.Icon;
   const [data, setData] = useState(null);
   const [activeChip, setActiveChip] = useState('전체');
-  const [page, setPage] = useState(1);
   const [loadedSection, setLoadedSection] = useState(null);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -482,7 +487,6 @@ export default function InfoPage() {
 
   useEffect(() => {
     setActiveChip(resolvedContent.chips[0] ?? '전체');
-    setPage(1);
   }, [resolvedContent.chips]);
 
   const loading = loadedSection !== resolvedContent.section && !error;
@@ -566,13 +570,6 @@ export default function InfoPage() {
         </div>
       </section>
 
-      {resolvedContent.section === 'accessibility' && (
-        <div className="pagination figma-pagination">
-          <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>← 이전</button>
-          {[1, 2, 3].map((value) => <button key={value} type="button" className={page === value ? 'active' : ''} onClick={() => setPage(value)}>{value}</button>)}
-          <button type="button" onClick={() => setPage((value) => Math.min(3, value + 1))}>다음 →</button>
-        </div>
-      )}
     </div>
   );
 }
@@ -717,8 +714,8 @@ function FacilityCard({ item }) {
       )}
       {item.description && <p className="facility-desc">{item.description}</p>}
       <div className="facility-actions">
-        <a className="facility-route-btn" href={mapSearchUrl(item)} target="_blank" rel="noreferrer">지도 보기</a>
-        {item.url && <a className="facility-route-btn secondary" href={item.url} target="_blank" rel="noreferrer">공식 링크</a>}
+        {item.map !== false && <a className="facility-route-btn" href={mapSearchUrl(item)} target="_blank" rel="noreferrer">지도 보기</a>}
+        {item.url && <a className="facility-route-btn secondary" href={item.url} target="_blank" rel="noreferrer">{item.urlLabel || '공식 링크'}</a>}
       </div>
     </article>
   );

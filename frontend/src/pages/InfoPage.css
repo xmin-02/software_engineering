@@ -820,9 +820,7 @@
   background: #f1f5f9;
 }
 
-.range-row button.active,
-.figma-pagination span.active,
-.figma-pagination button.active {
+.range-row button.active {
   background: #005bbf;
   color: #fff;
 }
