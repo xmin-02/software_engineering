@@ -13,6 +13,7 @@ const FONT_SCALE_KEY = 'cheonan_font_scale';
 const LANGUAGE_KEY = 'cheonan_language';
 const PLACE_FAVORITES_KEY = 'cheonan_favorite_places';
 const TOURISM_FAVORITES_KEY = 'cheonan_favorite_tourism';
+const READ_NOTIFICATIONS_KEY = 'cheonan_read_notifications';
 
 const LANGUAGES = {
   en: { label: 'English', short: 'EN' },
@@ -23,10 +24,10 @@ const LANGUAGES = {
 };
 
 const NOTIFICATION_ITEMS = [
-  { tag: '천안', text: '천안시청 신규 주차 금지 구역이 지정되었습니다', time: '5분 전' },
-  { tag: '교통', text: '천안 교통정보 천안IC 인근 교통 지체가 발생했습니다', time: '1시간 전' },
-  { tag: '날씨', text: '기상청 천안시 미세먼지 주의보가 발령되었습니다', time: '3시간 전' },
-  { tag: '행사', text: '천안시 문화재단 천안흥타령춤축제 일정이 공지되었습니다', time: '5시간 전' },
+  { id: 'parking', tag: '천안', text: '천안시청 신규 주차 금지 구역이 지정되었습니다', time: '5분 전' },
+  { id: 'traffic', tag: '교통', text: '천안 교통정보 천안IC 인근 교통 지체가 발생했습니다', time: '1시간 전' },
+  { id: 'weather', tag: '날씨', text: '기상청 천안시 미세먼지 주의보가 발령되었습니다', time: '3시간 전' },
+  { id: 'event', tag: '행사', text: '천안시 문화재단 천안흥타령춤축제 일정이 공지되었습니다', time: '5시간 전' },
 ];
 
 const makeWidgetItems = (date = new Date()) => {
@@ -40,38 +41,36 @@ const makeWidgetItems = (date = new Date()) => {
 
 const UI_TEXT = {
   ko: {
-    appTitle: '천안 대시보드',
-    subtitle: '실시간 데이터',
-    live: '실시간 운영 중',
-    search: '전체 검색 (시설명, 주소, 전화번호...)',
-    favorite: '즐겨찾기',
-    notifications: '알림',
-    language: '언어 선택',
-    font: '글자 크기',
-    widgets: '위젯',
+    appTitle: '천안 대시보드', subtitle: '실시간 데이터', live: '실시간 운영 중', search: '전체 검색 (시설명, 주소, 전화번호...)', favorite: '즐겨찾기', notifications: '알림', language: '언어 선택', font: '글자 크기', widgets: '위젯', markAllRead: '모두 읽음으로 표시', allWidgets: '전체 보기', fontPreview: '가나다라마바사 12345', small: '작게', normal: '기본', large: '크게', xlarge: '매우 크게', apply: '적용하기', close: '닫기', version: 'v1.0', makeLarger: '글자 크게', makeSmaller: '글자 작게', navAria: '메인 네비게이션', menuAria: '메뉴 열기/닫기',
   },
   en: {
-    appTitle: 'Cheonan Dashboard',
-    subtitle: 'Live data',
-    live: 'Live operation',
-    search: 'Search all (name, address, phone...)',
-    favorite: 'Favorites',
-    notifications: 'Notifications',
-    language: 'Language',
-    font: 'Font size',
-    widgets: 'Widgets',
+    appTitle: 'Cheonan Dashboard', subtitle: 'Live data', live: 'Live operation', search: 'Search all (name, address, phone...)', favorite: 'Favorites', notifications: 'Notifications', language: 'Language', font: 'Font size', widgets: 'Widgets', markAllRead: 'Mark all as read', allWidgets: 'View all', fontPreview: 'Alphabet 12345', small: 'Small', normal: 'Default', large: 'Large', xlarge: 'Extra large', apply: 'Apply', close: 'Close', version: 'v1.0', makeLarger: 'Larger text', makeSmaller: 'Smaller text', navAria: 'Main navigation', menuAria: 'Open or close menu',
+  },
+  ja: {
+    appTitle: '天安ダッシュボード', subtitle: 'リアルタイムデータ', live: 'リアルタイム運用中', search: '全体検索（施設名、住所、電話番号...）', favorite: 'お気に入り', notifications: '通知', language: '言語選択', font: '文字サイズ', widgets: 'ウィジェット', markAllRead: 'すべて既読にする', allWidgets: 'すべて見る', fontPreview: 'あいうえお 12345', small: '小', normal: '標準', large: '大', xlarge: '特大', apply: '適用', close: '閉じる', version: 'v1.0', makeLarger: '文字を大きく', makeSmaller: '文字を小さく', navAria: 'メインナビゲーション', menuAria: 'メニューを開閉',
   },
   zh: {
-    appTitle: '天安仪表板',
-    subtitle: '实时数据',
-    live: '实时运行中',
-    search: '全局搜索（设施名、地址、电话...）',
-    favorite: '收藏',
-    notifications: '通知',
-    language: '语言选择',
-    font: '字体大小',
-    widgets: '小组件',
+    appTitle: '天安仪表板', subtitle: '实时数据', live: '实时运行中', search: '全局搜索（设施名、地址、电话...）', favorite: '收藏', notifications: '通知', language: '语言选择', font: '字体大小', widgets: '小组件', markAllRead: '全部标为已读', allWidgets: '查看全部', fontPreview: '汉字示例 12345', small: '小', normal: '默认', large: '大', xlarge: '特大', apply: '应用', close: '关闭', version: 'v1.0', makeLarger: '放大文字', makeSmaller: '缩小文字', navAria: '主导航', menuAria: '打开或关闭菜单',
   },
+  es: {
+    appTitle: 'Panel de Cheonan', subtitle: 'Datos en vivo', live: 'Operación en vivo', search: 'Buscar todo (nombre, dirección, teléfono...)', favorite: 'Favoritos', notifications: 'Notificaciones', language: 'Idioma', font: 'Tamaño de texto', widgets: 'Widgets', markAllRead: 'Marcar todo como leído', allWidgets: 'Ver todo', fontPreview: 'Texto de muestra 12345', small: 'Pequeño', normal: 'Normal', large: 'Grande', xlarge: 'Muy grande', apply: 'Aplicar', close: 'Cerrar', version: 'v1.0', makeLarger: 'Texto grande', makeSmaller: 'Texto pequeño', navAria: 'Navegación principal', menuAria: 'Abrir o cerrar menú',
+  },
+};
+
+const NAV_LABELS = {
+  ko: ['대시보드', '맛집 · 카페', '관광', '청년', '대학교', '일자리', '가족', '접근성 정보', '고등학생', '의료/약국', '외국인 생활', '1인 가구'],
+  en: ['Dashboard', 'Food · Cafe', 'Tourism', 'Youth', 'Universities', 'Jobs', 'Family', 'Accessibility', 'High School', 'Medical/Pharmacy', 'Foreign Life', 'Single-person Homes'],
+  ja: ['ダッシュボード', 'グルメ・カフェ', '観光', '青年', '大学', '求人', '家族', 'アクセシビリティ情報', '高校生', '医療/薬局', '外国人生活', '一人暮らし'],
+  zh: ['仪表板', '美食·咖啡', '旅游', '青年', '大学', '就业', '家庭', '无障碍/便利信息', '高中生', '医疗/药店', '外国人生活', '一人户'],
+  es: ['Panel', 'Comida · Café', 'Turismo', 'Jóvenes', 'Universidades', 'Empleo', 'Familia', 'Accesibilidad', 'Secundaria', 'Médico/Farmacia', 'Vida extranjera', 'Hogares unipersonales'],
+};
+
+const PAGE_TITLE_LABELS = {
+  ko: ['천안 대시보드', '맛집 & 카페', '관광/명소', '청년', '대학 공지', '채용', '가족', '접근성 정보', '고등학생', '의료/약국', '외국인 생활', '1인 가구'],
+  en: ['Cheonan Dashboard', 'Food & Cafe', 'Tourism/Attractions', 'Youth', 'University Notices', 'Jobs', 'Family', 'Accessibility', 'High School', 'Medical/Pharmacy', 'Foreign Life', 'Single-person Homes'],
+  ja: ['天安ダッシュボード', 'グルメ & カフェ', '観光/名所', '青年', '大学のお知らせ', '求人', '家族', 'アクセシビリティ情報', '高校生', '医療/薬局', '外国人生活', '一人暮らし'],
+  zh: ['天安仪表板', '美食 & 咖啡', '旅游/景点', '青年', '大学公告', '招聘', '家庭', '无障碍/便利信息', '高中生', '医疗/药店', '外国人生活', '一人户'],
+  es: ['Panel de Cheonan', 'Comida & Café', 'Turismo/Atracciones', 'Jóvenes', 'Avisos universitarios', 'Empleo', 'Familia', 'Accesibilidad', 'Secundaria', 'Médico/Farmacia', 'Vida extranjera', 'Hogares unipersonales'],
 };
 
 const navItems = [
@@ -82,7 +81,7 @@ const navItems = [
   { to: '/college', label: '대학교', Icon: BookOpen, accent: 'var(--color-college)' },
   { to: '/jobs', label: '일자리', Icon: Briefcase, accent: 'var(--color-jobs)' },
   { to: '/family', label: '가족', Icon: Users, accent: 'var(--color-family)' },
-  { to: '/accessibility', label: '무장애 정보', Icon: Accessibility, accent: '#2563eb' },
+  { to: '/accessibility', label: '접근성 정보', Icon: Accessibility, accent: '#2563eb' },
   { to: '/high-school', label: '고등학생', Icon: School, accent: '#7c3aed' },
   { to: '/medical', label: '의료/약국', Icon: Pill, accent: '#059669' },
   { to: '/foreign-life', label: '외국인 생활', Icon: Globe2, accent: '#0f766e' },
@@ -97,7 +96,7 @@ const pageTitles = {
   '/college': '대학 공지',
   '/jobs': '채용',
   '/family': '가족',
-  '/accessibility': '무장애 정보',
+  '/accessibility': '접근성 정보',
   '/high-school': '고등학생',
   '/medical': '의료/약국',
   '/foreign-life': '외국인 생활',
@@ -110,6 +109,11 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState(null);
   const [modal, setModal] = useState(null);
+  const [topSearchQuery, setTopSearchQuery] = useState('');
+  const [readNotificationIds, setReadNotificationIds] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try { return JSON.parse(localStorage.getItem(READ_NOTIFICATIONS_KEY) || '[]'); } catch { return []; }
+  });
   const [language, setLanguage] = useState(() => {
     if (typeof window === 'undefined') return 'ko';
     return localStorage.getItem(LANGUAGE_KEY) || 'ko';
@@ -121,6 +125,7 @@ export default function Layout() {
   const [favoritePlaces, setFavoritePlaces] = useState([]);
   const [favoriteTourism, setFavoriteTourism] = useState([]);
   const widgetItems = useMemo(() => makeWidgetItems(), []);
+  const hasUnreadNotifications = NOTIFICATION_ITEMS.some((item) => !readNotificationIds.includes(item.id));
 
   useEffect(() => {
     const loadFavorites = () => {
@@ -137,6 +142,17 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
+    localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(readNotificationIds));
+  }, [readNotificationIds]);
+
+  useEffect(() => {
+    if (!modal) return undefined;
+    const onKey = (event) => { if (event.key === 'Escape') setModal(null); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [modal]);
+
+  useEffect(() => {
     document.documentElement.dataset.fontScale = fontScale;
     localStorage.setItem(FONT_SCALE_KEY, fontScale);
   }, [fontScale]);
@@ -150,8 +166,12 @@ export default function Layout() {
   const toggleFontScale = () =>
     setFontScale((v) => (v === 'lg' || v === 'xl' ? 'normal' : 'lg'));
 
-  const pageTitle = pageTitles[location.pathname] ?? '천안 대시보드';
   const text = UI_TEXT[language] ?? UI_TEXT.ko;
+  const navLabels = NAV_LABELS[language] ?? NAV_LABELS.ko;
+  const pageTitleLabels = PAGE_TITLE_LABELS[language] ?? PAGE_TITLE_LABELS.ko;
+  const pageTitleKeys = Object.keys(pageTitles);
+  const pageTitleIndex = pageTitleKeys.indexOf(location.pathname);
+  const pageTitle = pageTitleIndex >= 0 ? (pageTitleLabels[pageTitleIndex] ?? pageTitles[location.pathname]) : text.appTitle;
   const togglePanel = (panel) => {
     if (panel === 'favorites') {
       try { setFavoritePlaces(JSON.parse(localStorage.getItem(PLACE_FAVORITES_KEY) || '[]')); } catch { setFavoritePlaces([]); }
@@ -165,7 +185,21 @@ export default function Layout() {
   };
   const selectLanguage = (nextLanguage) => {
     setLanguage(nextLanguage);
-    openModal('language', { language: nextLanguage });
+    setOpenPanel(null);
+  };
+  const submitTopSearch = (event) => {
+    event.preventDefault();
+    const keyword = topSearchQuery.trim();
+    if (!keyword) return;
+    setOpenPanel(null);
+    navigate(`/places?search=${encodeURIComponent(keyword)}`);
+  };
+  const markAllNotificationsRead = () => {
+    setReadNotificationIds(NOTIFICATION_ITEMS.map((item) => item.id));
+  };
+  const openNotification = (item) => {
+    setReadNotificationIds((current) => current.includes(item.id) ? current : [...current, item.id]);
+    openModal('notification', { title: item.text, message: `${item.tag} · ${item.time}` });
   };
   const goTo = (path) => {
     setOpenPanel(null);
@@ -184,8 +218,8 @@ export default function Layout() {
             <img className="sidebar-brand-logo" src={sidebarLogo} alt="천안 인사이트 - 시민의 생각이 모여, 더 나은 천안으로" draggable="false" />
           </div>
         </div>
-        <nav className="sidebar-nav" aria-label="메인 네비게이션">
-          {navItems.map((item) => {
+        <nav className="sidebar-nav" aria-label={text.navAria}>
+          {navItems.map((item, index) => {
             const IconComponent = item.Icon;
             return (
               <NavLink
@@ -201,7 +235,7 @@ export default function Layout() {
                 onClick={() => setMenuOpen(false)}
               >
                 <IconComponent size={20} strokeWidth={1.8} className="nav-icon" />
-                <span className="nav-label">{item.label}</span>
+                <span className="nav-label">{navLabels[index] ?? item.label}</span>
               </NavLink>
             );
           })}
@@ -213,12 +247,12 @@ export default function Layout() {
             onClick={toggleFontScale}
             aria-pressed={fontScale === 'lg'}
             aria-label={
-              fontScale === 'lg' ? '글자 크기 원래대로 줄이기' : '글자 크기 크게 보기'
+              fontScale === 'lg' ? text.makeSmaller : text.makeLarger
             }
           >
-            {fontScale === 'lg' ? '글자 작게' : '글자 크게'}
+            {fontScale === 'lg' ? text.makeSmaller : text.makeLarger}
           </button>
-          <span className="sidebar-version">v1.0</span>
+          <span className="sidebar-version">{text.version}</span>
         </div>
       </aside>
 
@@ -227,7 +261,7 @@ export default function Layout() {
           <button
             className="menu-btn"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="메뉴 열기/닫기"
+            aria-label={text.menuAria}
           >
             ☰
           </button>
@@ -235,15 +269,20 @@ export default function Layout() {
             <span className="status-dot" />
             <span>{text.live}</span>
           </div>
-          <div className="top-search" role="search">
+          <form className="top-search" role="search" onSubmit={submitTopSearch}>
             <Search size={17} strokeWidth={1.8} />
-            <span>{text.search}</span>
-          </div>
+            <input
+              value={topSearchQuery}
+              onChange={(event) => setTopSearchQuery(event.target.value)}
+              placeholder={text.search}
+              aria-label={text.search}
+            />
+          </form>
           <div className="top-bar-info">
             <button
               type="button"
               className="top-icon-btn"
-              aria-label="즐겨찾기"
+              aria-label={text.favorite}
               aria-expanded={openPanel === 'favorites'}
               onClick={(e) => { e.stopPropagation(); togglePanel('favorites'); }}
             >
@@ -251,8 +290,8 @@ export default function Layout() {
             </button>
             <button
               type="button"
-              className="top-icon-btn has-alert"
-              aria-label="알림"
+              className={`top-icon-btn${hasUnreadNotifications ? ' has-alert' : ''}`}
+              aria-label={text.notifications}
               aria-expanded={openPanel === 'notifications'}
               onClick={(e) => { e.stopPropagation(); togglePanel('notifications'); }}
             >
@@ -261,7 +300,7 @@ export default function Layout() {
             <button
               type="button"
               className="top-pill-btn"
-              aria-label="언어 선택"
+              aria-label={text.language}
               aria-expanded={openPanel === 'language'}
               onClick={(e) => { e.stopPropagation(); togglePanel('language'); }}
             >
@@ -276,7 +315,7 @@ export default function Layout() {
               aria-pressed={fontScale === 'lg'}
               aria-expanded={openPanel === 'font'}
               aria-label={
-                fontScale === 'lg' ? '글자 크기 원래대로 줄이기' : '글자 크기 크게 보기'
+                fontScale === 'lg' ? text.makeSmaller : text.makeLarger
               }
             >
               <Type size={17} />
@@ -286,7 +325,7 @@ export default function Layout() {
             <button
               type="button"
               className="top-app-btn"
-              aria-label="위젯"
+              aria-label={text.widgets}
               aria-expanded={openPanel === 'widgets'}
               onClick={(e) => { e.stopPropagation(); togglePanel('widgets'); }}
             >
@@ -296,10 +335,10 @@ export default function Layout() {
             {openPanel && (
               <div className="top-dropdown" onClick={(e) => e.stopPropagation()}>
                 {openPanel === 'favorites' && (
-                  <FavoritesDropdown openModal={openModal} favoritePlaces={favoritePlaces} favoriteTourism={favoriteTourism} />
+                  <FavoritesDropdown openModal={openModal} favoritePlaces={favoritePlaces} favoriteTourism={favoriteTourism} text={text} />
                 )}
                 {openPanel === 'notifications' && (
-                  <NotificationsDropdown openModal={openModal} />
+                  <NotificationsDropdown onOpen={openNotification} onMarkAllRead={markAllNotificationsRead} readNotificationIds={readNotificationIds} text={text} />
                 )}
                 {openPanel === 'language' && (
                   <>
@@ -319,22 +358,22 @@ export default function Layout() {
                 {openPanel === 'font' && (
                   <>
                     <h3>{text.font}</h3>
-                    <div className="font-preview">가나다라마바사 12345</div>
+                    <div className="font-preview">{text.fontPreview}</div>
                     {[
-                      ['sm', '작게'],
-                      ['normal', '기본'],
-                      ['lg', '크게'],
-                      ['xl', '매우 크게'],
+                      ['sm', text.small],
+                      ['normal', text.normal],
+                      ['lg', text.large],
+                      ['xl', text.xlarge],
                     ].map(([key, label]) => (
                       <button key={key} type="button" className={fontScale === key ? 'selected' : ''} onClick={() => setFontScale(key)}>
                         {fontScale === key && <Check size={14} />} {label}
                       </button>
                     ))}
-                    <button type="button" className="dropdown-primary" onClick={() => openModal('font')}>적용하기</button>
+                    <button type="button" className="dropdown-primary" onClick={() => openModal('font')}>{text.apply}</button>
                   </>
                 )}
                 {openPanel === 'widgets' && (
-                  <WidgetsDropdown openModal={openModal} widgetItems={widgetItems} />
+                  <WidgetsDropdown openModal={openModal} widgetItems={widgetItems} text={text} />
                 )}
               </div>
             )}
@@ -342,7 +381,7 @@ export default function Layout() {
         </header>
         <main className="main-content">
           <h1 className="mobile-page-title">{pageTitle}</h1>
-          <Outlet />
+          <Outlet context={{ language, text }} />
         </main>
       </div>
       {modal && (
@@ -361,18 +400,16 @@ export default function Layout() {
     </div>
   );
 }
-
-
-function NotificationsDropdown({ openModal }) {
+function NotificationsDropdown({ onOpen, onMarkAllRead, readNotificationIds, text }) {
   return (
     <>
       <div className="dropdown-head-row">
-        <h3>알림</h3>
-        <button type="button" className="dropdown-text-btn" onClick={() => openModal('notification', { title: '모두 읽음으로 표시' })}>모두 읽음으로 표시</button>
+        <h3>{text.notifications}</h3>
+        <button type="button" className="dropdown-text-btn" onClick={onMarkAllRead}>{text.markAllRead}</button>
       </div>
       <div className="notification-list">
         {NOTIFICATION_ITEMS.map((item) => (
-          <button key={item.text} type="button" className="notification-row" onClick={() => openModal('notification', { title: item.text })}>
+          <button key={item.id} type="button" className={`notification-row${readNotificationIds.includes(item.id) ? ' is-read' : ''}`} onClick={() => onOpen(item)}>
             <span className="notification-tag">{item.tag}</span>
             <span className="notification-copy">{item.text}</span>
             <time>{item.time}</time>
@@ -383,12 +420,12 @@ function NotificationsDropdown({ openModal }) {
   );
 }
 
-function FavoritesDropdown({ openModal, favoritePlaces, favoriteTourism }) {
+function FavoritesDropdown({ openModal, favoritePlaces, favoriteTourism, text }) {
   const placeCount = favoritePlaces.length;
   const tourismCount = favoriteTourism.length;
   return (
     <>
-      <h3>즐겨찾기</h3>
+      <h3>{text.favorite}</h3>
       <button type="button" className="favorite-mini" onClick={() => openModal('favoriteRestaurants')}>
         <span>찜 맛집</span><strong>{placeCount ? `${placeCount}곳 저장` : '저장된 곳 없음'}</strong><small>{placeCount ? '내가 찜한 맛집만 보기' : '맛집 카드의 ☆ 버튼으로 저장하세요'}</small>
       </button>
@@ -402,10 +439,10 @@ function FavoritesDropdown({ openModal, favoritePlaces, favoriteTourism }) {
   );
 }
 
-function WidgetsDropdown({ openModal, widgetItems }) {
+function WidgetsDropdown({ openModal, widgetItems, text }) {
   return (
     <>
-      <h3>오늘의 위젯</h3>
+      <h3>{text.widgets}</h3>
       <div className="widget-stack">
         {widgetItems.map(({ label, value, desc }) => (
           <button key={label} type="button" className="widget-row" onClick={() => openModal('widget', { title: value })}>
@@ -414,7 +451,7 @@ function WidgetsDropdown({ openModal, widgetItems }) {
           </button>
         ))}
       </div>
-      <button type="button" className="dropdown-primary" onClick={() => openModal('widget', { title: '전체 위젯' })}>전체 보기</button>
+      <button type="button" className="dropdown-primary" onClick={() => openModal('widget', { title: text.widgets })}>{text.allWidgets}</button>
     </>
   );
 }
@@ -513,7 +550,7 @@ function ModalBody({ modal, languageLabel, favoritePlaces, favoriteTourism, onNa
     return <p>언어가 {languageLabel}(으)로 변경되었습니다. 공통 네비게이션/상단바부터 즉시 반영됩니다.</p>;
   }
   if (modal.type === 'notification') {
-    return <p>{modal.title} 알림 상세입니다. 관련 데이터는 최신 API 응답 기준으로 대시보드에 반영되어 있습니다.</p>;
+    return <p>{modal.message ? `${modal.message} — ` : ''}{modal.title} 알림 상세입니다. 확인한 알림은 읽음 상태로 표시됩니다.</p>;
   }
   if (modal.type === 'font') {
     return <p>글자 크기 설정이 적용되었습니다. 상단바와 주요 콘텐츠가 선택한 크기에 맞춰 표시됩니다.</p>;

@@ -52,19 +52,27 @@ export default function JobsPage() {
       </div>
 
       <div className="job-list">
-        {visibleJobs.map((job) => (
-          <article key={job.title} className="job-card">
-            <div className="job-main">
-              <div className="job-info">
-                <p className="job-company">{job.company}</p>
-                <span className="job-location-text">{job.location}</span>
-                <h3 className="job-title">{job.title}</h3>
-                <div className="job-tags"><span className="tag experience">{job.experience_level || '경력 무관'}</span><span className="tag type">{job.job_type || '직종 미분류'}</span><span className="tag deadline">마감일: {job.deadline || '상시채용'}</span></div>
+        {visibleJobs.map((job) => {
+          const content = (
+            <>
+              <div className="job-main">
+                <div className="job-info">
+                  <p className="job-company">{job.company}</p>
+                  <span className="job-location-text">{job.location}</span>
+                  <h3 className="job-title">{job.title}</h3>
+                  <div className="job-tags"><span className="tag experience">{job.experience_level || '경력 무관'}</span><span className="tag type">{job.job_type || '직종 미분류'}</span><span className="tag deadline">마감일: {job.deadline || '상시채용'}</span></div>
+                </div>
+                <div className="job-right"><span className="job-source">{job.source}</span></div>
               </div>
-              <div className="job-right"><span className="job-source">{job.source}</span></div>
-            </div>
-          </article>
-        ))}
+              {job.url && <span className="job-open-hint">공고 열기</span>}
+            </>
+          );
+          return job.url ? (
+            <a key={job.id ?? job.title} className="job-card job-card-link" href={job.url} target="_blank" rel="noreferrer">{content}</a>
+          ) : (
+            <article key={job.id ?? job.title} className="job-card">{content}</article>
+          );
+        })}
       </div>
       {visibleJobs.length === 0 && <p className="status-msg">선택한 조건의 채용 공고가 없습니다</p>}
 

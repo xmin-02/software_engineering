@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import {
   PieChart, Pie, Cell,
   LineChart, Line,
@@ -12,6 +13,22 @@ import api from '../api/client';
 import './DashboardPage.css';
 
 // 감성 색상 상수
+const renderPieLabel = ({ name, percent }) => (percent < 0.08 ? '' : `${name} ${(percent * 100).toFixed(0)}%`);
+
+
+const DASHBOARD_TEXT = {
+  ko: {
+    title: '천안 대시보드', totalPosts: 'Total Posts', positiveRate: 'Positive Rate', restaurants: 'Restaurants', events: 'Events', realtime: '실시간', api: 'API', db: 'DB', sentimentTrend: '감성 트렌드 (일별)', sentimentDistribution: '감성 분포', weeklyTopics: '주간 토픽', keywords: '키워드', placesEvents: '명소 & 행사', more: '더보기', noData: '아직 데이터가 없습니다', loadError: '데이터를 불러올 수 없습니다', noPlaces: '등록된 명소가 없습니다', loading: '데이터를 불러오는 중...', positive: '긍정', negative: '부정', neutral: '중립', topicTitle: '주간 토픽', keywordTitle: '주요 키워드 Top 30', sentimentTitle: '감성 분포 상세', sourceSentiment: '소스별 감성 비교', weeklySummary: '주간 요약', cheonanPlaces: '천안 맛집', noRestaurant: '등록된 맛집이 없습니다', restaurantError: '맛집 데이터를 불러올 수 없습니다', recentPosts: '최근 게시글', source: '소스', sentiment: '감성', all: '전체', applyFilter: '필터 적용', reset: '초기화', review: '리뷰', countSuffix: '건', placeSuffix: '곳' },
+  en: {
+    title: 'Cheonan Dashboard', totalPosts: 'Total Posts', positiveRate: 'Positive Rate', restaurants: 'Restaurants', events: 'Events', realtime: 'Live', api: 'API', db: 'DB', sentimentTrend: 'Sentiment Trend (Daily)', sentimentDistribution: 'Sentiment Distribution', weeklyTopics: 'Weekly Topics', keywords: 'Keywords', placesEvents: 'Places & Events', more: 'More', noData: 'No data yet', loadError: 'Unable to load data', noPlaces: 'No places registered', loading: 'Loading data...', positive: 'Positive', negative: 'Negative', neutral: 'Neutral', topicTitle: 'Weekly Topics', keywordTitle: 'Top 30 Keywords', sentimentTitle: 'Sentiment Details', sourceSentiment: 'Sentiment by Source', weeklySummary: 'Weekly Summary', cheonanPlaces: 'Cheonan Food Places', noRestaurant: 'No restaurants registered', restaurantError: 'Unable to load restaurant data', recentPosts: 'Recent Posts', source: 'Source', sentiment: 'Sentiment', all: 'All', applyFilter: 'Apply filter', reset: 'Reset', review: 'Reviews', countSuffix: '', placeSuffix: ' places' },
+  ja: {
+    title: '天安ダッシュボード', totalPosts: '投稿数', positiveRate: 'ポジティブ率', restaurants: '飲食店', events: 'イベント', realtime: 'リアルタイム', api: 'API', db: 'DB', sentimentTrend: '感情トレンド（日別）', sentimentDistribution: '感情分布', weeklyTopics: '週間トピック', keywords: 'キーワード', placesEvents: '名所・イベント', more: 'もっと見る', noData: 'まだデータがありません', loadError: 'データを読み込めません', noPlaces: '登録された名所がありません', loading: 'データを読み込み中...', positive: '肯定', negative: '否定', neutral: '中立', topicTitle: '週間トピック', keywordTitle: '主要キーワード Top 30', sentimentTitle: '感情分布詳細', sourceSentiment: 'ソース別感情比較', weeklySummary: '週間要約', cheonanPlaces: '天安グルメ', noRestaurant: '登録された飲食店がありません', restaurantError: '飲食店データを読み込めません', recentPosts: '最近の投稿', source: 'ソース', sentiment: '感情', all: 'すべて', applyFilter: 'フィルター適用', reset: 'リセット', review: 'レビュー', countSuffix: '件', placeSuffix: 'か所' },
+  zh: {
+    title: '天安仪表板', totalPosts: '总帖子', positiveRate: '正面率', restaurants: '餐厅', events: '活动', realtime: '实时', api: 'API', db: 'DB', sentimentTrend: '情绪趋势（每日）', sentimentDistribution: '情绪分布', weeklyTopics: '每周话题', keywords: '关键词', placesEvents: '景点与活动', more: '查看更多', noData: '暂无数据', loadError: '无法加载数据', noPlaces: '暂无景点', loading: '正在加载数据...', positive: '正面', negative: '负面', neutral: '中立', topicTitle: '每周话题', keywordTitle: '关键词 Top 30', sentimentTitle: '情绪分布详情', sourceSentiment: '按来源的情绪比较', weeklySummary: '每周摘要', cheonanPlaces: '天安美食', noRestaurant: '暂无餐厅', restaurantError: '无法加载餐厅数据', recentPosts: '最新帖子', source: '来源', sentiment: '情绪', all: '全部', applyFilter: '应用筛选', reset: '重置', review: '评论', countSuffix: '件', placeSuffix: '处' },
+  es: {
+    title: 'Panel de Cheonan', totalPosts: 'Publicaciones', positiveRate: 'Tasa positiva', restaurants: 'Restaurantes', events: 'Eventos', realtime: 'En vivo', api: 'API', db: 'DB', sentimentTrend: 'Tendencia de sentimiento (diaria)', sentimentDistribution: 'Distribución de sentimiento', weeklyTopics: 'Temas semanales', keywords: 'Palabras clave', placesEvents: 'Lugares y eventos', more: 'Ver más', noData: 'Aún no hay datos', loadError: 'No se pueden cargar los datos', noPlaces: 'No hay lugares registrados', loading: 'Cargando datos...', positive: 'Positivo', negative: 'Negativo', neutral: 'Neutral', topicTitle: 'Temas semanales', keywordTitle: 'Top 30 palabras clave', sentimentTitle: 'Detalle de sentimiento', sourceSentiment: 'Sentimiento por fuente', weeklySummary: 'Resumen semanal', cheonanPlaces: 'Comida en Cheonan', noRestaurant: 'No hay restaurantes registrados', restaurantError: 'No se pueden cargar restaurantes', recentPosts: 'Publicaciones recientes', source: 'Fuente', sentiment: 'Sentimiento', all: 'Todo', applyFilter: 'Aplicar filtro', reset: 'Restablecer', review: 'Reseñas', countSuffix: '', placeSuffix: ' lugares' },
+};
+
 const SENTIMENT_COLORS = {
   positive: '#5a9e6f',
   negative: '#c75a5a',
@@ -35,11 +52,11 @@ const SENTIMENT_LABELS = {
 };
 
 // 감성 뱃지 컴포넌트
-function SentimentBadge({ value }) {
+function SentimentBadge({ value, labels = SENTIMENT_LABELS }) {
   const key = value?.toLowerCase();
   return (
     <span className={`sentiment-badge ${key}`}>
-      {SENTIMENT_LABELS[key] ?? value}
+      {labels[key] ?? SENTIMENT_LABELS[key] ?? value}
     </span>
   );
 }
@@ -108,6 +125,9 @@ function DashboardModal({ open, onClose, title, children }) {
 }
 
 export default function DashboardPage() {
+  const { language = 'ko' } = useOutletContext() || {};
+  const t = DASHBOARD_TEXT[language] ?? DASHBOARD_TEXT.ko;
+  const sentimentLabels = { positive: t.positive, negative: t.negative, neutral: t.neutral };
   const [sentiment, setSentiment] = useState(null);
   const [trend, setTrend] = useState(null);
   const [sources, setSources] = useState(null);
@@ -208,7 +228,7 @@ export default function DashboardPage() {
     ? Object.entries(dashboardSentiment)
         .filter(([key]) => key !== 'total')
         .map(([key, value]) => ({
-          name: SENTIMENT_LABELS[key] ?? key,
+          name: sentimentLabels[key] ?? SENTIMENT_LABELS[key] ?? key,
           value,
           key,
         }))
@@ -267,21 +287,21 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="dashboard">
-        <p className="loading-text">데이터를 불러오는 중...</p>
+        <p className="loading-text">{t.loading}</p>
       </div>
     );
   }
 
   return (
     <div className="dashboard">
-      <h1 className="dashboard-title">천안 대시보드</h1>
+      <h1 className="dashboard-title">{t.title}</h1>
 
       <div className="kpi-grid">
         {[
-          { icon: FileText, label: 'Total Posts', value: `${totalPosts.toLocaleString()}건`, trend: 'API', modal: 'posts' },
-          { icon: SmilePlus, label: 'Positive Rate', value: `${positiveRate}%`, trend: '실시간', modal: 'sentiment' },
-          { icon: UtensilsCrossed, label: 'Restaurants', value: `${placeCount.toLocaleString()}곳`, trend: 'DB', modal: 'places' },
-          { icon: MapPin, label: 'Events', value: `${eventCount.toLocaleString()}곳`, trend: 'DB', modal: 'events' },
+          { icon: FileText, label: t.totalPosts, value: `${totalPosts.toLocaleString()}${t.countSuffix}`, trend: t.api, modal: 'posts' },
+          { icon: SmilePlus, label: t.positiveRate, value: `${positiveRate}%`, trend: t.realtime, modal: 'sentiment' },
+          { icon: UtensilsCrossed, label: t.restaurants, value: `${placeCount.toLocaleString()}${t.placeSuffix}`, trend: t.db, modal: 'places' },
+          { icon: MapPin, label: t.events, value: `${eventCount.toLocaleString()}${t.placeSuffix}`, trend: t.db, modal: 'events' },
         ].map((kpi) => (
           <div
             key={kpi.label}
@@ -301,10 +321,10 @@ export default function DashboardPage() {
       <div className="charts-grid">
         <div className="dash-card">
           <div className="dash-card-title">
-            감성 트렌드 (일별)
+            {t.sentimentTrend}
           </div>
           {!dashboardTrend?.length ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={dashboardTrend} margin={{ right: 16 }}>
@@ -313,9 +333,9 @@ export default function DashboardPage() {
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="positive" name="긍정" stroke={SENTIMENT_COLORS.positive} dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="negative" name="부정" stroke={SENTIMENT_COLORS.negative} dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="neutral" name="중립" stroke={SENTIMENT_COLORS.neutral} dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="positive" name={t.positive} stroke={SENTIMENT_COLORS.positive} dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="negative" name={t.negative} stroke={SENTIMENT_COLORS.negative} dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="neutral" name={t.neutral} stroke={SENTIMENT_COLORS.neutral} dot={false} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -323,13 +343,13 @@ export default function DashboardPage() {
 
         <div className="dash-card" {...openModalProps('sentiment')} aria-label="감성 분포 자세히 보기">
           <div className="dash-card-title">
-            감성 분포
-            <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
+            {t.sentimentDistribution}
+            <span className="dash-card-more">{t.more} <ChevronRight size={14} /></span>
           </div>
           {errors.sentiment ? (
-            <p className="error-text">데이터를 불러올 수 없습니다</p>
+            <p className="error-text">{t.loadError}</p>
           ) : pieData.length === 0 ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -340,7 +360,8 @@ export default function DashboardPage() {
                   innerRadius={45}
                   outerRadius={75}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={renderPieLabel}
+                  labelLine={false}
                 >
                   {pieData.map((entry) => (
                     <Cell key={entry.key} fill={SENTIMENT_COLORS[entry.key] ?? '#ccc'} />
@@ -357,19 +378,19 @@ export default function DashboardPage() {
       <div className="content-grid">
         <div className="dash-card" {...openModalProps('topics')} aria-label="주간 토픽 자세히 보기">
           <div className="dash-card-title">
-            주간 토픽
-            <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
+            {t.weeklyTopics}
+            <span className="dash-card-more">{t.more} <ChevronRight size={14} /></span>
           </div>
           {!dashboardTopics?.length ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <div className="compact-topic-list">
-              {dashboardTopics.slice(0, 5).map((t, i) => (
-                <div key={t.id} className="compact-topic-item">
+              {dashboardTopics.slice(0, 5).map((topic, i) => (
+                <div key={topic.id} className="compact-topic-item">
                   <span className="compact-topic-rank">{i + 1}</span>
                   <div className="compact-topic-info">
-                    <span className="compact-topic-name">{t.name}</span>
-                    <span className="compact-topic-count">{t.post_count}건</span>
+                    <span className="compact-topic-name">{topic.name}</span>
+                    <span className="compact-topic-count">{`${topic.post_count}${t.countSuffix}`}</span>
                   </div>
                 </div>
               ))}
@@ -379,13 +400,13 @@ export default function DashboardPage() {
 
         <div className="dash-card" {...openModalProps('keywords')} aria-label="키워드 자세히 보기">
           <div className="dash-card-title">
-            키워드
-            <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
+            {t.keywords}
+            <span className="dash-card-more">{t.more} <ChevronRight size={14} /></span>
           </div>
           {errors.keywords ? (
-            <p className="error-text">데이터를 불러올 수 없습니다</p>
+            <p className="error-text">{t.loadError}</p>
           ) : !dashboardKeywords?.length ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <div className="keyword-list compact">
               {dashboardKeywords.slice(0, 10).map((kw, idx) => (
@@ -396,7 +417,7 @@ export default function DashboardPage() {
                     fontSize: `${getKeywordSize(kw.count, 28, 13)}px`,
                     color: getKeywordColor(idx),
                   }}
-                  title={`${kw.keyword}: ${kw.count}건`}
+                  title={`${kw.keyword}: ${kw.count}${t.countSuffix}`}
                 >
                   {kw.keyword}
                 </span>
@@ -407,19 +428,19 @@ export default function DashboardPage() {
 
         <div className="dash-card dash-card-tabbed">
           <div className="dash-tab-bar">
-            <button className="dash-tab-btn active" type="button" onClick={() => setActiveModal('events')}>명소 & 행사</button>
+            <button className="dash-tab-btn active" type="button" onClick={() => setActiveModal('events')}>{t.placesEvents}</button>
           </div>
 
           {rightTab === 'events' ? (
             <div {...openModalProps('events')} aria-label="명소 행사 자세히 보기">
               <div className="dash-card-title" style={{ marginTop: 12 }}>
                 <span />
-                <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
+                <span className="dash-card-more">{t.more} <ChevronRight size={14} /></span>
               </div>
               {errors.events ? (
-                <p className="error-text">데이터를 불러올 수 없습니다</p>
+                <p className="error-text">{t.loadError}</p>
               ) : !dashboardEvents?.length ? (
-                <p className="empty-text">등록된 명소가 없습니다</p>
+                <p className="empty-text">{t.noPlaces}</p>
               ) : (
                 <div className="compact-event-list">
                   {dashboardEvents.slice(0, 3).map((evt) => (
@@ -442,17 +463,17 @@ export default function DashboardPage() {
             <div {...openModalProps('posts')} aria-label="최근 게시글 자세히 보기">
               <div className="dash-card-title" style={{ marginTop: 12 }}>
                 <span />
-                <span className="dash-card-more">더보기 <ChevronRight size={14} /></span>
+                <span className="dash-card-more">{t.more} <ChevronRight size={14} /></span>
               </div>
               {errors.posts ? (
-                <p className="error-text">데이터를 불러올 수 없습니다</p>
+                <p className="error-text">{t.loadError}</p>
               ) : !filteredPosts.length ? (
-                <p className="empty-text">아직 데이터가 없습니다</p>
+                <p className="empty-text">{t.noData}</p>
               ) : (
                 <div className="compact-post-list">
                   {filteredPosts.slice(0, 5).map((post, idx) => (
                     <div key={post.id ?? idx} className="compact-post-item">
-                      <SentimentBadge value={post.sentiment} />
+                      <SentimentBadge value={post.sentiment} labels={sentimentLabels} />
                       <span className="compact-post-title" title={post.title}>
                         {post.url ? (
                           <a href={post.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{post.title}</a>
@@ -471,18 +492,18 @@ export default function DashboardPage() {
       {/* === 모달들 === */}
 
       {/* 주간 토픽 모달 */}
-      <DashboardModal open={activeModal === 'topics'} onClose={closeModal} title="주간 토픽">
+      <DashboardModal open={activeModal === 'topics'} onClose={closeModal} title={t.topicTitle}>
         {!dashboardTopics?.length ? (
-          <p className="empty-text">아직 데이터가 없습니다</p>
+          <p className="empty-text">{t.noData}</p>
         ) : (
           <div className="topic-list">
-            {dashboardTopics.slice(0, 8).map((t) => (
-              <div key={t.id} className="topic-card">
-                <div className="topic-name">{t.name}</div>
+            {dashboardTopics.slice(0, 8).map((topic) => (
+              <div key={topic.id} className="topic-card">
+                <div className="topic-name">{topic.name}</div>
                 <div className="topic-meta">
-                  <span className="topic-count">{t.post_count}건</span>
+                  <span className="topic-count">{`${topic.post_count}${t.countSuffix}`}</span>
                   <div className="topic-keywords">
-                    {t.keywords?.slice(0, 3).map((kw, i) => (
+                    {topic.keywords?.slice(0, 3).map((kw, i) => (
                       <span key={i} className="topic-kw">{kw}</span>
                     ))}
                   </div>
@@ -494,9 +515,9 @@ export default function DashboardPage() {
       </DashboardModal>
 
       {/* 키워드 모달 */}
-      <DashboardModal open={activeModal === 'keywords'} onClose={closeModal} title="주요 키워드 Top 30">
+      <DashboardModal open={activeModal === 'keywords'} onClose={closeModal} title={t.keywordTitle}>
         {!dashboardKeywords?.length ? (
-          <p className="empty-text">아직 데이터가 없습니다</p>
+          <p className="empty-text">{t.noData}</p>
         ) : (
           <div className="keyword-list">
             {dashboardKeywords.map((kw, idx) => (
@@ -507,7 +528,7 @@ export default function DashboardPage() {
                   fontSize: `${getKeywordSize(kw.count)}px`,
                   color: getKeywordColor(idx),
                 }}
-                title={`${kw.keyword}: ${kw.count}건`}
+                title={`${kw.keyword}: ${kw.count}${t.countSuffix}`}
               >
                 {kw.keyword}
               </span>
@@ -517,11 +538,11 @@ export default function DashboardPage() {
       </DashboardModal>
 
       {/* 감성 분포 모달 (+ 소스별 비교) */}
-      <DashboardModal open={activeModal === 'sentiment'} onClose={closeModal} title="감성 분포 상세">
+      <DashboardModal open={activeModal === 'sentiment'} onClose={closeModal} title={t.sentimentTitle}>
         <div className="modal-section">
-          <h3>감성 분포</h3>
+          <h3>{t.sentimentDistribution}</h3>
           {pieData.length === 0 ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -531,7 +552,8 @@ export default function DashboardPage() {
                   cy="50%"
                   outerRadius={110}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={renderPieLabel}
+                  labelLine={false}
                 >
                   {pieData.map((entry) => (
                     <Cell key={entry.key} fill={SENTIMENT_COLORS[entry.key] ?? '#ccc'} />
@@ -545,9 +567,9 @@ export default function DashboardPage() {
         </div>
 
         <div className="modal-section">
-          <h3>소스별 감성 비교</h3>
+          <h3>{t.sourceSentiment}</h3>
           {!sourceData.length ? (
-            <p className="empty-text">아직 데이터가 없습니다</p>
+            <p className="empty-text">{t.noData}</p>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={sourceData} margin={{ right: 16 }}>
@@ -556,9 +578,9 @@ export default function DashboardPage() {
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="positive" name="긍정" stackId="a" fill={SENTIMENT_COLORS.positive} />
-                <Bar dataKey="negative" name="부정" stackId="a" fill={SENTIMENT_COLORS.negative} />
-                <Bar dataKey="neutral" name="중립" stackId="a" fill={SENTIMENT_COLORS.neutral} />
+                <Bar dataKey="positive" name={t.positive} stackId="a" fill={SENTIMENT_COLORS.positive} />
+                <Bar dataKey="negative" name={t.negative} stackId="a" fill={SENTIMENT_COLORS.negative} />
+                <Bar dataKey="neutral" name={t.neutral} stackId="a" fill={SENTIMENT_COLORS.neutral} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -567,7 +589,7 @@ export default function DashboardPage() {
         {/* 주간 요약 */}
         {summaries?.length ? (
           <div className="modal-section">
-            <h3>주간 요약</h3>
+            <h3>{t.weeklySummary}</h3>
             <div className="summary-list">
               {summaries.slice(0, 2).map((s, idx) => (
                 <div key={idx} className="summary-item">
@@ -579,7 +601,7 @@ export default function DashboardPage() {
           </div>
         ) : sentiment ? (
           <div className="modal-section">
-            <h3>주간 요약</h3>
+            <h3>{t.weeklySummary}</h3>
             <div className="summary-fallback">
               <p className="summary-text">
                 현재까지 총 <strong>{dashboardSentiment.total?.toLocaleString()}건</strong>의 게시글이 분석되었습니다.
@@ -599,11 +621,11 @@ export default function DashboardPage() {
       </DashboardModal>
 
       {/* 맛집 모달 */}
-      <DashboardModal open={activeModal === 'places'} onClose={closeModal} title="천안 맛집">
+      <DashboardModal open={activeModal === 'places'} onClose={closeModal} title={t.cheonanPlaces}>
         {errors.places ? (
-          <p className="empty-text">맛집 데이터를 불러올 수 없습니다</p>
+          <p className="empty-text">{t.restaurantError}</p>
         ) : getPlaceItems(places).length === 0 ? (
-          <p className="empty-text">등록된 맛집이 없습니다</p>
+          <p className="empty-text">{t.noRestaurant}</p>
         ) : (
           <div className="place-list">
             {getPlaceItems(places).map((place) => (
@@ -612,7 +634,7 @@ export default function DashboardPage() {
                 <div className="place-meta-row">
                   {place.category && <span className="place-category">{place.category}</span>}
                   {place.review_count != null && (
-                    <span className="place-review-count">리뷰 {place.review_count}건</span>
+                    <span className="place-review-count">{t.review} {place.review_count}{t.countSuffix}</span>
                   )}
                 </div>
                 {place.address && <div className="place-address">{place.address}</div>}
@@ -622,10 +644,10 @@ export default function DashboardPage() {
         )}
       </DashboardModal>
 
-      {/* 명소 & 행사 모달 */}
-      <DashboardModal open={activeModal === 'events'} onClose={closeModal} title="천안 명소 & 행사">
+      {/* {t.placesEvents} 모달 */}
+      <DashboardModal open={activeModal === 'events'} onClose={closeModal} title={t.placesEvents}>
         {!dashboardEvents?.length ? (
-          <p className="empty-text">등록된 명소가 없습니다</p>
+          <p className="empty-text">{t.noPlaces}</p>
         ) : (
           <div className="event-list">
             {dashboardEvents.map((evt) => (
@@ -665,7 +687,7 @@ export default function DashboardPage() {
           </select>
         </div>
         {!filteredPosts.length ? (
-          <p className="empty-text">아직 데이터가 없습니다</p>
+          <p className="empty-text">{t.noData}</p>
         ) : (
           <table className="posts-table">
             <thead>
@@ -685,7 +707,7 @@ export default function DashboardPage() {
                       <a href={post.url} target="_blank" rel="noreferrer">{post.title}</a>
                     ) : post.title}
                   </td>
-                  <td><SentimentBadge value={post.sentiment} /></td>
+                  <td><SentimentBadge value={post.sentiment} labels={sentimentLabels} /></td>
                   <td>{formatDate(post.published_at)}</td>
                 </tr>
               ))}

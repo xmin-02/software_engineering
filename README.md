@@ -21,7 +21,7 @@ The current deployed UI includes:
 - Main dashboard with sentiment trend, weekly topics, keyword/source cards, summaries, and recent posts.
 - `맛집 · 카페` tab with restaurant/cafe cards, filters, currently-open control, and detail interactions.
 - `관광`, `청년`, `대학교`, `일자리`, `가족` sections.
-- Additional lifestyle side tabs: `무장애 정보`, `고등학생`, `의료/약국`, `외국인 생활`, `1인 가구`.
+- Additional lifestyle side tabs: `접근성 정보`, `고등학생`, `의료/약국`, `외국인 생활`, `1인 가구`.
 - Right-top controls for favorites, notifications, language, font size, and widgets.
 - Dropdown-driven modals for favorite shortcuts, favorite management, notifications, language changes, and widget previews.
 - Real place/tourism imagery where available, with local fallback assets for stable rendering.

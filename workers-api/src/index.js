@@ -8,8 +8,8 @@ const RECENT_DAYS = 30;
 const TOPIC_DAYS = 7;
 const PLACE_FETCH_LIMIT = 1000;
 const CHEONAN_CENTER = { latitude: 36.8151, longitude: 127.1139 };
-const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com', 'file.albamon.com'];
-const BAD_IMAGE_TERMS = ['instar--', 'profile_thumb', 'tripcdn', 'hotel', 'motel'];
+const BAD_IMAGE_HOSTS = ['imgnews.naver.net', 'ssl.pstatic.net/static', 'ssl.pstatic.net/imgstock', 'cdninstagram.com', 'fbcdn.net', 'pup-post-phinf.pstatic.net', 'ssproxy.ucloudbiz.olleh.com', 'ak-d.tripcdn.com', 'file.albamon.com', 'a0.muscache.com', 'muscache.com', 'humoruniv.com', 'pinimg.com', 'pinterest.', 'coupang', 'siksinhot.com'];
+const BAD_IMAGE_TERMS = ['instar--', 'profile_thumb', 'profile_photo', 'tripcdn', 'hotel', 'motel', 'airbnb', 'pinterest', 'coupangcdn'];
 const FOOD_CATEGORY_ALIASES = ['한식', '중식', '일식', '양식', '분식', '음식점', '패스트푸드', '카페', '카페,디저트', '간식', '이탈리아음식', '아시아음식', '패밀리레스토랑', '도시락', '치킨', '퓨전요리'];
 const UNIVERSITY_CATEGORY_ALIASES = {
 	학사: ['학사', '일반', '대플', '교수학습개발원', '교양대학', '입학관리처'],
@@ -18,8 +18,10 @@ const UNIVERSITY_CATEGORY_ALIASES = {
 	행사: ['행사', '특강', '사회봉사센터', '인성개발원', '실용음악트랙', '백석대학 합창단'],
 };
 const CHEONAN_AREAS = ['쌍용', '불당', '신부', '성정', '두정', '백석', '안서', '봉명', '대흥', '신방', '청당', '성환', '병천', '목천', '직산', '성거', '입장', '풍세', '광덕', '구성', '다가', '유량'];
-const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩', '광고', '협찬', '제공받', '원고료', '체험단'];
-const FOOD_REVIEW_TERMS = ['맛있', '맛집', '메뉴', '음식', '초밥', '김밥', '떡볶', '카페', '커피', '디저트', '고기', '매장'];
+const REVIEW_BLOCK_TERMS = ['네일', '알레르망', '화장품', '공장', '유튜브', 'youtu.be', 'story.kakao.com', '금호김영집', '부처님', '법을 전파', '주상복합', '돌담길', '어학원', '학원', '입시', '강의실', '백화점 6층', '캐럿21빌딩', '광고', '협찬', '제공받', '원고료', '체험단', '프리드짐', 'PT', '루틱헤어', '더끌레르', '전자담배', '꽃빙', '반지공방', '아뜰리에', '야끼니꾸', '상석', '코다리', '냉면집', '대관문의', '필라테스', '헬스'];
+const FOOD_REVIEW_TERMS = ['맛있', '맛집', '메뉴', '음식', '초밥', '김밥', '떡볶', '카페', '커피', '디저트', '고기', '매장', '식사', '밥', '빵', '라떼'];
+const POST_BLOCK_TERMS = ['광고', '협찬', '제공받', '원고료', '체험단', '식사권을제공', '소정의수수료', '업체로부터'];
+const LIST_REVIEW_BLOCK_TERMS = ['학원', '어학원', '캐럿21빌딩', '백화점', '교회', '베이비페어', '기저귀', '마트', '델리마트', '병원', '수술', 'story.kakao.com', '금호김영집', '맞은편', '건물', '6층'];
 const TOPIC_BLOCK_TERMS = ['견적', '이사', '이삿짐', '화환', '근조', '장례', '000원', '특가', '할인', '전국서비스', '당일배송', '삼정엔지니어링', '수행사례', '비상주', '상담', '선임비용', '전자담배', '미용실', '필라테스', '홈페이지', '가입하기', '수수료', '시공', '설치', '교체', '납품', '업체', '사다리차', '정책자금', '대출', '보험', '영업시간', '법률', '대리인', '토목설계', '부지조성', '오늘도여행', '쉐어하우스', '원룸', '졸작', '고유가지원금', '가전', '중고폰'];
 const TOPIC_ALLOW_TERMS = ['맛집', '카페', '축제', '행사', '공원', '교통', '주차', '전세', '병원', '약국', '학교', '천안시청', '동물복지', '환경', '터미널', '독립기념관', '수신메론', '성정', '두정', '불당', '백석', '신부'];
 const TOPIC_MIN_ITEMS = 5;
@@ -44,6 +46,14 @@ const reviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p', options = {}) =
 	const noKnownArea = CHEONAN_AREAS.map((area) => `${placeAlias}.address NOT LIKE '%${area}%'`).join(' AND ');
 	const blockClauses = REVIEW_BLOCK_TERMS.map((term) => `${compactReview} NOT LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' AND ');
 	const foodClauses = FOOD_REVIEW_TERMS.map((term) => `${compactReview} LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' OR ');
+	const referenceOnlyClauses = [
+		`${compactReview} NOT LIKE '%' || ${compactName} || '건물%'`,
+		`${compactReview} NOT LIKE '%' || ${compactName} || '바로옆%'`,
+		`${compactReview} NOT LIKE '%' || ${compactName} || '옆%'`,
+		`${compactReview} NOT LIKE '%' || ${compactName} || '맞은편%'`,
+		`${compactReview} NOT LIKE '%' || ${compactName} || '근처%'`,
+		`${compactReview} NOT LIKE '%' || ${compactName} || '있는건물%'`,
+	].join(' AND ');
 	const areaFilter = options.requireArea ? `AND ((${noKnownArea}) OR ${areaClauses})` : '';
 	return `
 		${reviewAlias}.place_id = ${placeAlias}.id
@@ -53,8 +63,38 @@ const reviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p', options = {}) =
 		AND (${foodClauses})
 		${areaFilter}
 		AND ${blockClauses}
+		AND ${referenceOnlyClauses}
 	`;
 };
+
+
+const listReviewRelevanceSql = (reviewAlias = 'r', placeAlias = 'p') => {
+	const compactReview = compactSql(`${reviewAlias}.review_text`);
+	const compactName = compactSql(`${placeAlias}.name`);
+	const blockClauses = LIST_REVIEW_BLOCK_TERMS.map((term) => `${compactReview} NOT LIKE '%${term.toLowerCase().replace(/\s+/g, '')}%'`).join(' AND ');
+	return `
+		${reviewAlias}.place_id = ${placeAlias}.id
+		AND ${placeAlias}.name IS NOT NULL
+		AND ${reviewAlias}.review_text IS NOT NULL
+		AND length(trim(${reviewAlias}.review_text)) > 20
+		AND instr(${compactReview}, ${compactName}) > 0
+		AND ${blockClauses}
+	`;
+};
+
+
+const compactText = (value) => String(value || '').toLowerCase().replace(/\s+/g, '');
+const isCleanPlaceReview = (place, reviewText) => {
+	const compactReview = compactText(reviewText);
+	const compactName = compactText(place?.name);
+	if (!compactReview || !compactName || !compactReview.includes(compactName)) return false;
+	const blockTerms = [...REVIEW_BLOCK_TERMS, ...POST_BLOCK_TERMS].map(compactText);
+	if (blockTerms.some((term) => term && compactReview.includes(term))) return false;
+	const referenceOnly = [`${compactName}건물`, `${compactName}바로옆`, `${compactName}옆`, `${compactName}맞은편`, `${compactName}근처`, `${compactName}있는건물`];
+	return !referenceOnly.some((term) => compactReview.includes(term));
+};
+
+const postQualityWhere = (alias = 'p') => blockSql(`COALESCE(${alias}.title, '') || ' ' || COALESCE(${alias}.content, '')`, POST_BLOCK_TERMS);
 
 const toInt = (value, fallback = 0) => {
 	const n = parseInt(value, 10);
@@ -307,6 +347,14 @@ const estateItem = (item) => ({
 	meta: estatePrice(item),
 });
 
+
+const ACCESSIBILITY_ITEMS = [
+	{ title: '천안시청', subtitle: '공공기관', description: '주출입구 경사로, 엘리베이터, 장애인 주차구역 등 접근성 편의시설 확인 권장', meta: '공식 확인', address: '천안시 서북구 번영로 156' },
+	{ title: '천안종합터미널', subtitle: '교통시설', description: '휠체어 이동 동선, 승강장 접근성, 교통약자 대기 공간 확인 권장', meta: '교통 접근', address: '천안시 동남구 터미널9길 36' },
+	{ title: '천안역', subtitle: '교통시설', description: '엘리베이터, 장애인 화장실, 전동휠체어 충전 등 역사 편의시설 확인 권장', meta: '철도 접근', address: '천안시 동남구 만남로 23' },
+	{ title: '충청남도 광역이동지원센터', subtitle: '이동지원', description: '휠체어 이용자와 교통약자를 위한 사전 예약 이동지원 서비스', meta: '1644-5588', address: '충청남도 이동지원' },
+];
+
 const OFFICIAL_LINKS = {
 	accessibility: [
 		{ label: '천안시청 복지', url: 'https://www.cheonan.go.kr/' },
@@ -358,6 +406,7 @@ app.get('/api/posts', async (c) => {
 		where.push('p.published_at <= ?');
 		params.push(date_to);
 	}
+	where.push(postQualityWhere('p'));
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
 	const total = await c.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM posts p LEFT JOIN analysis a ON p.id=a.post_id ${wc}`)
 		.bind(...params)
@@ -576,26 +625,37 @@ app.get('/api/places', async (c) => {
 	if (age_group === 'family') where.push("p.id NOT IN (SELECT place_id FROM place_tags WHERE tag='노키즈존')");
 	if (age_group === 'college') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가성비','카공','데이트','단체석'))");
 	if (age_group === 'family') where.push("p.id IN (SELECT place_id FROM place_tags WHERE tag IN ('가족','키즈시설'))");
+	const strictReviewFilter = listReviewRelevanceSql('r', 'p2');
+	const reviewStatsJoin = `
+		LEFT JOIN (
+			SELECT p2.id AS place_id, AVG(r.sentiment_score) AS avg_sentiment_score, COUNT(r.id) AS review_count
+			FROM places p2
+			JOIN place_reviews r ON r.place_id = p2.id
+			WHERE ${strictReviewFilter}
+			GROUP BY p2.id
+		) rs ON rs.place_id = p.id
+	`;
+	where.push('COALESCE(rs.review_count, 0) > 0');
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
-	const relevantReviewWhere = reviewRelevanceSql('r', 'p');
-	const avgRelevantScore = `(SELECT AVG(r.sentiment_score) FROM place_reviews r WHERE ${relevantReviewWhere})`;
-	const relevantReviewCount = `(SELECT COUNT(*) FROM place_reviews r WHERE ${relevantReviewWhere})`;
+	const avgReviewScore = 'rs.avg_sentiment_score';
+	const reviewCount = 'rs.review_count';
 	const distanceOrder = `(CASE WHEN p.latitude IS NULL OR p.longitude IS NULL THEN 999999 ELSE ((p.latitude - ${CHEONAN_CENTER.latitude}) * (p.latitude - ${CHEONAN_CENTER.latitude}) + (p.longitude - ${CHEONAN_CENTER.longitude}) * (p.longitude - ${CHEONAN_CENTER.longitude})) END)`;
 	const orderBy =
 		sort_by === 'rating'
-			? 'COALESCE(p.rating_naver, p.rating_kakao, avg_sentiment_score, 0) DESC, p.id ASC'
+			? `COALESCE(p.rating_naver, p.rating_kakao, ${avgReviewScore}, 0) DESC, p.id ASC`
 			: sort_by === 'review_count'
-				? 'review_count DESC, COALESCE(avg_sentiment_score, 0) DESC, p.id ASC'
+				? `${reviewCount} DESC, ${avgReviewScore} DESC, p.id ASC`
 				: sort_by === 'distance'
-					? `${distanceOrder} ASC, COALESCE(avg_sentiment_score, 0) DESC, p.id ASC`
-					: 'COALESCE(avg_sentiment_score, 0) DESC, review_count DESC, p.id ASC';
+					? `${distanceOrder} ASC, ${avgReviewScore} DESC, p.id ASC`
+					: `COALESCE(p.rating_naver, p.rating_kakao, ${avgReviewScore}, 0) DESC, p.updated_at DESC, p.id ASC`;
 	const baseSelect = `
 		SELECT
 			p.*,
-			COALESCE(${avgRelevantScore}, 0) AS avg_sentiment_score,
-			${relevantReviewCount} AS review_count,
+			${avgReviewScore} AS avg_sentiment_score,
+			${reviewCount} AS review_count,
 			COALESCE(GROUP_CONCAT(DISTINCT pt.tag), '') AS tag_list
 		FROM places p
+		${reviewStatsJoin}
 		LEFT JOIN place_tags pt ON pt.place_id = p.id
 		${wc}
 		GROUP BY p.id
@@ -619,7 +679,8 @@ app.get('/api/places', async (c) => {
 		return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
 	}
 
-	const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ?`).bind(...params, PLACE_FETCH_LIMIT).all();
+	const fetchLimit = Math.min(PLACE_FETCH_LIMIT, Math.max(limit * 3, 60) + offset);
+	const rows = await c.env.DB.prepare(`${baseSelect} LIMIT ?`).bind(...params, fetchLimit).all();
 	const filtered = dedupePlaces(rows.results.map(toPlace));
 	const pageItems = filtered.slice(offset, offset + limit);
 	return c.json({ items: pageItems, total: filtered.length, page: pageNum, size: limit, has_next: offset + limit < filtered.length });
@@ -650,25 +711,22 @@ app.get('/api/places/:id', async (c) => {
 	const reviewLimit = clampPageSize(c.req.query('review_limit') || '100', 100);
 	const place = await c.env.DB.prepare('SELECT * FROM places WHERE id=?').bind(id).first();
 	if (!place) return c.json({ error: 'Not found' }, 404);
-	const reviews = await c.env.DB.prepare(
+	const rawReviews = await c.env.DB.prepare(
 		`SELECT r.* FROM place_reviews r
 		 JOIN places p ON p.id=r.place_id
 		 WHERE r.place_id=?
-		   AND ${reviewRelevanceSql('r', 'p', { requireArea: true })}
+		   AND ${listReviewRelevanceSql('r', 'p')}
 		 ORDER BY r.published_at DESC LIMIT ?`,
 	)
-		.bind(id, reviewLimit)
+		.bind(id, Math.max(reviewLimit * 10, 100))
 		.all();
+	const cleanReviews = rawReviews.results.filter((review) => isCleanPlaceReview(place, review.review_text));
+	const reviews = cleanReviews.slice(0, reviewLimit);
+	const avgScore = cleanReviews.length
+		? cleanReviews.reduce((sum, review) => sum + (Number(review.sentiment_score) || 0), 0) / cleanReviews.length
+		: null;
 	const tags = await c.env.DB.prepare('SELECT tag FROM place_tags WHERE place_id=?').bind(id).all();
-	const stats = await c.env.DB.prepare(
-		`SELECT AVG(r.sentiment_score) AS avg_score, COUNT(*) AS cnt
-		 FROM place_reviews r
-		 JOIN places p ON p.id=r.place_id
-		 WHERE r.place_id=?
-		   AND ${reviewRelevanceSql('r', 'p', { requireArea: true })}`,
-	)
-		.bind(id)
-		.first();
+	const stats = { avg_score: avgScore, cnt: cleanReviews.length };
 	return c.json({
 		place: {
 			...place,
@@ -680,7 +738,7 @@ app.get('/api/places/:id', async (c) => {
 			business_hours: normalizeBusinessHours(place.business_hours),
 			rating: place.rating_naver ?? place.rating_kakao ?? null,
 		},
-		reviews: reviews.results.map(parseKeywords),
+		reviews: reviews.map(parseKeywords),
 	});
 });
 
@@ -749,6 +807,8 @@ app.get('/api/college/housing', async (c) => {
 
 app.get('/api/jobs', async (c) => {
 	const { experience_level, job_type, page = '1', size = '20' } = c.req.query();
+	const experienceAliases = { experienced: 'mid', 신입: 'entry', 주니어: 'junior', 미드: 'mid', 시니어: 'senior' };
+	const jobTypeAliases = { 'IT/개발': 'it', IT: 'it', 개발: 'it', '제조/생산': 'manufacturing', 제조: 'manufacturing', 생산: 'manufacturing', 디자인: 'design', 영업: 'sales', 서비스: 'service', 마케팅: 'marketing' };
 	const pageNum = Math.max(toInt(page, 1), 1);
 	const limit = clampPageSize(size);
 	const offset = (pageNum - 1) * limit;
@@ -756,11 +816,11 @@ app.get('/api/jobs', async (c) => {
 	const params = [];
 	if (experience_level) {
 		where.push('experience_level=?');
-		params.push(experience_level);
+		params.push(experienceAliases[experience_level] || experience_level);
 	}
 	if (job_type) {
 		where.push('job_type=?');
-		params.push(job_type);
+		params.push(jobTypeAliases[job_type] || job_type);
 	}
 	const wc = where.length ? `WHERE ${where.join(' AND ')}` : '';
 	const total = await c.env.DB.prepare(`SELECT COUNT(*) AS cnt FROM jobs ${wc}`)
@@ -845,7 +905,7 @@ app.get('/api/life-info/:section', async (c) => {
 				"SELECT * FROM places WHERE category IN ('카페','분식','한식','음식점','패스트푸드') ORDER BY COALESCE(updated_at, collected_at) DESC, id DESC LIMIT 6",
 			).all(),
 			c.env.DB.prepare(
-				'SELECT * FROM places WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY COALESCE(updated_at, collected_at) DESC, id DESC LIMIT 6',
+				"SELECT * FROM places WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND category NOT IN ('카페','분식','한식','음식점','패스트푸드','중식','일식','양식','간식') ORDER BY COALESCE(updated_at, collected_at) DESC, id DESC LIMIT 6",
 			).all(),
 			c.env.DB.prepare('SELECT COUNT(*) AS cnt FROM places').first('cnt'),
 			c.env.DB.prepare('SELECT COUNT(*) AS cnt FROM university_notices').first('cnt'),
@@ -863,11 +923,11 @@ app.get('/api/life-info/:section', async (c) => {
 			sections: [
 				{
 					title: '좌표 확인 가능한 생활시설',
-					caption: '무장애 세부 속성은 추가 API 연동 전까지 위치 기반 후보로 표시합니다.',
-					items: mappedPlaces.results.map(placeInfoItem),
+					caption: '접근성 세부 속성은 공식 API 연동 전까지 확인 가능한 공공·교통시설 중심으로 표시합니다.',
+					items: (mappedPlaces.results.length ? mappedPlaces.results.map(placeInfoItem) : ACCESSIBILITY_ITEMS),
 				},
 				{
-					title: '우선 보강할 무장애 속성',
+					title: '우선 보강할 접근성 속성',
 					items: [
 						{ title: '휠체어 출입', description: '출입구 단차/경사로/엘리베이터 여부' },
 						{ title: '장애인 화장실', description: '층별 위치와 운영 시간' },

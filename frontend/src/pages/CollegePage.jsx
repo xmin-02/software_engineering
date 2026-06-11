@@ -86,7 +86,7 @@ export default function CollegePage() {
         </div>
         <div className="places-grid">
           {collegePlaces.map((place, index) => (
-            <article key={place.id ?? place.name} className="place-card college-place-card">
+            <article key={place.id ?? place.name} className="place-card college-place-card" role="button" tabIndex={0} onClick={() => navigate(`/places?search=${encodeURIComponent(place.name)}`)} onKeyDown={(event) => { if (event.key === 'Enter') navigate(`/places?search=${encodeURIComponent(place.name)}`); }}>
               <img className="college-place-image" src={normalizePlaceImage(place.image_url || place.photo_url, PLACE_IMAGES[index % PLACE_IMAGES.length])} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = PLACE_IMAGES[index % PLACE_IMAGES.length]; }} />
               <div className="college-place-rating">{place.rating ?? (place.avg_sentiment_score ? (4 + Number(place.avg_sentiment_score)).toFixed(1) : '신규')}</div>
               <span className="place-category">{place.category}</span>

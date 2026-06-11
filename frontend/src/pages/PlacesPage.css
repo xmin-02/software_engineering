@@ -1275,7 +1275,8 @@
   margin-top: 6px;
 }
 
-.modal-map-actions a {
+.modal-map-actions a,
+.modal-map-actions button {
   flex: 1;
   min-width: 100px;
   border-radius: 12px;
@@ -1288,7 +1289,8 @@
   font-weight: 900;
 }
 
-.modal-map-actions a:last-child {
+.modal-map-actions a:last-child,
+.modal-map-actions button:last-child {
   background: #005bbf;
 }
 

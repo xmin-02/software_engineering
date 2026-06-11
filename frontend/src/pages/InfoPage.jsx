@@ -17,10 +17,10 @@ import './InfoPage.css';
 const FIGMA_PAGES = {
   '/accessibility': {
     section: 'accessibility',
-    title: '무장애 정보',
+    title: '접근성 정보',
     eyebrow: '실시간 업데이트',
     description:
-      '천안시는 모든 시민이 편리하게 이용할 수 있는 무장애 환경을 구축하고 있습니다. 휠체어 접근 가능 시설, 장애인 화장실, 저상버스, 콜택시 정보를 확인하세요.',
+      '천안시는 모든 시민이 편리하게 이동하고 이용할 수 있는 접근성 환경을 구축하고 있습니다. 휠체어 접근 가능 시설, 장애인 화장실, 저상버스, 이동지원 정보를 확인하세요.',
     Icon: Accessibility,
     accent: '#2563eb',
     chips: ['전체', '휠체어 접근', '장애인 화장실', '저상버스', '콜택시'],
@@ -125,14 +125,14 @@ const FIGMA_PAGES = {
   },
   '/medical': {
     section: 'medical',
-    title: '의료 약국',
+    title: '의료/약국',
     eyebrow: '실시간 업데이트',
     description:
       '천안시는 모든 시민이 편리하게 이용할 수 있는 의료 서비스를 제공하고 있습니다. 가까운 병원, 의원, 약국 정보를 확인하세요.',
     Icon: Pill,
     accent: '#059669',
-    chips: ['야간/응급진료', '분만가능 산부인과', '보건소 검진', '정형외과', '내과', '한의원'],
-    countLabel: '총 3개의 시설',
+    chips: ['야간/응급진료', '약국', '분만가능 산부인과', '보건소 검진', '정형외과', '내과', '한의원'],
+    countLabel: '총 9개의 정보',
     cards: [
       {
         title: '단국대학교병원 응급실',
@@ -157,6 +157,42 @@ const FIGMA_PAGES = {
         address: '충남 천안시 동남구 순천향6길 31',
         hours: '24시간 응급실 운영',
         phone: '041-570-5119',
+      },
+      {
+        title: 'E-Gen 응급의료포털 약국 찾기',
+        distance: '공식',
+        status: '약국 검색',
+        address: '천안시 운영 약국·휴일지킴이약국 조회',
+        hours: '방문 전 전화 확인 권장',
+        phone: '119',
+        description: '심야·휴일 운영 약국은 변동이 커서 E-Gen 또는 휴일지킴이약국에서 실시간 확인하세요.',
+      },
+      {
+        title: '휴일지킴이약국 천안 조회',
+        distance: '공식',
+        status: '약국 검색',
+        address: '천안시 약국 운영시간 조회',
+        hours: '휴일·야간 약국 확인',
+        phone: '129',
+        description: '공휴일과 야간에 문 여는 약국을 지역 기준으로 확인하는 안내 카드입니다.',
+      },
+      {
+        title: '단국대학교병원 산부인과',
+        distance: '1.2km',
+        status: '분만 가능 여부 확인',
+        address: '충남 천안시 동남구 단대로 119',
+        hours: '외래/응급 운영시간 확인 필요',
+        phone: '041-550-6114',
+        description: '분만·고위험 임신 진료 가능 여부는 방문 전 병원 대표번호로 확인하세요.',
+      },
+      {
+        title: '순천향대학교 천안병원 산부인과',
+        distance: '3.1km',
+        status: '분만 가능 여부 확인',
+        address: '충남 천안시 동남구 순천향6길 31',
+        hours: '외래/응급 운영시간 확인 필요',
+        phone: '041-570-2114',
+        description: '분만·산전 진료 가능 여부는 진료일과 의료진 일정에 따라 달라질 수 있습니다.',
       },
       {
         title: '천안시 서북구보건소',
@@ -187,42 +223,109 @@ const FIGMA_PAGES = {
     Icon: Globe2,
     accent: '#0f766e',
     chips: ['출입국·외국인청', '외국인노동자지원', '다국어 의료', '할랄/베트남 식료품', '모스크', '1345 긴급상담'],
-    countLabel: '총 2개의 시설',
+    countLabel: '총 9개의 정보',
     cards: [
       {
-        title: '천안출입국·외국인청',
-        distance: '2.3km',
-        status: '운영중',
+        title: '천안출입국·외국인사무소',
+        subtitle: '출입국·외국인청',
+        distance: '공식 기관',
+        status: '체류/비자 민원',
         address: '충남 천안시 서북구 불당22대로 114',
         hours: '평일 09:00-18:00',
-        phone: '041-564-6700',
-        description: '영어, 중국어, 베트남어',
+        phone: '041-621-1345',
+        description: '체류기간 연장, 외국인등록, 각종 출입국 민원은 방문 예약 후 이용하세요.',
+        latitude: 36.8157,
+        longitude: 127.1072,
+        url: 'https://www.immigration.go.kr/',
       },
       {
         title: '천안시 외국인주민지원센터',
-        distance: '1.5km',
+        subtitle: '외국인노동자지원',
+        distance: '생활 상담',
         status: '운영중',
         address: '충남 천안시 동남구 천안대로 400',
         hours: '평일 09:00-18:00',
         phone: '041-521-2961',
-        description: '영어, 중국어, 베트남어, 타갈로그어',
+        description: '생활상담, 통번역 연계, 체류·노동·가족 지원 정보를 확인할 수 있습니다.',
+        latitude: 36.8062,
+        longitude: 127.1522,
       },
       {
         title: '외국인종합안내센터 1345',
+        subtitle: '1345 긴급상담',
         distance: '전화 상담',
-        status: '긴급상담',
-        address: '국번 없이 1345',
+        status: '다국어 상담',
+        address: '전화 1345',
         hours: '평일 상담 · 긴급 안내',
         phone: '1345',
-        description: '출입국, 체류, 생활민원 다국어 상담',
+        description: '출입국, 체류, 생활민원 다국어 상담. 위치 이동이 아닌 전화 상담 정보입니다.',
+        url: 'https://www.hikorea.go.kr/',
       },
       {
-        title: '다국어 의료·생활 안내',
-        distance: '생활 지원',
+        title: '순천향대학교 천안병원 국제진료 안내',
+        subtitle: '다국어 의료',
+        distance: '의료기관',
+        status: '방문 전 확인',
+        address: '충남 천안시 동남구 순천향6길 31',
+        hours: '진료과별 상이',
+        phone: '041-570-2114',
+        description: '외국어 지원 가능 여부와 진료 예약은 병원 대표번호로 먼저 확인하세요.',
+        latitude: 36.8027,
+        longitude: 127.1356,
+      },
+      {
+        title: '단국대학교병원 국제진료 안내',
+        subtitle: '다국어 의료',
+        distance: '의료기관',
+        status: '방문 전 확인',
+        address: '충남 천안시 동남구 단대로 119',
+        hours: '진료과별 상이',
+        phone: '041-550-6114',
+        description: '다국어 안내 가능 여부와 진료 예약은 병원 대표번호로 확인하세요.',
+        latitude: 36.8429,
+        longitude: 127.1737,
+      },
+      {
+        title: '천안역 인근 아시아 식료품 거리',
+        subtitle: '할랄/베트남 식료품',
+        distance: '생활권',
+        status: '지도 검색',
+        address: '충남 천안시 동남구 대흥동 천안역 일대',
+        hours: '매장별 상이',
+        description: '베트남·중앙아시아·할랄 식료품점은 천안역 주변 검색 결과를 우선 확인하세요.',
+        latitude: 36.8105,
+        longitude: 127.1472,
+      },
+      {
+        title: '쌍용동 외국 식료품점 검색',
+        subtitle: '할랄/베트남 식료품',
+        distance: '생활권',
+        status: '지도 검색',
+        address: '충남 천안시 서북구 쌍용동',
+        hours: '매장별 상이',
+        description: '베트남 식료품, 할랄 식재료, 아시아 마트를 지도에서 확인하세요.',
+        latitude: 36.8015,
+        longitude: 127.1305,
+      },
+      {
+        title: '천안 모스크/기도실 검색',
+        subtitle: '모스크',
+        distance: '지도 검색',
         status: '확인 필요',
-        address: '천안시 외국인 생활권',
-        hours: '기관별 상이',
-        description: '다국어 의료 안내, 할랄·베트남 식료품, 모스크 정보를 함께 확인하세요.',
+        address: '천안시 모스크 기도실',
+        hours: '시설별 상이',
+        description: '운영 여부가 변동될 수 있어 방문 전 지도 검색과 커뮤니티 확인이 필요합니다.',
+      },
+      {
+        title: '다누리 콜센터 1577-1366',
+        subtitle: '외국인노동자지원',
+        distance: '전화 상담',
+        status: '다국어 상담',
+        address: '전화 1577-1366',
+        hours: '365일 상담 안내',
+        phone: '1577-1366',
+        description: '한국 생활, 가족, 체류 상담을 다국어로 받을 수 있는 전국 상담 창구입니다.',
+        url: 'https://www.liveinkorea.kr/',
       },
     ],
   },
@@ -281,6 +384,9 @@ function normalizeInfoCard(item) {
     hours: item.hours,
     phone: item.phone,
     description: item.description && item.address ? item.description : '',
+    latitude: item.latitude,
+    longitude: item.longitude,
+    url: item.url,
   };
 }
 
@@ -293,7 +399,7 @@ function keywordMatch(item, keywords) {
 
 function filterCuratedCards(content, activeChip) {
   const cards = content.cards ?? [];
-  if (!activeChip || ['전체', content.chips?.[0]].includes(activeChip)) return cards;
+  if (!activeChip || activeChip === '전체') return cards;
   const chipKeywords = {
     '휠체어 접근': ['휠체어', '경사로', '엘리베이터', '접근'],
     '장애인 화장실': ['화장실'],
@@ -306,24 +412,34 @@ function filterCuratedCards(content, activeChip) {
     청소년수련관: ['청소년', '수련관'],
     입시설명회: ['입시', '설명회', '수능'],
     '야간/응급진료': ['응급', '24시간', '야간'],
+    약국: ['약국', 'E-Gen', '휴일지킴이', '운영 약국'],
     '분만가능 산부인과': ['산부인과', '분만'],
     '보건소 검진': ['보건소', '검진'],
     정형외과: ['정형외과'],
     내과: ['내과'],
     한의원: ['한의원'],
     '출입국·외국인청': ['출입국', '외국인청'],
-    외국인노동자지원: ['노동자', '지원센터', '주민지원'],
-    '다국어 의료': ['다국어', '의료'],
-    '할랄/베트남 식료품': ['할랄', '베트남', '식료품'],
+    외국인노동자지원: ['노동자', '지원센터', '주민지원', '다누리', '1577-1366'],
+    '다국어 의료': ['다국어 의료', '국제진료', '의료기관'],
+    '할랄/베트남 식료품': ['할랄', '베트남', '식료품', '아시아', '식료품점'],
     모스크: ['모스크'],
     '1345 긴급상담': ['1345', '긴급상담'],
   };
-  const filtered = cards.filter((item) => keywordMatch(item, chipKeywords[activeChip] ?? [activeChip]));
-  return filtered.length ? filtered : cards;
+  return cards.filter((item) => keywordMatch(item, chipKeywords[activeChip] ?? [activeChip]));
 }
 
 function isStructuredLifeInfo(section) {
   return ['accessibility', 'high-school', 'medical', 'foreign-life'].includes(section);
+}
+
+function searchCards(cards, query) {
+  const keyword = query.trim().toLowerCase();
+  if (!keyword) return cards;
+  return cards.filter((item) => [item.title, item.subtitle, item.status, item.address, item.hours, item.phone, item.description]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .includes(keyword));
 }
 
 function getDisplayCards(content, activeChip, currentData) {
@@ -346,6 +462,7 @@ export default function InfoPage() {
   const [page, setPage] = useState(1);
   const [loadedSection, setLoadedSection] = useState(null);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -369,8 +486,8 @@ export default function InfoPage() {
 
   const loading = loadedSection !== resolvedContent.section && !error;
   const currentData = loadedSection === resolvedContent.section ? data : null;
-  const displayCards = getDisplayCards(resolvedContent, activeChip, currentData);
-  const displayCountLabel = activeChip === (resolvedContent.chips[0] ?? '전체')
+  const displayCards = searchCards(getDisplayCards(resolvedContent, activeChip, currentData), searchQuery);
+  const displayCountLabel = activeChip === '전체'
     ? (isStructuredLifeInfo(resolvedContent.section) ? resolvedContent.countLabel : `총 ${displayCards.length}개의 정보`)
     : `${activeChip} 정보 ${displayCards.length}건`;
   void useMemo;
@@ -389,7 +506,7 @@ export default function InfoPage() {
       </section>
 
       <section className="info-search-row" aria-label="검색 및 상태">
-        <div className="info-search-box">전체 검색 (시설명, 주소, 전화번호...)</div>
+        <label className="info-search-box"><span className="sr-only">생활 정보 검색</span><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="전체 검색 (시설명, 주소, 전화번호...)" /></label>
         <span>KO</span>
         <span>A</span>
       </section>
@@ -428,7 +545,7 @@ export default function InfoPage() {
             <span>학원 위치 | 주요 학원가를 한눈에 확인하세요</span>
             <div className="academy-map-pins">
               {displayCards.slice(0, 4).map((item, index) => (
-                <button key={item.title} type="button" style={{ '--pin-x': `${18 + index * 20}%`, '--pin-y': `${35 + (index % 2) * 28}%` }}>
+                <button key={item.title} type="button" onClick={() => openMapSearch(item)} style={{ '--pin-x': `${18 + index * 20}%`, '--pin-y': `${35 + (index % 2) * 28}%` }} aria-label={`${item.title} 지도에서 보기`}>
                   {index + 1}
                 </button>
               ))}
@@ -439,7 +556,7 @@ export default function InfoPage() {
 
       <section className="info-facility-section">
         <div className="info-section-head figma">
-          <h2>{activeChip === (resolvedContent.chips[0] ?? '전체') ? displayCountLabel : `${activeChip} 정보`}</h2>
+          <h2>{activeChip === '전체' ? displayCountLabel : `${activeChip} 정보`}</h2>
         </div>
         <div className="info-facility-list">
           {displayCards.map((item, index) => (
@@ -451,7 +568,7 @@ export default function InfoPage() {
       {resolvedContent.section === 'accessibility' && (
         <div className="pagination figma-pagination">
           <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))}>← 이전</button>
-          {[1, 2, 3].map((value) => <span key={value} className={page === value ? 'active' : ''}>{value}</span>)}
+          {[1, 2, 3].map((value) => <button key={value} type="button" className={page === value ? 'active' : ''} onClick={() => setPage(value)}>{value}</button>)}
           <button type="button" onClick={() => setPage((value) => Math.min(3, value + 1))}>다음 →</button>
         </div>
       )}
@@ -462,7 +579,7 @@ export default function InfoPage() {
 
 function heroTitle(content) {
   if (content.section === 'foreign-life') return '천안시 외국인 생활 지원 안내';
-  if (content.section === 'accessibility') return '천안시 무장애 정보 안내';
+  if (content.section === 'accessibility') return '천안시 접근성 정보 안내';
   if (content.section === 'high-school') return '천안시 고등학생 학습 정보 안내';
   return `천안시 ${content.title} 정보 안내`;
 }
@@ -568,6 +685,18 @@ function SingleHouseholdPortal({ content, apiData }) {
   );
 }
 
+function openMapSearch(item) {
+  window.open(mapSearchUrl(item), '_blank', 'noopener,noreferrer');
+}
+
+function mapSearchUrl(item) {
+  if (item.latitude && item.longitude) {
+    return `https://map.kakao.com/link/map/${encodeURIComponent(item.title || '천안')},${item.latitude},${item.longitude}`;
+  }
+  const query = item.address && !/^전화/.test(item.address) ? `${item.title} ${item.address}` : item.title || item.address || '천안';
+  return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
+}
+
 function FacilityCard({ item }) {
   return (
     <article className="info-facility-card">
@@ -590,7 +719,10 @@ function FacilityCard({ item }) {
         <p className="facility-row"><Phone size={16} /> {item.phone}</p>
       )}
       {item.description && <p className="facility-desc">{item.description}</p>}
-      <button type="button" className="facility-route-btn" onClick={() => window.open(`https://map.kakao.com/link/search/${encodeURIComponent(item.title)}`, '_blank', 'noopener,noreferrer')}>길찾기</button>
+      <div className="facility-actions">
+        <a className="facility-route-btn" href={mapSearchUrl(item)} target="_blank" rel="noreferrer">지도 보기</a>
+        {item.url && <a className="facility-route-btn secondary" href={item.url} target="_blank" rel="noreferrer">공식 링크</a>}
+      </div>
     </article>
   );
 }

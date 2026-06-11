@@ -99,10 +99,21 @@ export default function EventsPage() {
     : EVENT_FALLBACKS;
   const upcomingEvents = useMemo(() => eventSource.map((_, index, array) => array[(index + eventOffset) % array.length]).slice(0, 3), [eventOffset, eventSource]);
   const chosenSpots = useMemo(() => {
-    const spots = [...SPOT_FALLBACKS];
-    if (sortMode === '평점 순') return spots.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    const eventSpots = events
+      .filter((event) => event.image_url || event.location)
+      .slice(0, 3)
+      .map((event, index) => ({
+        title: event.title,
+        category: event.category || '천안 명소',
+        rating: null,
+        address: event.location || '천안시',
+        image: event.image_url || SPOT_FALLBACKS[index % SPOT_FALLBACKS.length].image,
+        url: event.url,
+      }));
+    const spots = eventSpots.length >= 3 ? eventSpots : SPOT_FALLBACKS;
+    if (sortMode === '평점 순') return [...spots].sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     return spots;
-  }, [sortMode]);
+  }, [events, sortMode]);
   const toggleFavorite = (spot) => {
     setFavorites((current) => {
       const exists = current.some((item) => item.title === spot.title);
@@ -152,9 +163,9 @@ export default function EventsPage() {
 
       <section className="tourism-map-section" aria-label="지도에서 명소 찾기">
         <div className="tourism-map-copy">
-          <h2>지도로 명소 찾기</h2>
+          <h2>천안 관광 지도</h2>
           <p>
-            내 주변의 가장 인기 있는 장소를 실시간 지도로 확인해보세요. 각 장소의 혼잡도와 현재 운영 여부를 즉시 파악할 수 있습니다.
+            주요 관광지와 행사 위치를 한눈에 보는 안내 영역입니다. 정확한 길찾기와 현재 운영 정보는 카카오맵에서 확인하세요.
           </p>
           <div className="tourism-map-legend">
             <span><i className="good" />쾌적함</span>
@@ -162,9 +173,9 @@ export default function EventsPage() {
             <span><i className="busy" />혼잡</span>
           </div>
         </div>
-        <div className="tourism-map-art">
-          <img src={tourismMap} alt="천안 관광지 혼잡도 지도" />
-        </div>
+        <a className="tourism-map-art" href="https://map.kakao.com/link/search/%EC%B2%9C%EC%95%88%20%EA%B4%80%EA%B4%91%EC%A7%80" target="_blank" rel="noreferrer" aria-label="카카오맵에서 천안 관광지 검색">
+          <img src={tourismMap} alt="천안 관광지 위치 안내" />
+        </a>
       </section>
       {selectedSpot && <TourismSpotModal spot={selectedSpot} favorite={favorites.some((item) => item.title === selectedSpot.title)} onToggleFavorite={toggleFavorite} onClose={() => setSelectedSpot(null)} />}
     </div>
@@ -202,7 +213,7 @@ function TourismSpotCard({ spot, favorite, onToggleFavorite, onSelect }) {
         </div>
         <h3>{spot.title}</h3>
         <p><MapPin size={13} />{spot.address}</p>
-        <a href={spot.url || '#'} onClick={(e) => { e.stopPropagation(); if (!spot.url) e.preventDefault(); }} target={spot.url ? '_blank' : undefined} rel="noreferrer" className="tourism-discover-btn">
+        <a href={spot.url || `https://map.kakao.com/link/search/${encodeURIComponent(`${spot.title} ${spot.address || '천안'}`)}`} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer" className="tourism-discover-btn">
           Discover <ArrowRight size={14} />
         </a>
       </div>
@@ -224,7 +235,7 @@ function TourismSpotModal({ spot, favorite, onToggleFavorite, onClose }) {
         <strong>{spot.rating ? `★ ${spot.rating}` : '추천 명소'}</strong>
         <div className="tourism-modal-actions">
           <button type="button" onClick={() => onToggleFavorite(spot)}>{favorite ? '찜 해제' : '찜하기'}</button>
-          <a href={spot.url} target="_blank" rel="noreferrer">관련 페이지 이동</a>
+          <a href={spot.url || `https://map.kakao.com/link/search/${encodeURIComponent(`${spot.title} ${spot.address || '천안'}`)}`} target="_blank" rel="noreferrer">관련 페이지 이동</a>
         </div>
       </section>
     </div>

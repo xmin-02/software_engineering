@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
 import './PlacesPage.css';
 import placeImage1 from '../assets/figma/place-1.jpg';
@@ -110,16 +111,39 @@ function formatDate(date) {
   return date ? date.slice(0, 10).replaceAll('-', '.') : '';
 }
 
-function kakaoMapUrl(place) {
+function kakaoSearchUrl(place) {
   const query = [place.name, place.address].filter(Boolean).join(' ');
   return `https://map.kakao.com/link/search/${encodeURIComponent(query || '천안 맛집')}`;
+}
+
+function kakaoMapUrl(place) {
+  if (place.latitude && place.longitude) {
+    return `https://map.kakao.com/link/map/${encodeURIComponent(place.name || '장소')},${place.latitude},${place.longitude}`;
+  }
+  return kakaoSearchUrl(place);
 }
 
 function kakaoRouteUrl(place) {
   if (place.latitude && place.longitude) {
     return `https://map.kakao.com/link/to/${encodeURIComponent(place.name || '목적지')},${place.latitude},${place.longitude}`;
   }
-  return kakaoMapUrl(place);
+  return kakaoSearchUrl(place);
+}
+
+function openKakaoRouteFromCurrent(place) {
+  const openDestinationOnly = () => window.open(kakaoRouteUrl(place), '_blank', 'noopener,noreferrer');
+  if (!place.latitude || !place.longitude || !navigator.geolocation) {
+    openDestinationOnly();
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      const url = `https://map.kakao.com/link/from/${encodeURIComponent('현위치')},${coords.latitude},${coords.longitude}/to/${encodeURIComponent(place.name || '목적지')},${place.latitude},${place.longitude}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    },
+    openDestinationOnly,
+    { enableHighAccuracy: true, timeout: 4000, maximumAge: 60000 },
+  );
 }
 
 function displayHours(hours) {
@@ -197,7 +221,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
                   <span>{current.address || '천안시 위치 정보'}</span>
                   <div className="modal-map-actions">
                     <a href={kakaoMapUrl(current)} target="_blank" rel="noreferrer">지도 보기</a>
-                    <a href={kakaoRouteUrl(current)} target="_blank" rel="noreferrer">길찾기</a>
+                    <button type="button" onClick={() => openKakaoRouteFromCurrent(current)}>길찾기</button>
                   </div>
                 </div>
               </div>
@@ -211,11 +235,13 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
 }
 
 export default function PlacesPage() {
+  const [searchParams] = useSearchParams();
+  const initialSearchQuery = searchParams.get('search') || '';
   const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [category, setCategory] = useState('전체');
   const [sort, setSort] = useState('평점 높은 순');
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialSearchQuery);
   const [visibleCount, setVisibleCount] = useState(PLACE_PAGE_SIZE);
   const [favorites, setFavorites] = useState(() => {
     try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
