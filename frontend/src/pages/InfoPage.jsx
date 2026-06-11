@@ -67,7 +67,7 @@ const FIGMA_PAGES = {
         description: '휠체어 이용자와 교통약자를 위한 사전 예약 이동지원 서비스',
         phone: '1644-5588',
         map: false,
-        url: 'https://www.16445588.co.kr/',
+        url: 'http://www.kappdcheonan.or.kr/bbs/content.php?co_id=2001',
         urlLabel: '예약 안내',
       },
       {
@@ -77,7 +77,7 @@ const FIGMA_PAGES = {
         address: '천안시 버스정보시스템 및 공영주차장',
         description: '저상버스 운행 여부와 장애인 주차구역 위치를 출발 전 확인하세요.',
         map: false,
-        url: 'https://its.cheonan.go.kr/',
+        url: 'https://its.cheonan.go.kr/bis/lowFloor.do',
         urlLabel: '노선 확인',
       },
     ],
