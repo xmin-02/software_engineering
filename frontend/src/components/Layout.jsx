@@ -41,19 +41,19 @@ const makeWidgetItems = (date = new Date()) => {
 
 const UI_TEXT = {
   ko: {
-    appTitle: '천안 대시보드', subtitle: '실시간 데이터', live: '실시간 운영 중', search: '전체 검색 (시설명, 주소, 전화번호...)', favorite: '즐겨찾기', notifications: '알림', language: '언어 선택', font: '글자 크기', widgets: '위젯', markAllRead: '모두 읽음으로 표시', allWidgets: '전체 보기', fontPreview: '가나다라마바사 12345', small: '작게', normal: '기본', large: '크게', xlarge: '매우 크게', apply: '적용하기', close: '닫기', version: 'v1.0', makeLarger: '글자 크게', makeSmaller: '글자 작게', navAria: '메인 네비게이션', menuAria: '메뉴 열기/닫기',
+    appTitle: '천안 대시보드', subtitle: '실시간 데이터', live: '실시간 운영 중', search: '전체 검색 (시설명, 주소, 전화번호...)', favorite: '즐겨찾기', notifications: '알림', language: '언어 선택', font: '글자 크기', widgets: '위젯', markAllRead: '모두 읽음으로 표시', allWidgets: '전체 보기', fontPreview: '가나다라마바사 12345', small: '작게', normal: '기본', large: '크게', xlarge: '매우 크게', apply: '적용하기', close: '닫기', version: 'v1.0', makeLarger: '글자 크게', makeSmaller: '글자 작게', navAria: '메인 네비게이션', menuAria: '메뉴 열기/닫기', footerBrand: '천안 인사이트', footerTagline: '시민의 생각이 모여, 더 나은 천안으로', footerSource: '데이터 출처: 공공데이터 · 지역 리뷰 · 공식 안내 링크', footerPrivacy: '개인정보 수집 없이 공공·리뷰 데이터를 요약 제공합니다.', footerProject: '소프트웨어공학 프로젝트', footerContact: '문의: ch@xmin.io',
   },
   en: {
-    appTitle: 'Cheonan Dashboard', subtitle: 'Live data', live: 'Live operation', search: 'Search all (name, address, phone...)', favorite: 'Favorites', notifications: 'Notifications', language: 'Language', font: 'Font size', widgets: 'Widgets', markAllRead: 'Mark all as read', allWidgets: 'View all', fontPreview: 'Alphabet 12345', small: 'Small', normal: 'Default', large: 'Large', xlarge: 'Extra large', apply: 'Apply', close: 'Close', version: 'v1.0', makeLarger: 'Larger text', makeSmaller: 'Smaller text', navAria: 'Main navigation', menuAria: 'Open or close menu',
+    appTitle: 'Cheonan Dashboard', subtitle: 'Live data', live: 'Live operation', search: 'Search all (name, address, phone...)', favorite: 'Favorites', notifications: 'Notifications', language: 'Language', font: 'Font size', widgets: 'Widgets', markAllRead: 'Mark all as read', allWidgets: 'View all', fontPreview: 'Alphabet 12345', small: 'Small', normal: 'Default', large: 'Large', xlarge: 'Extra large', apply: 'Apply', close: 'Close', version: 'v1.0', makeLarger: 'Larger text', makeSmaller: 'Smaller text', navAria: 'Main navigation', menuAria: 'Open or close menu', footerBrand: 'Cheonan Insight', footerTagline: 'People’s voices gathered for a better Cheonan', footerSource: 'Data sources: public data · local reviews · official links', footerPrivacy: 'Summarized public and review data without collecting personal information.', footerProject: 'Software Engineering Project', footerContact: 'Contact: ch@xmin.io',
   },
   ja: {
-    appTitle: '天安ダッシュボード', subtitle: 'リアルタイムデータ', live: 'リアルタイム運用中', search: '全体検索（施設名、住所、電話番号...）', favorite: 'お気に入り', notifications: '通知', language: '言語選択', font: '文字サイズ', widgets: 'ウィジェット', markAllRead: 'すべて既読にする', allWidgets: 'すべて見る', fontPreview: 'あいうえお 12345', small: '小', normal: '標準', large: '大', xlarge: '特大', apply: '適用', close: '閉じる', version: 'v1.0', makeLarger: '文字を大きく', makeSmaller: '文字を小さく', navAria: 'メインナビゲーション', menuAria: 'メニューを開閉',
+    appTitle: '天安ダッシュボード', subtitle: 'リアルタイムデータ', live: 'リアルタイム運用中', search: '全体検索（施設名、住所、電話番号...）', favorite: 'お気に入り', notifications: '通知', language: '言語選択', font: '文字サイズ', widgets: 'ウィジェット', markAllRead: 'すべて既読にする', allWidgets: 'すべて見る', fontPreview: 'あいうえお 12345', small: '小', normal: '標準', large: '大', xlarge: '特大', apply: '適用', close: '閉じる', version: 'v1.0', makeLarger: '文字を大きく', makeSmaller: '文字を小さく', navAria: 'メインナビゲーション', menuAria: 'メニューを開閉', footerBrand: '天安インサイト', footerTagline: '市民の声を集め、より良い天安へ', footerSource: 'データ出典: 公共データ · 地域レビュー · 公式案内リンク', footerPrivacy: '個人情報を収集せず、公共・レビュー情報を要約します。', footerProject: 'ソフトウェア工学プロジェクト', footerContact: 'お問い合わせ: ch@xmin.io',
   },
   zh: {
-    appTitle: '天安仪表板', subtitle: '实时数据', live: '实时运行中', search: '全局搜索（设施名、地址、电话...）', favorite: '收藏', notifications: '通知', language: '语言选择', font: '字体大小', widgets: '小组件', markAllRead: '全部标为已读', allWidgets: '查看全部', fontPreview: '汉字示例 12345', small: '小', normal: '默认', large: '大', xlarge: '特大', apply: '应用', close: '关闭', version: 'v1.0', makeLarger: '放大文字', makeSmaller: '缩小文字', navAria: '主导航', menuAria: '打开或关闭菜单',
+    appTitle: '天安仪表板', subtitle: '实时数据', live: '实时运行中', search: '全局搜索（设施名、地址、电话...）', favorite: '收藏', notifications: '通知', language: '语言选择', font: '字体大小', widgets: '小组件', markAllRead: '全部标为已读', allWidgets: '查看全部', fontPreview: '汉字示例 12345', small: '小', normal: '默认', large: '大', xlarge: '特大', apply: '应用', close: '关闭', version: 'v1.0', makeLarger: '放大文字', makeSmaller: '缩小文字', navAria: '主导航', menuAria: '打开或关闭菜单', footerBrand: '天安 Insight', footerTagline: '汇聚市民想法，迈向更好的天安', footerSource: '数据来源：公共数据 · 本地评论 · 官方指南链接', footerPrivacy: '不收集个人信息，提供公共与评论数据摘要。', footerProject: '软件工程项目', footerContact: '联系: ch@xmin.io',
   },
   es: {
-    appTitle: 'Panel de Cheonan', subtitle: 'Datos en vivo', live: 'Operación en vivo', search: 'Buscar todo (nombre, dirección, teléfono...)', favorite: 'Favoritos', notifications: 'Notificaciones', language: 'Idioma', font: 'Tamaño de texto', widgets: 'Widgets', markAllRead: 'Marcar todo como leído', allWidgets: 'Ver todo', fontPreview: 'Texto de muestra 12345', small: 'Pequeño', normal: 'Normal', large: 'Grande', xlarge: 'Muy grande', apply: 'Aplicar', close: 'Cerrar', version: 'v1.0', makeLarger: 'Texto grande', makeSmaller: 'Texto pequeño', navAria: 'Navegación principal', menuAria: 'Abrir o cerrar menú',
+    appTitle: 'Panel de Cheonan', subtitle: 'Datos en vivo', live: 'Operación en vivo', search: 'Buscar todo (nombre, dirección, teléfono...)', favorite: 'Favoritos', notifications: 'Notificaciones', language: 'Idioma', font: 'Tamaño de texto', widgets: 'Widgets', markAllRead: 'Marcar todo como leído', allWidgets: 'Ver todo', fontPreview: 'Texto de muestra 12345', small: 'Pequeño', normal: 'Normal', large: 'Grande', xlarge: 'Muy grande', apply: 'Aplicar', close: 'Cerrar', version: 'v1.0', makeLarger: 'Texto grande', makeSmaller: 'Texto pequeño', navAria: 'Navegación principal', menuAria: 'Abrir o cerrar menú', footerBrand: 'Cheonan Insight', footerTagline: 'Voces ciudadanas para un Cheonan mejor', footerSource: 'Fuentes: datos públicos · reseñas locales · enlaces oficiales', footerPrivacy: 'Resumen de datos públicos y reseñas sin recopilar información personal.', footerProject: 'Proyecto de Ingeniería de Software', footerContact: 'Contacto: ch@xmin.io',
   },
 };
 
@@ -382,6 +382,19 @@ export default function Layout() {
         <main className="main-content">
           <h1 className="mobile-page-title">{pageTitle}</h1>
           <Outlet context={{ language, text }} />
+          <footer className="app-footer" aria-label="서비스 정보">
+            <div className="app-footer-brand">
+              <strong>{text.footerBrand}</strong>
+              <span>{text.footerTagline}</span>
+            </div>
+            <div className="app-footer-meta">
+              <span>{text.footerProject}</span>
+              <span>{text.footerContact}</span>
+              <span>{text.footerSource}</span>
+              <span>{text.footerPrivacy}</span>
+            </div>
+            <p>© 2026 Cheonan Insight. All rights reserved.</p>
+          </footer>
         </main>
       </div>
       {modal && (

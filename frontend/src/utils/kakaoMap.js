@@ -58,3 +58,35 @@ export function staticMapUrl(item) {
   const longitude = Number(item.longitude);
   return `https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=16&size=640x640&maptype=mapnik&markers=${latitude},${longitude},red-pushpin`;
 }
+
+
+const KAKAO_SDK_ID = 'kakao-map-sdk';
+let kakaoMapsPromise;
+
+export function loadKakaoMapsSdk(appKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY) {
+  if (typeof window === 'undefined' || !appKey) return Promise.resolve(null);
+  if (window.kakao?.maps) {
+    return new Promise((resolve) => window.kakao.maps.load(() => resolve(window.kakao.maps)));
+  }
+  if (kakaoMapsPromise) return kakaoMapsPromise;
+  kakaoMapsPromise = new Promise((resolve, reject) => {
+    const existing = document.getElementById(KAKAO_SDK_ID);
+    const script = existing || document.createElement('script');
+    script.id = KAKAO_SDK_ID;
+    script.async = true;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false`;
+    script.onload = () => {
+      if (!window.kakao?.maps) {
+        reject(new Error('Kakao maps SDK unavailable'));
+        return;
+      }
+      window.kakao.maps.load(() => resolve(window.kakao.maps));
+    };
+    script.onerror = () => reject(new Error('Failed to load Kakao maps SDK'));
+    if (!existing) document.head.appendChild(script);
+  }).catch((error) => {
+    kakaoMapsPromise = null;
+    throw error;
+  });
+  return kakaoMapsPromise;
+}

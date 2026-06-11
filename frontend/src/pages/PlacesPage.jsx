@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
-import { kakaoMapUrl, openKakaoRouteFromCurrent, staticMapUrl } from '../utils/kakaoMap';
+import { kakaoMapUrl, loadKakaoMapsSdk, openKakaoRouteFromCurrent, staticMapUrl } from '../utils/kakaoMap';
 import './PlacesPage.css';
 import placeImage1 from '../assets/figma/place-1.jpg';
 import placeImage2 from '../assets/figma/place-2.jpg';
@@ -118,6 +118,80 @@ function displayHours(hours) {
   return hours.today || hours.mon || hours.everyday || hours.daily || '정보 없음';
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function KakaoMapPreview({ place }) {
+  const [sdkReady, setSdkReady] = useState(false);
+  const [sdkError, setSdkError] = useState(false);
+  const mapPreviewUrl = staticMapUrl(place);
+
+  useEffect(() => {
+    let ignore = false;
+    loadKakaoMapsSdk()
+      .then((maps) => {
+        if (!ignore && maps) setSdkReady(true);
+      })
+      .catch(() => {
+        if (!ignore) setSdkError(true);
+      });
+    return () => { ignore = true; };
+  }, [place?.latitude, place?.longitude]);
+
+  useEffect(() => {
+    if (!sdkReady) return undefined;
+    let map;
+    const container = document.getElementById(`kakao-map-${favoriteId(place)}`);
+    if (container && window.kakao?.maps) {
+      const latitude = Number(place.latitude);
+      const longitude = Number(place.longitude);
+      const center = new window.kakao.maps.LatLng(latitude, longitude);
+      map = new window.kakao.maps.Map(container, { center, level: 3 });
+      const marker = new window.kakao.maps.Marker({ position: center });
+      marker.setMap(map);
+      const overlay = new window.kakao.maps.CustomOverlay({
+        position: center,
+        yAnchor: 1.8,
+        content: `<div class="kakao-map-name">${escapeHtml(place.name || '장소')}</div>`,
+      });
+      overlay.setMap(map);
+    }
+    return () => { if (map) map = null; };
+  }, [sdkReady, place]);
+
+  if (sdkReady) {
+    return <div id={`kakao-map-${favoriteId(place)}`} className="kakao-map-canvas" aria-label={`${place.name} 카카오 지도`} />;
+  }
+
+  return (
+    <>
+      {mapPreviewUrl && !sdkError && (
+        <img
+          className="static-map-image"
+          src={mapPreviewUrl}
+          alt={`${place.name} 지도 미리보기`}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={(event) => { event.currentTarget.style.display = 'none'; setSdkError(true); }}
+        />
+      )}
+      <div className="fallback-map-grid" />
+      <span className="fallback-map-label">CHEONAN MAP</span>
+      <div className="fallback-map-marker modal-place-marker" style={{ left: '48%', top: '48%' }}>
+        <span className="fallback-map-dot" />
+        <span className="fallback-map-name">{place.name}</span>
+      </div>
+    </>
+  );
+}
+
 function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(Boolean(place?.id && !String(place.id).startsWith('figma')));
@@ -184,22 +258,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
           <div className="modal-right">
             <div className="modal-right-sticky">
               <div className={`fallback-map compact modal-place-map-preview${mapPreviewUrl ? ' has-static-map' : ''}`} aria-label={`${current.name} 위치 미리보기`}>
-                {mapPreviewUrl && (
-                  <img
-                    className="static-map-image"
-                    src={mapPreviewUrl}
-                    alt={`${current.name} 지도 미리보기`}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
-                  />
-                )}
-                <div className="fallback-map-grid" />
-                <span className="fallback-map-label">CHEONAN MAP</span>
-                <div className="fallback-map-marker modal-place-marker" style={{ left: '48%', top: '48%' }}>
-                  <span className="fallback-map-dot" />
-                  <span className="fallback-map-name">{current.name}</span>
-                </div>
+                <KakaoMapPreview place={current} />
                 <div className="modal-map-card">
                   <strong>{current.name}</strong>
                   <span>{current.address || '천안시 위치 정보'}</span>
