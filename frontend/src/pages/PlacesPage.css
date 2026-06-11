@@ -826,6 +826,27 @@
   min-height: 300px;
 }
 
+.fallback-map.has-static-map {
+  background: #eef2f7;
+}
+
+.static-map-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.95) contrast(0.98);
+}
+
+.fallback-map.has-static-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.16));
+}
+
 .fallback-map-grid {
   position: absolute;
   inset: 0;
@@ -836,8 +857,14 @@
   background-size: 42px 42px;
 }
 
+.fallback-map.has-static-map .fallback-map-grid {
+  opacity: 0.16;
+  background-size: 48px 48px;
+}
+
 .fallback-map-label {
   position: absolute;
+  z-index: 3;
   left: 16px;
   top: 16px;
   padding: 7px 12px;
@@ -861,6 +888,7 @@
 
 .fallback-map-marker {
   position: absolute;
+  z-index: 3;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1245,6 +1273,7 @@
 }
 
 .modal-map-card {
+  z-index: 3;
   position: absolute;
   left: 24px;
   right: 24px;

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
+import { kakaoMapUrl, openKakaoRouteFromCurrent, staticMapUrl } from '../utils/kakaoMap';
 import './PlacesPage.css';
 import placeImage1 from '../assets/figma/place-1.jpg';
 import placeImage2 from '../assets/figma/place-2.jpg';
@@ -111,41 +112,6 @@ function formatDate(date) {
   return date ? date.slice(0, 10).replaceAll('-', '.') : '';
 }
 
-function kakaoSearchUrl(place) {
-  const query = [place.name, place.address].filter(Boolean).join(' ');
-  return `https://map.kakao.com/link/search/${encodeURIComponent(query || '천안 맛집')}`;
-}
-
-function kakaoMapUrl(place) {
-  if (place.latitude && place.longitude) {
-    return `https://map.kakao.com/link/map/${encodeURIComponent(place.name || '장소')},${place.latitude},${place.longitude}`;
-  }
-  return kakaoSearchUrl(place);
-}
-
-function kakaoRouteUrl(place) {
-  if (place.latitude && place.longitude) {
-    return `https://map.kakao.com/link/to/${encodeURIComponent(place.name || '목적지')},${place.latitude},${place.longitude}`;
-  }
-  return kakaoSearchUrl(place);
-}
-
-function openKakaoRouteFromCurrent(place) {
-  const openDestinationOnly = () => window.open(kakaoRouteUrl(place), '_blank', 'noopener,noreferrer');
-  if (!place.latitude || !place.longitude || !navigator.geolocation) {
-    openDestinationOnly();
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    ({ coords }) => {
-      const url = `https://map.kakao.com/link/from/${encodeURIComponent('현위치')},${coords.latitude},${coords.longitude}/to/${encodeURIComponent(place.name || '목적지')},${place.latitude},${place.longitude}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
-    },
-    openDestinationOnly,
-    { enableHighAccuracy: true, timeout: 4000, maximumAge: 60000 },
-  );
-}
-
 function displayHours(hours) {
   if (!hours) return '정보 없음';
   if (typeof hours === 'string') return hours;
@@ -180,6 +146,7 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
 
   const current = detail?.place ?? place;
   const reviews = detail?.reviews ?? [];
+  const mapPreviewUrl = staticMapUrl(current);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -209,7 +176,17 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
           </div>
           <div className="modal-right">
             <div className="modal-right-sticky">
-              <div className="fallback-map compact modal-place-map-preview" aria-label={`${current.name} 위치 미리보기`}>
+              <div className={`fallback-map compact modal-place-map-preview${mapPreviewUrl ? ' has-static-map' : ''}`} aria-label={`${current.name} 위치 미리보기`}>
+                {mapPreviewUrl && (
+                  <img
+                    className="static-map-image"
+                    src={mapPreviewUrl}
+                    alt={`${current.name} 지도 미리보기`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                  />
+                )}
                 <div className="fallback-map-grid" />
                 <span className="fallback-map-label">CHEONAN MAP</span>
                 <div className="fallback-map-marker modal-place-marker" style={{ left: '48%', top: '48%' }}>

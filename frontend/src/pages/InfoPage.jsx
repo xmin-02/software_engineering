@@ -12,6 +12,7 @@ import {
   School,
 } from 'lucide-react';
 import api from '../api/client';
+import { kakaoMapUrl } from '../utils/kakaoMap';
 import './InfoPage.css';
 
 const FIGMA_PAGES = {
@@ -690,11 +691,7 @@ function openMapSearch(item) {
 }
 
 function mapSearchUrl(item) {
-  if (item.latitude && item.longitude) {
-    return `https://map.kakao.com/link/map/${encodeURIComponent(item.title || '천안')},${item.latitude},${item.longitude}`;
-  }
-  const query = item.address && !/^전화/.test(item.address) ? `${item.title} ${item.address}` : item.title || item.address || '천안';
-  return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
+  return kakaoMapUrl(item);
 }
 
 function FacilityCard({ item }) {

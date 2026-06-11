@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, Heart, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import './EventsPage.css';
 import api from '../api/client';
+import { kakaoMapUrl, kakaoSearchUrl } from '../utils/kakaoMap';
 import tourismEvent1 from '../assets/figma/tourism/tourism-event-1.jpg';
 import tourismEvent2 from '../assets/figma/tourism/tourism-event-2.jpg';
 import tourismEvent3 from '../assets/figma/tourism/tourism-event-3.jpg';
@@ -173,7 +174,7 @@ export default function EventsPage() {
             <span><i className="busy" />혼잡</span>
           </div>
         </div>
-        <a className="tourism-map-art" href="https://map.kakao.com/link/search/%EC%B2%9C%EC%95%88%20%EA%B4%80%EA%B4%91%EC%A7%80" target="_blank" rel="noreferrer" aria-label="카카오맵에서 천안 관광지 검색">
+        <a className="tourism-map-art" href={kakaoSearchUrl({ title: '천안 관광지' })} target="_blank" rel="noreferrer" aria-label="카카오맵에서 천안 관광지 검색">
           <img src={tourismMap} alt="천안 관광지 위치 안내" />
         </a>
       </section>
@@ -213,7 +214,7 @@ function TourismSpotCard({ spot, favorite, onToggleFavorite, onSelect }) {
         </div>
         <h3>{spot.title}</h3>
         <p><MapPin size={13} />{spot.address}</p>
-        <a href={spot.url || `https://map.kakao.com/link/search/${encodeURIComponent(`${spot.title} ${spot.address || '천안'}`)}`} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer" className="tourism-discover-btn">
+        <a href={spot.url || kakaoMapUrl(spot)} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer" className="tourism-discover-btn">
           Discover <ArrowRight size={14} />
         </a>
       </div>
@@ -235,7 +236,7 @@ function TourismSpotModal({ spot, favorite, onToggleFavorite, onClose }) {
         <strong>{spot.rating ? `★ ${spot.rating}` : '추천 명소'}</strong>
         <div className="tourism-modal-actions">
           <button type="button" onClick={() => onToggleFavorite(spot)}>{favorite ? '찜 해제' : '찜하기'}</button>
-          <a href={spot.url || `https://map.kakao.com/link/search/${encodeURIComponent(`${spot.title} ${spot.address || '천안'}`)}`} target="_blank" rel="noreferrer">관련 페이지 이동</a>
+          <a href={spot.url || kakaoMapUrl(spot)} target="_blank" rel="noreferrer">관련 페이지 이동</a>
         </div>
       </section>
     </div>
