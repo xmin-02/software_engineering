@@ -16,8 +16,9 @@ function placeLabel(item, fallback = '천안') {
 }
 
 export function kakaoSearchUrl(item, fallback = '천안') {
+  const explicitQuery = String(item?.mapQuery ?? '').trim();
   const address = cleanMapAddress(item?.address || item?.location);
-  const query = address || placeLabel(item, fallback);
+  const query = explicitQuery || address || placeLabel(item, fallback);
   return `https://map.kakao.com/link/search/${encodeURIComponent(query)}`;
 }
 

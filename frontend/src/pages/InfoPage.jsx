@@ -320,6 +320,7 @@ const FIGMA_PAGES = {
         distance: '지도 검색',
         status: '확인 필요',
         address: '천안시 모스크 기도실',
+        mapQuery: '천안 모스크',
         hours: '시설별 상이',
         description: '운영 여부가 변동될 수 있어 방문 전 지도 검색과 커뮤니티 확인이 필요합니다.',
       },

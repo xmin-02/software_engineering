@@ -144,7 +144,14 @@ function ActualPlaceModal({ place, onClose, favorite, onToggleFavorite }) {
     return () => { ignore = true; };
   }, [place]);
 
-  const current = detail?.place ?? place;
+  const current = detail?.place
+    ? {
+      ...place,
+      ...detail.place,
+      latitude: detail.place.latitude ?? place.latitude,
+      longitude: detail.place.longitude ?? place.longitude,
+    }
+    : place;
   const reviews = detail?.reviews ?? [];
   const mapPreviewUrl = staticMapUrl(current);
 
